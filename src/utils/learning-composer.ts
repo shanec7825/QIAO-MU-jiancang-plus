@@ -1,0 +1,350 @@
+import { createElement, Film, FileText, Image as ImageIcon, Music, NotebookPen, Paperclip, X } from 'lucide';
+import * as records from './learning-record';
+import { clockLabel } from './learning-record';
+import { generalSettings, saveSettings } from './storage-utils';
+import { addAttachments, discardAttachments, MAX_ATTACHMENTS, pickAttachments } from './learning-record';
+import type { LearningSource, LearningRecordDraft, DailyTargetResult, DraftAttachment, AttachResult } from './learning-record';
+import browser from './browser-polyfill';
+import { helperInstallPrompt } from './helper-install';
+import { bilibiliVideo } from './video-source';
+import { addMark, loadMarks, MARKS_EVENT, renderMarks } from './learning-marks';
+import { youtubeVideoId } from './youtube-url';
+
+import { t } from './ui-text';
+type Services = Pick<typeof records, 'createLearningDraft' | 'loadLearningDraft' | 'persistLearningDraft' | 'getDailyTarget' | 'saveLearningRecord' | 'dispatchLearningRecord'> & Partial<Pick<typeof records, 'addAttachments' | 'pickAttachments' | 'discardAttachments'>>;
+export interface LearningEntry { quote?: string; aiSupplement?: string }
+export interface LearningNotes { button: HTMLButtonElement; open: (entry?: LearningEntry) => Promise<void>; dispose: () => void; updateSource: (getSource: () => LearningSource, getHighlights?: () => string[]) => void }
+const mounts = new WeakMap<Document, LearningNotes>();
+export const learningNotes = (doc: Document) => mounts.get(doc);
+
+// Only a selection whose two ends belong to the article is eligible. Never read its unselected text.
+export function learningSelection(doc: Document): string {
+  const selection = doc.getSelection(), article = doc.querySelector('article');
+  if (!article || !selection || selection.isCollapsed || !selection.anchorNode || !selection.focusNode) return '';
+  if (!article.contains(selection.anchorNode) || !article.contains(selection.focusNode)) return '';
+  return selection.toString().trim();
+}
+
+// The transcript line that is currently highlighted (follows the playhead on YouTube, the last jump elsewhere).
+export function activeSegmentTime(doc: Document): number | undefined {
+  const raw = doc.querySelector('.transcript-segment.is-active .timestamp')?.getAttribute('data-timestamp');
+  return raw !== null && raw !== undefined && raw !== '' && Number.isFinite(Number(raw)) && Number(raw) >= 0 ? Number(raw) : undefined;
+}
+
+export function learningTimestamp(doc: Document): number | undefined {
+  const selection = doc.getSelection();
+  const anchor = selection?.anchorNode instanceof Element ? selection.anchorNode : selection?.anchorNode?.parentElement;
+  const segment = selection && !selection.isCollapsed ? anchor?.closest('.transcript-segment') : undefined;
+  const raw = segment?.querySelector('.timestamp')?.getAttribute('data-timestamp');
+  if (raw !== null && raw !== undefined && raw !== '' && Number.isFinite(Number(raw)) && Number(raw) >= 0) return Number(raw);
+  const video = doc.querySelector<HTMLVideoElement>('article video');
+  return video && video.readyState > 0 && Number.isFinite(video.currentTime) ? video.currentTime : undefined;
+}
+
+// `getTime` supplies the playhead on a plain video page; `singleKey: false` leaves the page's own N key alone.
+export function mountLearningNotes(options: { doc: Document; getSource: () => LearningSource; getHighlights?: () => string[]; getTime?: () => number | undefined; singleKey?: boolean; services?: Services }): LearningNotes {
+  const { doc } = options;
+  const previous = mounts.get(doc);
+  if (previous && doc.querySelector('.learning-composer')) { previous.updateSource(options.getSource, options.getHighlights); return previous; }
+  previous?.dispose();
+  const service = options.services || records; let getSource = options.getSource, getHighlights = options.getHighlights;
+  const node = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '', className = '') => {
+    const element = doc.createElement(tag); element.textContent = text; element.className = className; return element;
+  };
+  const button = node('button', '', 'learning-note-entry'); button.type = 'button';
+  button.title = t('记笔记（N）— 保存到今天的日记'); button.setAttribute('aria-label', t('记到今天日记')); button.append(createElement(NotebookPen));
+  button.addEventListener('mousedown', event => event.preventDefault());
+  // A small non-modal card: the video keeps playing and the transcript stays selectable while you write.
+  const dialog = node('dialog', '', 'learning-composer'); dialog.setAttribute('aria-label', t('记到今天日记'));
+  const form = node('form'); form.noValidate = true;
+  const header = node('header'); const closeButton = node('button', '', 'learning-close'); closeButton.type = 'button';
+  closeButton.title = t('关闭并保留草稿（Esc）'); closeButton.setAttribute('aria-label', t('关闭并保留草稿')); closeButton.append(createElement(X));
+  header.append(closeButton);
+  const status = node('p', '', 'learning-status'); status.setAttribute('role', 'status');
+  const field = (label: string, tag: 'input' | 'textarea' = 'textarea') => {
+    const wrap = node('label', label, 'learning-field'); const input = node(tag); input.setAttribute('aria-label', label); wrap.append(input); return { wrap, input };
+  };
+  const reflection = field(t('我的理解')); const reflectionInput = reflection.input as HTMLTextAreaElement;
+  reflection.wrap.classList.add('learning-main'); reflectionInput.rows = 4; reflectionInput.placeholder = t('随手记点什么…  ⌘/Ctrl + Enter 保存');
+  // The excerpt is part of the note, so it is shown as a quotation rather than hidden in a settings-like panel.
+  const quote = field(t('原文摘录')); const quoteInput = quote.input as HTMLTextAreaElement; quoteInput.rows = 2;
+  const quoteBlock = node('div', '', 'learning-quote'); quoteBlock.hidden = true;
+  const removeQuote = node('button', t('移除摘录'), 'learning-secondary'); removeQuote.type = 'button';
+  quote.wrap.classList.add('learning-quote-field'); quoteBlock.append(quote.wrap, removeQuote);
+  const sourceTitle = field(t('来源标题'), 'input'), sourceUrl = field(t('来源链接'), 'input'), time = field(t('视频时间（秒）'), 'input');
+  const titleInput = sourceTitle.input as HTMLInputElement, urlInput = sourceUrl.input as HTMLInputElement, timeInput = time.input as HTMLInputElement;
+  urlInput.type = 'url'; timeInput.type = 'number'; timeInput.min = '0'; timeInput.step = '1';
+  const details = node('details', '', 'learning-more learning-source-details'); details.append(node('summary', t('来源与时间')));
+  details.append(sourceTitle.wrap, sourceUrl.wrap, time.wrap);
+  const aiDetails = node('details', '', 'learning-ai'); aiDetails.hidden = true; aiDetails.append(node('summary', t('AI 补充（已选择的回答）')));
+  const ai = field(t('AI 补充')); const aiInput = ai.input as HTMLTextAreaElement; aiInput.rows = 3;
+  const removeAi = node('button', t('移除 AI 补充'), 'learning-secondary'); removeAi.type = 'button'; aiDetails.append(ai.wrap, removeAi);
+  const replaceQuote = node('button', t('改用本次选中的摘录'), 'learning-secondary'); replaceQuote.type = 'button'; replaceQuote.hidden = true;
+  const showQuote = () => { quoteBlock.hidden = false; };
+  const syncQuote = () => { if (quoteInput.value.trim()) showQuote(); };
+  const highlightDetails = node('details', '', 'learning-more'); highlightDetails.append(node('summary', t('从已有高亮选择摘录')));
+  highlightDetails.hidden = !getHighlights;
+  const highlightList = node('div'); highlightDetails.append(highlightList);
+  highlightDetails.addEventListener('toggle', () => {
+    if (!highlightDetails.open || busy || loading) return;
+    highlightList.replaceChildren();
+    // Read only saved highlights after an explicit action, never the article body.
+    for (const html of getHighlights?.() || []) {
+      const inert = new DOMParser().parseFromString(html, 'text/html');
+      inert.querySelectorAll('script,style').forEach(element => element.remove());
+      const text = inert.body.textContent?.trim(); if (!text) continue;
+      const choice = node('button', text, 'learning-highlight-choice'); choice.type = 'button';
+      choice.onclick = () => { if (busy || loading) return; quoteInput.value = text; timeInput.value = ''; showQuote(); updateChip(); pendingQuote = ''; replaceQuote.hidden = true; void persist(); };
+      highlightList.append(choice);
+    }
+    if (!highlightList.childElementCount) highlightList.append(node('p', t('此来源暂无高亮')));
+  });
+  const uriDetails = node('details', '', 'learning-uri'); uriDetails.hidden = true;
+  uriDetails.append(node('summary', t('通过 Obsidian 打开（实际写入未验证）')));
+  const uriVault = field(t('Obsidian 库名'), 'input'); const uriVaultInput = uriVault.input as HTMLInputElement;
+  const dispatch = node('button', t('发送到 Obsidian（未验证）'), 'learning-secondary'); dispatch.type = 'button';
+  uriDetails.append(node('p', t('需明确输入库名；日期与路径由 Obsidian 解析，无法在这里确认写入。')), uriVault.wrap, dispatch);
+  // What goes into the diary besides your own words. Each switch is also a setting, so the choice is remembered.
+  const toggle = (label: string, extra: string) => {
+    const element = node('button', '', 'learning-toggle ' + extra); element.type = 'button'; element.setAttribute('role', 'switch');
+    element.append(node('span', '', 'learning-switch'), node('span', label)); return element;
+  };
+  const quoteToggle = toggle(t('摘录'), 'learning-toggle-quote'), sourceToggle = toggle(t('来源'), 'learning-toggle-source'), sourceLabel = sourceToggle.lastElementChild as HTMLElement;
+  quoteToggle.title = t('关闭后，这条笔记不写入摘录'); sourceToggle.title = t('关闭后，这条笔记不写入来源链接和视频时间');
+  const editSource = node('button', t('编辑'), 'learning-secondary learning-edit-source'); editSource.type = 'button'; editSource.title = t('修改来源标题、链接和视频时间');
+  const attachButton = node('button', '', 'learning-secondary learning-attach'); attachButton.type = 'button'; attachButton.append(createElement(Paperclip), node('span', t('附件')));
+  attachButton.title = t('添加图片、视频、压缩包等，保存时复制进 Obsidian 的附件文件夹（也可以直接粘贴或拖入）');
+  const attachList = node('div', '', 'learning-attachments'); attachList.hidden = true;
+  const tools = node('div', '', 'learning-tools'); tools.append(quoteToggle, sourceToggle, editSource, attachButton);
+  // Where the note will land: one quiet line, shown in the footer next to the save button.
+  const targetLine = node('p', t('正在确认今日日记位置…'), 'learning-target'); targetLine.setAttribute('role', 'status');
+  const footer = node('footer'); const retryTarget = node('button', t('重试'), 'learning-secondary'); retryTarget.title = t('重新确认今日日记位置'); retryTarget.type = 'button';
+  const installHelper = node('button', t('让 AI 帮我安装'), 'learning-secondary'); installHelper.type = 'button'; installHelper.hidden = true;
+  installHelper.title = t('复制一段话，发给 Claude Code 或 Codex，它会在你的电脑上装好本地助手');
+  const save = node('button', t('保存到日记'), 'learning-primary'); save.type = 'submit'; save.disabled = true; save.title = t('保存（⌘/Ctrl + Enter）');
+  const destination = node('div', '', 'learning-destination'); const draftNote = node('span', '', 'learning-draft'); draftNote.title = t('这是上次没写完的草稿');
+  destination.append(targetLine, draftNote, retryTarget, installHelper);
+  footer.append(destination, save);
+  const notice = node('div', '', 'learning-save-notice'); notice.hidden = true; notice.setAttribute('role','status'); doc.body.append(notice);
+  let noticeTimer: ReturnType<typeof setTimeout> | undefined;
+  const notify = (message: string) => { notice.textContent = message; notice.hidden = false; clearTimeout(noticeTimer); noticeTimer = setTimeout(() => {notice.hidden = true;}, 8000); };
+  form.append(header, reflection.wrap, quoteBlock, replaceQuote, aiDetails, attachList, tools, highlightDetails, details, uriDetails, status, footer); dialog.append(form); doc.body.append(dialog);
+  let draft: LearningRecordDraft | undefined, origin: LearningSource | undefined, target: DailyTargetResult = { status: 'unavailable' };
+  let pendingQuote = '', pendingTime: number | undefined, busy = false, loading = false, generation = 0, writeQueue = Promise.resolve(), lastTime: number | undefined;
+  let timedFrameSrc = '', targetLoading = false, includeQuote = true, includeSource = true;
+  let attachments: DraftAttachment[] = [], attaching = 0;
+  const files = { add: (list: File[], source: 'clipboard' | 'finder') => (service.addAttachments || addAttachments)(list, source), pick: () => (service.pickAttachments || pickAttachments)(), discard: (ids: string[]) => (service.discardAttachments || discardAttachments)(ids) };
+  let returnFocus: HTMLElement | null = null;
+  const hasContent = () => Boolean(reflectionInput.value.trim() || (includeQuote && quoteInput.value.trim()) || aiInput.value.trim() || attachments.length);
+  // "example.com · 6:04": where the note came from, as the label of its switch.
+  const updateChip = () => {
+    const raw = timeInput.value, seconds = Number(raw); let label = '';
+    try { label = new URL(urlInput.value).hostname.replace(/^www\./, ''); } catch { label = titleInput.value.trim().slice(0, 24); }
+    if (raw !== '' && !time.wrap.hidden && Number.isFinite(seconds) && seconds >= 0) label += (label ? ' · ' : '') + clockLabel(seconds);
+    sourceLabel.textContent = label || t('来源');
+  };
+  const paintOptions = () => {
+    quoteToggle.setAttribute('aria-checked', String(includeQuote)); quoteToggle.classList.toggle('is-off', !includeQuote); quoteBlock.classList.toggle('is-off', !includeQuote);
+    const hasSource = Boolean(urlInput.value.trim() || titleInput.value.trim());
+    sourceToggle.hidden = !hasSource; sourceToggle.setAttribute('aria-checked', String(includeSource)); sourceToggle.classList.toggle('is-off', !includeSource);
+    details.hidden = !hasSource || !includeSource; editSource.hidden = details.hidden;
+  };
+  const updateButtons = () => {
+    paintOptions(); save.disabled = !draft || busy || loading || attaching > 0 || targetLoading || target.status !== 'ready' || !hasContent();
+    dispatch.disabled = busy || loading || !hasContent() || attachments.length > 0 || !uriVaultInput.value.trim();
+    // Files are staged by the local helper, so without it there is nowhere to put them.
+    attachButton.hidden = target.status !== 'ready'; attachButton.disabled = busy || loading || attachments.length >= MAX_ATTACHMENTS;
+  };
+  const sizeLabel = (bytes: number) => bytes >= 2 ** 30 ? (bytes / 2 ** 30).toFixed(1) + ' GB' : bytes >= 2 ** 20 ? (bytes / 2 ** 20).toFixed(1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB';
+  const kindIcon = { image: ImageIcon, video: Film, audio: Music, pdf: FileText, other: Paperclip };
+  const renderAttachments = () => {
+    attachList.replaceChildren(...attachments.map(item => {
+      const chip = node('div', '', 'learning-attachment'); chip.title = item.name + ' · ' + sizeLabel(item.size);
+      const preview = node('span', '', 'learning-attachment-preview'); const icon = () => preview.replaceChildren(createElement(kindIcon[item.kind] || Paperclip));
+      if (item.thumb) { const image = doc.createElement('img'); image.alt = ''; image.src = item.thumb; image.onerror = icon; preview.append(image); } else icon();
+      const remove = node('button', '', 'learning-attachment-remove'); remove.type = 'button'; remove.title = t('移除（还没有复制进库）'); remove.setAttribute('aria-label', t('移除附件 ') + item.name); remove.append(createElement(X));
+      remove.onclick = () => { if (busy || loading) return; attachments = attachments.filter(other => other !== item); files.discard([item.id]); renderAttachments(); updateButtons(); void persist(); };
+      chip.append(preview, node('span', item.name, 'learning-attachment-name'), node('span', sizeLabel(item.size), 'learning-attachment-size'), remove); return chip;
+    }));
+    attachList.hidden = !attachments.length;
+  };
+  // Staging can take a moment for a big file, so saving waits for it. A card that was closed meanwhile releases the files.
+  const addFiles = async (job: () => Promise<AttachResult>) => {
+    if (busy || loading || !draft) return;
+    if (target.status !== 'ready') { status.textContent = t('连接本地助手后才能添加附件'); return; }
+    const current = generation; attaching++; status.textContent = t('正在添加附件…'); updateButtons();
+    try {
+      const result = await job();
+      if (current !== generation) { files.discard(result.items.map(item => item.id)); return; }
+      const room = Math.max(0, MAX_ATTACHMENTS - attachments.length), accepted = result.items.slice(0, room), problems = [...result.errors];
+      files.discard(result.items.slice(room).map(item => item.id)); if (accepted.length < result.items.length) problems.push(t('最多添加 ') + MAX_ATTACHMENTS + t(' 个附件'));
+      attachments = [...attachments, ...accepted]; renderAttachments(); void persist();
+      status.textContent = problems.join('；');
+    } catch { if (current === generation) status.textContent = t('添加附件失败，请重试'); }
+    finally { attaching--; updateButtons(); }
+  };
+  const collect = () => {
+    if (!draft) return;
+    draft.reflection = reflectionInput.value; draft.quote = quoteInput.value; draft.aiSupplement = aiInput.value || undefined; draft.attachments = attachments.length ? attachments.map(item => ({ ...item })) : undefined; draft.omit = { quote: !includeQuote, source: !includeSource };
+    draft.source = { title: titleInput.value, url: urlInput.value || undefined, kind: origin?.kind };
+    if (timeInput.value !== '') draft.source.timestampSeconds = Number(timeInput.value);
+    updateButtons();
+  };
+  const persist = () => {
+    collect(); if (!draft || !origin) return writeQueue;
+    const snapshot = JSON.parse(JSON.stringify(draft)) as LearningRecordDraft, source = { ...origin };
+    writeQueue = writeQueue.then(() => service.persistLearningDraft(snapshot, source)).catch(() => { status.textContent = t('草稿暂时未能保存到本机，请先保留输入内容'); });
+    return writeQueue;
+  };
+  const paintDraft = () => {
+    if (!draft) return;
+    reflectionInput.value = draft.reflection; quoteInput.value = draft.quote; aiInput.value = draft.aiSupplement || '';
+    titleInput.value = draft.source.title; urlInput.value = draft.source.url || ''; timeInput.value = draft.source.timestampSeconds === undefined ? '' : String(Math.floor(draft.source.timestampSeconds));
+    aiDetails.hidden = !aiInput.value; time.wrap.hidden = draft.source.kind !== 'youtube' && draft.source.kind !== 'bilibili';
+    attachments = draft.attachments?.map(item => ({ ...item })) || []; renderAttachments();
+    quoteBlock.hidden = !quoteInput.value.trim(); updateChip(); updateButtons();
+  };
+  const paintTarget = () => {
+    targetLine.title = target.status === 'ready' ? (target.relativePath || '') : ''; targetLine.textContent = target.status === 'ready' ? (target.vault || '') + ' · ' + (target.date || '') : (target.error || t('没连上本地保存助手，暂时无法写入日记'));
+    targetLine.classList.toggle('is-problem', target.status !== 'ready'); retryTarget.hidden = target.status === 'ready'; installHelper.hidden = !target.problem;
+    uriDetails.hidden = target.status !== 'unavailable'; updateButtons();
+  };
+  const refreshTarget = async () => {
+    const current = generation; targetLoading = true; targetLine.textContent = t('正在确认今日日记位置…'); updateButtons();
+    try { const fresh = await service.getDailyTarget(); if (current !== generation) return; target = fresh; }
+    catch { if (current === generation) target = {status:'unavailable',error:t('日记目标确认失败，请重试')}; }
+    finally { if (current === generation) { targetLoading = false; paintTarget(); } }
+  };
+  const show = () => { if (!dialog.open) { if (typeof dialog.show === 'function') dialog.show(); else dialog.setAttribute('open', ''); } };
+  const close = () => { if (!loading && !busy) void persist(); ++generation; if (typeof dialog.close === 'function') dialog.close(); else dialog.removeAttribute('open'); returnFocus?.focus({ preventScroll: true }); };
+  const enabled = () => generalSettings.learningNotes !== false;
+  const open = async (entry: LearningEntry = {}) => {
+    if (!enabled()) return;
+    if (busy) { notify(t('上一条记录正在保存，请稍候重试')); return; }
+    if (dialog.open) {
+      if (entry.quote && draft && !loading) {
+        // The card is non-modal, so a new selection can arrive while it is open: fill an empty excerpt, otherwise offer it.
+        const at = learningTimestamp(doc);
+        if (!quoteInput.value.trim()) { quoteInput.value = entry.quote; if (at !== undefined && time.wrap.hidden === false && timeInput.value === '') timeInput.value = String(Math.floor(at)); showQuote(); updateChip(); void persist(); }
+        else if (entry.quote !== quoteInput.value) { pendingQuote = entry.quote; pendingTime = at; replaceQuote.hidden = false; }
+      }
+      if (entry.aiSupplement && draft) { aiInput.value = [aiInput.value, entry.aiSupplement].filter(Boolean).join('\n\n'); aiDetails.hidden = false; aiDetails.open = true; void persist(); }
+      reflectionInput.focus(); return;
+    }
+    const selectedTime = learningTimestamp(doc);
+    includeQuote = generalSettings.learningIncludeQuote !== false; includeSource = generalSettings.learningIncludeSource !== false;
+    returnFocus = doc.activeElement as HTMLElement; show(); loading = true; busy = false; status.textContent = ''; draftNote.textContent = ''; pendingQuote = ''; replaceQuote.hidden = true;
+    draft = undefined; attachments = []; renderAttachments(); origin = { ...getSource() };
+    target = {status:'unavailable'}; targetLoading = false; targetLine.textContent = t('正在确认今日日记位置…');
+    for (const input of Array.from(form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input,textarea'))) input.value = '';
+    details.open = false; paintEdit(); quoteBlock.hidden = true; highlightDetails.open = false; highlightList.replaceChildren(); highlightDetails.hidden = !getHighlights; aiDetails.hidden = true; aiDetails.open = false; uriDetails.hidden = true;
+    updateButtons();
+    if (youtubeVideoId(origin.url || '') || bilibiliVideo(origin.url || '')) {
+      origin.kind = youtubeVideoId(origin.url || '') ? 'youtube' : 'bilibili';
+      // Selected line first, then the playhead YouTube reports, then the line that is currently highlighted.
+      origin.timestampSeconds = selectedTime ?? (doc.querySelector<HTMLIFrameElement>('article iframe')?.src === timedFrameSrc ? lastTime : undefined) ?? activeSegmentTime(doc) ?? options.getTime?.();
+    }
+    else origin.kind = origin.url ? 'web' : 'thought';
+    const current = ++generation;
+    for (const input of Array.from(form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input,textarea'))) input.disabled = true;
+    try {
+      await writeQueue; if (current !== generation) return;
+      const [restored, fresh] = await Promise.all([service.loadLearningDraft(origin), service.getDailyTarget()]);
+      if (current !== generation) return;
+      draft = restored || service.createLearningDraft(origin, entry); target = fresh;
+      if (restored && entry.quote && entry.quote !== restored.quote) { pendingQuote = entry.quote; pendingTime = origin.timestampSeconds; replaceQuote.hidden = false; }
+      if (restored && entry.aiSupplement) draft.aiSupplement = [draft.aiSupplement, entry.aiSupplement].filter(Boolean).join('\n\n');
+      paintDraft(); paintTarget(); draftNote.textContent = restored ? t('已恢复草稿') : ''; updateButtons();
+      if (entry.aiSupplement) { aiDetails.hidden = false; aiDetails.open = true; }
+    } catch { status.textContent = t('草稿或日记目标读取失败，请关闭后重试'); }
+    finally {
+      if (current !== generation) return;
+      loading = false; for (const input of Array.from(form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input,textarea'))) input.disabled = false;
+      updateButtons(); reflectionInput.focus();
+    }
+  };
+  const submit = async (uri = false) => {
+    if (busy || loading || !draft || !hasContent() || (!uri && (targetLoading || target.status !== 'ready'))) return;
+    collect(); busy = true; updateButtons(); for (const input of Array.from(form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input,textarea'))) input.disabled = true;
+    status.textContent = uri ? t('正在发送…') : t('正在写入…');
+    try {
+      await persist(); const snapshot = JSON.parse(JSON.stringify(draft)) as LearningRecordDraft;
+      const result = uri ? await service.dispatchLearningRecord(snapshot, uriVaultInput.value.trim()) : await service.saveLearningRecord(snapshot, target);
+      if (result.target) { target = result.target; paintTarget(); }
+      if (result.status === 'saved') {
+        if (includeSource && draft.source.timestampSeconds !== undefined && origin?.url) { const text = draft.reflection.trim() || draft.quote.trim() || draft.aiSupplement || ''; await addMark(origin.url, { t: draft.source.timestampSeconds, text, at: draft.createdAt }); doc.dispatchEvent(new CustomEvent(MARKS_EVENT)); }
+        status.textContent = t('已写入 ') + result.vault + ' · ' + result.date + (attachments.length ? ' · ' + attachments.length + t(' 个附件') : '') + (result.error ? '；' + result.error : '');
+        notify(status.textContent);
+        // Core clears only the saved capture. A new entry must get a fresh ID.
+        draft = undefined; if (typeof dialog.close === 'function') dialog.close(); else dialog.removeAttribute('open'); returnFocus?.focus({ preventScroll: true });
+      } else if (result.status === 'dispatched') status.textContent = t('已发送到 Obsidian，实际写入未验证；草稿保留，请在 Obsidian 核对');
+      else status.textContent = result.error || (result.status === 'unconfirmed' ? t('可能已写入，请保留同一记录重试核对') : t('尚未写入，草稿已保留'));
+    } catch { status.textContent = t('保存响应中断，请保留同一草稿重试，不要重复发送'); }
+    finally { busy = false; for (const input of Array.from(form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input,textarea'))) input.disabled = false; updateButtons(); }
+  };
+  form.addEventListener('input', () => { updateChip(); if (!busy && !loading) void persist(); });
+  const paintEdit = () => { editSource.textContent = details.open ? t('收起') : t('编辑'); };
+  details.addEventListener('toggle', paintEdit);
+  editSource.onclick = () => { details.open = !details.open; paintEdit(); if (details.open) titleInput.focus(); };
+  removeQuote.onclick = () => { if (busy || loading) return; quoteInput.value = ''; quoteBlock.hidden = true; pendingQuote = ''; replaceQuote.hidden = true; void persist(); reflectionInput.focus(); };
+  form.addEventListener('submit', event => { event.preventDefault(); void submit(); });
+  attachButton.onclick = () => { void addFiles(() => files.pick()); };
+  // Pasting or dropping files into the card attaches them; plain text pastes are left alone.
+  form.addEventListener('paste', event => {
+    const pasted = Array.from(event.clipboardData?.files || []); if (!pasted.length) return;
+    event.preventDefault(); event.stopPropagation(); void addFiles(() => files.add(pasted, 'clipboard'));
+  });
+  const dragging = (event: DragEvent) => Array.from(event.dataTransfer?.types || []).includes('Files');
+  dialog.addEventListener('dragover', event => { if (!dragging(event)) return; event.preventDefault(); dialog.classList.add('is-dropping'); });
+  dialog.addEventListener('dragleave', event => { if (event.target === dialog) dialog.classList.remove('is-dropping'); });
+  dialog.addEventListener('drop', event => {
+    dialog.classList.remove('is-dropping'); const dropped = Array.from(event.dataTransfer?.files || []); if (!dragging(event)) return;
+    event.preventDefault(); event.stopPropagation(); if (dropped.length) void addFiles(() => files.add(dropped, 'finder'));
+  });
+  form.addEventListener('keydown', event => {
+    if (event.isComposing) return;
+    if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) { event.preventDefault(); event.stopPropagation(); void submit(); }
+    else if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); }
+  });
+  dialog.addEventListener('cancel', event => { event.preventDefault(); close(); }); closeButton.onclick = close;
+  installHelper.onclick = async () => {
+    try { await navigator.clipboard.writeText(helperInstallPrompt(browser.runtime.id)); status.textContent = t('已复制，粘贴给 Claude Code 或 Codex；装好后回到这里点「重试」'); }
+    catch { status.textContent = t('复制失败，请在扩展说明里找到「让 AI 代装」那段话'); }
+  };
+  retryTarget.onclick = () => { if (!busy && !loading) void refreshTarget(); }; dispatch.onclick = () => { void submit(true); };
+  const remember = (key: 'learningIncludeQuote' | 'learningIncludeSource', value: boolean) => { void saveSettings({ [key]: value }).catch(() => { /* the choice still applies to this note */ }); };
+  quoteToggle.onclick = () => { if (busy || loading) return; includeQuote = !includeQuote; remember('learningIncludeQuote', includeQuote); updateChip(); void persist(); };
+  sourceToggle.onclick = () => { if (busy || loading) return; includeSource = !includeSource; remember('learningIncludeSource', includeSource); updateChip(); void persist(); };
+  removeAi.onclick = () => { if (busy || loading) return; aiInput.value = ''; aiDetails.hidden = true; void persist(); };
+  replaceQuote.onclick = () => { if (busy || loading) return; quoteInput.value = pendingQuote; timeInput.value = pendingTime === undefined ? '' : String(Math.floor(pendingTime)); pendingQuote = ''; pendingTime = undefined; replaceQuote.hidden = true; showQuote(); updateChip(); void persist(); };
+  button.onclick = () => { void open({ quote: learningSelection(doc) }); };
+  const onMessage = (event: MessageEvent) => {
+    const iframe = doc.querySelector<HTMLIFrameElement>('article iframe[src*="youtube.com/embed/"]');
+    if (!iframe || event.source !== iframe.contentWindow || event.origin !== new URL(iframe.src).origin) return;
+    try { const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data; const seconds = data?.info?.currentTime; if (typeof seconds === 'number' && Number.isFinite(seconds) && seconds >= 0) { lastTime = seconds; timedFrameSrc = iframe.src; } } catch { /* unrelated messages */ }
+  };
+  // One key, no modifier: capture while watching without reaching for the mouse. Ignored while typing.
+  const onKey = (event: KeyboardEvent) => {
+    if (event.defaultPrevented || event.isComposing || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || event.key.toLowerCase() !== 'n') return;
+    const target = event.target as HTMLElement | null;
+    if (target && (/^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName) || target.isContentEditable || target.closest?.('dialog[open]'))) return;
+    if (options.singleKey === false || !enabled() || !doc.querySelector('article')) return;
+    event.preventDefault(); void open({ quote: learningSelection(doc) });
+  };
+  doc.addEventListener('keydown', onKey);
+  doc.defaultView?.addEventListener('message', onMessage);
+  // Show where notes were taken on the transcript; it may load after this card, so watch the article too.
+  let marksTimer: ReturnType<typeof setTimeout> | undefined, marksFor = '';
+  const refreshMarks = async () => {
+    const url = getSource().url || ''; const marks = await loadMarks(url); const article = doc.querySelector('article');
+    if (article) renderMarks(article, marks); marksFor = url;
+  };
+  const scheduleMarks = () => { clearTimeout(marksTimer); marksTimer = setTimeout(() => { void refreshMarks(); }, 120); };
+  doc.addEventListener(MARKS_EVENT, scheduleMarks);
+  const marksObserver = typeof MutationObserver !== 'undefined' && doc.querySelector('article') ? new MutationObserver(scheduleMarks) : undefined;
+  marksObserver?.observe(doc.querySelector('article')!, { childList: true });
+  scheduleMarks();
+  const controller = { button, open, updateSource: (next: () => LearningSource, highlights?: () => string[]) => { getSource = next; if (highlights) getHighlights = highlights; scheduleMarks(); }, dispose: () => { doc.removeEventListener('keydown', onKey); doc.removeEventListener(MARKS_EVENT, scheduleMarks); marksObserver?.disconnect(); clearTimeout(marksTimer); doc.defaultView?.removeEventListener('message', onMessage); clearTimeout(noticeTimer); notice.remove(); dialog.remove(); button.remove(); mounts.delete(doc); } };
+  button.hidden = !enabled(); // the setting is read when the page opens
+  mounts.set(doc, controller); return controller;
+}

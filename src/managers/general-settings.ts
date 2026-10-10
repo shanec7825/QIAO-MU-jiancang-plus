@@ -1,0 +1,632 @@
+import { handleDragStart, handleDragOver, handleDrop, handleDragEnd } from '../utils/drag-and-drop';
+import { initializeIcons } from '../icons/icons';
+import { getCommands } from '../utils/hotkeys';
+import { initializeToggles, updateToggleState, initializeSettingToggle } from '../utils/ui-utils';
+import { generalSettings, loadSettings, saveSettings, setLocalStorage, getLocalStorage } from '../utils/storage-utils';
+import { detectBrowser } from '../utils/browser-detection';
+import { createElementWithClass, createElementWithHTML } from '../utils/dom-utils';
+import { createDefaultTemplate, getTemplates, saveTemplateSettings } from '../managers/template-manager';
+import { updateTemplateList, showTemplateEditor } from '../managers/template-ui';
+import { checkForUpdate } from '../utils/update-check';
+import { exportAllSettings, importAllSettings } from '../utils/import-export';
+import { Settings, Template } from '../types/types';
+import { exportHighlights, importHighlights } from './highlights-manager';
+import { getMessage, setupLanguageAndDirection } from '../utils/i18n';
+import { debounce } from '../utils/debounce';
+import { initializeAsrSettings } from './asr-settings';
+import { initializeStudySitesSettings } from './study-sites-settings';
+import { initializeStudyHome } from './study-home-settings';
+import browser from '../utils/browser-polyfill';
+import { createUsageChart, aggregateUsageData, UsageMetric } from '../utils/charts';
+import { getClipHistory } from '../utils/storage-utils';
+import dayjs from 'dayjs';
+import weekOfYear from 'dayjs/plugin/weekOfYear';
+import { showModal, hideModal } from '../utils/modal-utils';
+import { LocalSaveResult } from '../utils/local-save';
+import { releaseNotesView } from './release-notes-view';
+import { describeHelperFailure, nativeHelperRepairPrompt } from '../utils/native-helper-prompt';
+import { DEFAULT_TRIPLE_KEYS, TRIPLE_COMMANDS, TripleCommand, normalizeTripleKeys, normalizeSites } from '../utils/triple-key';
+
+import { t } from '../utils/ui-text';
+dayjs.extend(weekOfYear);
+
+export function updateVaultList(): void {
+	const vaultList = document.getElementById('vault-list') as HTMLUListElement;
+	if (!vaultList) return;
+
+	// Clear existing vaults
+	vaultList.textContent = '';
+	generalSettings.vaults.forEach((vault, index) => {
+		const li = document.createElement('li');
+		li.dataset.index = index.toString();
+		li.draggable = true;
+
+		const dragHandle = createElementWithClass('div', 'drag-handle');
+		dragHandle.appendChild(createElementWithHTML('i', '', { 'data-lucide': 'grip-vertical' }));
+		li.appendChild(dragHandle);
+
+		const span = document.createElement('span');
+		span.textContent = vault;
+		li.appendChild(span);
+
+		const removeBtn = createElementWithClass('button', 'setting-item-list-remove clickable-icon');
+		removeBtn.setAttribute('type', 'button');
+		removeBtn.setAttribute('aria-label', getMessage('removeVault'));
+		removeBtn.appendChild(createElementWithHTML('i', '', { 'data-lucide': 'trash-2' }));
+		li.appendChild(removeBtn);
+
+		li.addEventListener('dragstart', handleDragStart);
+		li.addEventListener('dragover', handleDragOver);
+		li.addEventListener('drop', handleDrop);
+		li.addEventListener('dragend', handleDragEnd);
+		removeBtn.addEventListener('click', (e) => {
+			e.stopPropagation();
+			removeVault(index);
+		});
+		vaultList.appendChild(li);
+	});
+
+	initializeIcons(vaultList);
+}
+
+export function addVault(vault: string): void {
+	generalSettings.vaults.push(vault);
+	saveSettings();
+	updateVaultList();
+}
+
+export function removeVault(index: number): void {
+	generalSettings.vaults.splice(index, 1);
+	saveSettings();
+	updateVaultList();
+}
+
+export async function setShortcutInstructions() {
+	const shortcutInstructionsElement = document.querySelector('.shortcut-instructions');
+	if (shortcutInstructionsElement) {
+		const browser = await detectBrowser();
+		// Clear content
+		shortcutInstructionsElement.textContent = '';
+		shortcutInstructionsElement.appendChild(document.createTextNode(getMessage('shortcutInstructionsIntro') + ' '));
+		
+		// Browser-specific instructions
+		let instructionsText = '';
+		let url = '';
+		
+		switch (browser) {
+			case 'chrome':
+				instructionsText = getMessage('shortcutInstructionsChrome', ['$URL']);
+				url = 'chrome://extensions/shortcuts';
+				break;
+			case 'brave':
+				instructionsText = getMessage('shortcutInstructionsBrave', ['$URL']);
+				url = 'brave://extensions/shortcuts';
+				break;
+			case 'firefox':
+				instructionsText = getMessage('shortcutInstructionsFirefox', ['$URL']);
+				url = 'about:addons';
+				break;
+			case 'edge':
+				instructionsText = getMessage('shortcutInstructionsEdge', ['$URL']);
+				url = 'edge://extensions/shortcuts';
+				break;
+			case 'safari':
+			case 'mobile-safari':
+				instructionsText = getMessage('shortcutInstructionsSafari');
+				break;
+			default:
+				instructionsText = getMessage('shortcutInstructionsDefault');
+		}
+		
+		if (url) {
+			// Split text around the URL placeholder and add strong element
+			const parts = instructionsText.split('$URL');
+			if (parts.length === 2) {
+				shortcutInstructionsElement.appendChild(document.createTextNode(parts[0]));
+				
+				const strongElement = document.createElement('strong');
+				strongElement.textContent = url;
+				shortcutInstructionsElement.appendChild(strongElement);
+				
+				shortcutInstructionsElement.appendChild(document.createTextNode(parts[1]));
+			} else {
+				// Fallback if no placeholder found
+				shortcutInstructionsElement.appendChild(document.createTextNode(instructionsText));
+			}
+		} else {
+			// Safari and default cases (no URL needed)
+			shortcutInstructionsElement.appendChild(document.createTextNode(instructionsText));
+		}
+	}
+}
+
+async function initializeVersionDisplay(): Promise<void> {
+	const manifest = browser.runtime.getManifest();
+	const versionNumber = document.getElementById('version-number');
+	const status = document.getElementById('version-status');
+	const link = document.getElementById('changelog-link') as HTMLAnchorElement | null;
+	if (versionNumber) versionNumber.textContent = manifest.version;
+	if (!status) return;
+	// The store edition is updated by the store. The local edition checks the project's releases once per visit and says so only when it read the answer.
+	if (!__LOCAL_EDITION__) { status.textContent = t('商店会自动更新这个插件。'); return; }
+	status.textContent = t('正在检查更新…');
+	void releaseNotesView();
+	const result = await checkForUpdate(manifest.version);
+	if (result.state === 'newer') {
+		status.textContent = t('有新版本 {0}，点右边去下载。', [result.version]);
+		if (link) { link.textContent = t('下载新版'); link.href = result.url; link.classList.add('mod-cta'); }
+	} else status.textContent = result.state === 'current' ? t('已是最新版本。') : t('暂时没能检查更新，可以到右边看看最新发布。');
+}
+
+export function initializeGeneralSettings(): void {
+	loadSettings().then(async () => {
+		await setupLanguageAndDirection();
+
+		// Add version check initialization
+		await initializeVersionDisplay();
+
+		updateVaultList();
+		initializeShowMoreActionsToggle();
+		initializeBetaFeaturesToggle();
+		initializeLegacyModeToggle();
+		initializeSilentOpenToggle();
+		initializeVaultInput();
+		initializeLocalVaultSettings();
+		initializeOpenBehaviorDropdown();
+		initializeDefaultTemplateDropdown();
+		initializeKeyboardShortcuts();
+		initializeToggles();
+		setShortcutInstructions();
+		void initializeAsrSettings();
+		void initializeStudySitesSettings();
+		void initializeStudyHome();
+		initializeAutoSave();
+		initializeResetDefaultTemplateButton();
+		initializeExportImportAllSettingsButtons();
+		initializeHighlighterSettings();
+		initializeExportHighlightsButton();
+		initializeSaveBehaviorDropdown();
+		await initializeUsageChart();
+	});
+}
+
+function initializeAutoSave(): void {
+	// The settings are spread over several pages of the menu; each page's form saves the same way.
+	for (const id of ['general-settings-form', 'clip-settings-form', 'learning-settings-form', 'video-settings-form']) {
+		const form = document.getElementById(id);
+		if (!form) continue;
+		// Listen for both input and change events
+		form.addEventListener('input', debounce(saveSettingsFromForm, 500));
+		form.addEventListener('change', debounce(saveSettingsFromForm, 500));
+	}
+}
+
+function saveSettingsFromForm(): void {
+	const openBehaviorDropdown = document.getElementById('open-behavior-dropdown') as HTMLSelectElement;
+	const showMoreActionsToggle = document.getElementById('show-more-actions-toggle') as HTMLInputElement;
+	const betaFeaturesToggle = document.getElementById('beta-features-toggle') as HTMLInputElement;
+	const legacyModeToggle = document.getElementById('legacy-mode-toggle') as HTMLInputElement;
+	const silentOpenToggle = document.getElementById('silent-open-toggle') as HTMLInputElement;
+	const highlighterToggle = document.getElementById('highlighter-toggle') as HTMLInputElement;
+	const alwaysShowHighlightsToggle = document.getElementById('highlighter-visibility') as HTMLInputElement;
+	const highlightBehaviorSelect = document.getElementById('highlighter-behavior') as HTMLSelectElement;
+
+	const updatedSettings = {
+		...generalSettings, // Keep existing settings
+		openBehavior: (openBehaviorDropdown?.value as Settings['openBehavior']) ?? generalSettings.openBehavior,
+		showMoreActionsButton: showMoreActionsToggle?.checked ?? generalSettings.showMoreActionsButton,
+		betaFeatures: betaFeaturesToggle?.checked ?? generalSettings.betaFeatures,
+		legacyMode: legacyModeToggle?.checked ?? generalSettings.legacyMode,
+		silentOpen: silentOpenToggle?.checked ?? generalSettings.silentOpen,
+		highlighterEnabled: highlighterToggle?.checked ?? generalSettings.highlighterEnabled,
+		alwaysShowHighlights: alwaysShowHighlightsToggle?.checked ?? generalSettings.alwaysShowHighlights,
+		highlightBehavior: highlightBehaviorSelect?.value ?? generalSettings.highlightBehavior
+	};
+
+	saveSettings(updatedSettings);
+}
+
+function initializeShowMoreActionsToggle(): void {
+	initializeSettingToggle('show-more-actions-toggle', generalSettings.showMoreActionsButton, (checked) => {
+		saveSettings({ ...generalSettings, showMoreActionsButton: checked });
+	});
+}
+
+async function initializeLocalVaultSettings(): Promise<void> {
+	const row = document.getElementById('local-vault-row');
+	const select = document.getElementById('local-vault-select') as HTMLSelectElement | null;
+	const status = document.getElementById('local-vault-status');
+	const note = document.getElementById('local-helper-note');
+	const help = document.getElementById('local-helper-help');
+	const download = document.getElementById('local-helper-download');
+	const more = document.getElementById('local-helper-more');
+	const copy = document.getElementById('local-helper-copy') as HTMLButtonElement | null;
+	const uriVaults = document.getElementById('uri-vaults');
+	if (!row || !select || !status || !note) return;
+	const OTHER = '__other__';
+	let failure: string | undefined;
+	let current = '';
+	const isMac = /Mac/i.test(navigator.platform || navigator.userAgent);
+
+	const showOffline = (message: string, reason?: string) => {
+		failure = reason;
+		row.hidden = true;
+		if (uriVaults) uriVaults.hidden = false;
+		note.textContent = message;
+		if (help) help.hidden = false;
+		if (download) download.hidden = !isMac;
+		if (copy) copy.hidden = isMac && !/forbidden|exited/i.test(reason || '');
+		if (more) more.hidden = false;
+	};
+	const showOnline = () => {
+		row.hidden = false;
+		if (uriVaults) uriVaults.hidden = true;
+		note.textContent = t('已连接 ✓');
+		if (help) help.hidden = true;
+	};
+	copy?.addEventListener('click', async () => {
+		try { await navigator.clipboard.writeText(nativeHelperRepairPrompt(browser.runtime.id, failure)); copy.textContent = t('已复制，去发给 AI 助手'); }
+		catch { copy.textContent = t('复制失败，请点“所有安装包”'); }
+	});
+
+	const fill = (vaults: { name: string; path: string }[], active: string) => {
+		select.textContent = '';
+		const known = vaults.some(v => v.path === active);
+		const options = known || !active ? vaults : [{ name: active.split(/[\\/]/).pop() || active, path: active }, ...vaults];
+		for (const v of options) {
+			const option = document.createElement('option');
+			option.value = v.path;
+			option.textContent = v.name;
+			option.title = v.path;
+			select.appendChild(option);
+		}
+		const other = document.createElement('option');
+		other.value = OTHER;
+		other.textContent = t('选择其他文件夹…');
+		select.appendChild(other);
+		if (active) select.value = active;
+		if (!select.value && options.length) select.value = options[0].path;
+	};
+	const remember = async (result: LocalSaveResult) => {
+		if (!result.vault || !result.vaultPath) return;
+		if (!generalSettings.vaults.includes(result.vault)) {
+			generalSettings.vaults.push(result.vault);
+			await saveSettings();
+			updateVaultList();
+		}
+		await browser.storage.local.set({ qiaomuNativeConfigured: true });
+		await setLocalStorage('lastSelectedVault', result.vault);
+		current = result.vaultPath;
+	};
+	let vaultList: { name: string; path: string }[] = [];
+	select.addEventListener('change', async () => {
+		const wanted = select.value;
+		select.disabled = true;
+		try {
+			const result = (wanted === OTHER
+				? await browser.runtime.sendMessage({ action: 'qiaomuLocalChooseVault' })
+				: await browser.runtime.sendMessage({ action: 'qiaomuLocalConfigure', payload: { vaultPath: wanted } })) as LocalSaveResult;
+			if (result?.cancelled) { fill(vaultList, current); return; }
+			if (!result?.ok || !result.vault || !result.vaultPath) {
+				fill(vaultList, current);
+				status.textContent = result?.error || t('没能保存，请再试一次');
+				if (result?.reason) showOffline(result.error || t('本地助手没有响应'), result.reason);
+				return;
+			}
+			if (wanted === OTHER) {
+				const saved = await browser.runtime.sendMessage({ action: 'qiaomuLocalConfigure', payload: { vaultPath: result.vaultPath } }) as LocalSaveResult;
+				if (!saved?.ok) { fill(vaultList, current); status.textContent = saved?.error || t('没能保存，请再试一次'); return; }
+				if (!vaultList.some(v => v.path === result.vaultPath)) vaultList = [{ name: result.vault, path: result.vaultPath }, ...vaultList];
+			}
+			await remember(result);
+			fill(vaultList, current);
+			status.textContent = t('已保存到 {0}', [result.vault]);
+		} catch { showOffline(t('本地助手没有响应，请先安装或更新')); }
+		finally { select.disabled = false; }
+	});
+
+	try {
+		const state = await browser.runtime.sendMessage({ action: 'qiaomuLocalStatus' }) as LocalSaveResult;
+		if (!state?.ok) { showOffline(`${describeHelperFailure(state?.reason)}`, state?.reason); return; }
+		const listed = await browser.runtime.sendMessage({ action: 'qiaomuLocalListVaults' }) as { ok?: boolean; vaults?: { name: string; path: string }[] };
+		vaultList = listed?.ok && Array.isArray(listed.vaults) ? listed.vaults : [];
+		current = state.vaultPath || '';
+		showOnline();
+		fill(vaultList, current);
+		status.textContent = current ? current : t('选一个库，之后一键保存，不用打开 Obsidian。');
+		if (!current && vaultList.length) status.textContent = t('选一个库，之后一键保存，不用打开 Obsidian。');
+	} catch { showOffline(t('还没有安装本地助手。')); }
+}
+
+function initializeVaultInput(): void {
+	const vaultInput = document.getElementById('vault-input') as HTMLInputElement;
+	if (vaultInput) {
+		vaultInput.addEventListener('keypress', (e) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				const newVault = vaultInput.value.trim();
+				if (newVault) {
+					addVault(newVault);
+					vaultInput.value = '';
+				}
+			}
+		});
+	}
+}
+
+async function initializeKeyboardShortcuts(): Promise<void> {
+	const shortcutsList = document.getElementById('keyboard-shortcuts-list');
+	if (!shortcutsList) return;
+
+	const browser = await detectBrowser();
+
+	if (browser === 'mobile-safari') {
+		// For Safari, display a message about keyboard shortcuts not being available
+		const messageItem = document.createElement('div');
+		messageItem.className = 'shortcut-item';
+		messageItem.textContent = getMessage('shortcutInstructionsSafari');
+		shortcutsList.appendChild(messageItem);
+	} else {
+		// For other browsers, proceed with displaying the shortcuts
+		getCommands().then(commands => {
+			commands.forEach(command => {
+				const shortcutItem = createElementWithClass('div', 'shortcut-item');
+				
+				const descriptionSpan = document.createElement('span');
+				descriptionSpan.textContent = command.description;
+				shortcutItem.appendChild(descriptionSpan);
+
+				const hotkeySpan = createElementWithClass('span', 'setting-hotkey');
+				hotkeySpan.textContent = command.shortcut || getMessage('shortcutNotSet');
+				shortcutItem.appendChild(hotkeySpan);
+
+				shortcutsList.appendChild(shortcutItem);
+			});
+		});
+	}
+}
+
+function initializeBetaFeaturesToggle(): void {
+	initializeSettingToggle('beta-features-toggle', generalSettings.betaFeatures, (checked) => {
+		saveSettings({ ...generalSettings, betaFeatures: checked });
+	});
+}
+
+function initializeLegacyModeToggle(): void {
+	initializeSettingToggle('legacy-mode-toggle', generalSettings.legacyMode, (checked) => {
+		saveSettings({ ...generalSettings, legacyMode: checked });
+	});
+}
+
+function initializeSilentOpenToggle(): void {
+	initializeSettingToggle('silent-open-toggle', generalSettings.silentOpen, (checked) => {
+		saveSettings({ ...generalSettings, silentOpen: checked });
+	});
+}
+
+function initializeOpenBehaviorDropdown(): void {
+	initializeSettingDropdown(
+		'open-behavior-dropdown',
+		generalSettings.openBehavior,
+		(value) => {
+			saveSettings({ ...generalSettings, openBehavior: value as Settings['openBehavior'] });
+		}
+	);
+}
+
+function populateDefaultTemplateDropdown(templates: Template[]): void {
+	const dropdown = document.getElementById('default-template-dropdown') as HTMLSelectElement | null;
+	if (!dropdown) return;
+	dropdown.textContent = '';
+	templates.forEach(template => {
+		const option = document.createElement('option');
+		option.value = template.id;
+		option.textContent = template.name;
+		dropdown.appendChild(option);
+	});
+	dropdown.value = templates.some(t => t.id === generalSettings.defaultTemplateId) ? generalSettings.defaultTemplateId! : (templates[0]?.id ?? '');
+}
+
+// Templates load after the general settings are built, so the list follows every template list update.
+// Per-action shortcut letters: one character each, no duplicates; an empty box switches the action off.
+function initializeTripleKeyFields(): void {
+	const inputs = Object.fromEntries(TRIPLE_COMMANDS.map(command => [command, document.getElementById(`triple-key-${command}`) as HTMLInputElement | null])) as Record<TripleCommand, HTMLInputElement | null>;
+	const error = document.getElementById('triple-key-error');
+	if (!inputs.read || !inputs.edit || !inputs.clip || !inputs.note) return;
+
+	const fill = (keys: Record<TripleCommand, string>) => TRIPLE_COMMANDS.forEach(command => { inputs[command]!.value = keys[command]; });
+	fill(normalizeTripleKeys(generalSettings.tripleKeys));
+
+	const showError = (message: string) => { if (error) { error.hidden = !message; error.textContent = message; } };
+	const save = () => {
+		const typed = Object.fromEntries(TRIPLE_COMMANDS.map(command => [command, inputs[command]!.value.trim().toLowerCase()])) as Record<TripleCommand, string>;
+		const invalid = TRIPLE_COMMANDS.find(command => typed[command] && !/^[a-z0-9]$/.test(typed[command]));
+		const filled = TRIPLE_COMMANDS.filter(command => typed[command]);
+		const duplicate = filled.some((command, index) => filled.findIndex(other => typed[other] === typed[command]) !== index);
+		if (invalid) return showError(getMessage('tripleKeyInvalid'));
+		if (duplicate) return showError(getMessage('tripleKeyDuplicate'));
+		showError('');
+		saveSettings({ ...generalSettings, tripleKeys: typed });
+	};
+	TRIPLE_COMMANDS.forEach(command => {
+		inputs[command]!.addEventListener('input', () => { inputs[command]!.value = inputs[command]!.value.toLowerCase(); save(); });
+		inputs[command]!.addEventListener('focus', () => inputs[command]!.select());
+	});
+	document.getElementById('triple-key-reset')?.addEventListener('click', () => {
+		fill(DEFAULT_TRIPLE_KEYS);
+		showError('');
+		saveSettings({ ...generalSettings, tripleKeys: { ...DEFAULT_TRIPLE_KEYS } });
+	});
+}
+
+function initializeDefaultTemplateDropdown(): void {
+	const dropdown = document.getElementById('default-template-dropdown') as HTMLSelectElement | null;
+	if (dropdown) {
+		populateDefaultTemplateDropdown(getTemplates());
+		document.addEventListener('qiaomu-templates-updated', event => populateDefaultTemplateDropdown((event as CustomEvent<Template[]>).detail));
+		dropdown.addEventListener('change', () => saveSettings({ ...generalSettings, defaultTemplateId: dropdown.value }));
+	}
+	initializeSettingToggle('youtube-hide-native-toggle', generalSettings.youtubeHideNativeTranscript !== false, (checked) => {
+		saveSettings({ ...generalSettings, youtubeHideNativeTranscript: checked });
+	});
+	initializeSettingToggle('youtube-auto-transcript-toggle', generalSettings.youtubeAutoTranscript !== false, (checked) => {
+		saveSettings({ ...generalSettings, youtubeAutoTranscript: checked });
+	});
+	void browser.storage.local.get('qiaomuRssEnabled').then(saved => {
+		initializeSettingToggle('rss-share-toggle', saved.qiaomuRssEnabled === true, (checked) => { void browser.storage.local.set({ qiaomuRssEnabled: checked }); });
+	});
+	initializeSettingToggle('learning-notes-toggle', generalSettings.learningNotes !== false, (checked) => {
+		saveSettings({ ...generalSettings, learningNotes: checked });
+	});
+	initializeSettingToggle('learning-include-quote-toggle', generalSettings.learningIncludeQuote !== false, (checked) => {
+		saveSettings({ ...generalSettings, learningIncludeQuote: checked });
+	});
+	initializeSettingToggle('learning-include-source-toggle', generalSettings.learningIncludeSource !== false, (checked) => {
+		saveSettings({ ...generalSettings, learningIncludeSource: checked });
+	});
+	initializeSettingToggle('youtube-panel-actions-toggle', generalSettings.youtubePanelActions !== false, (checked) => {
+		saveSettings({ ...generalSettings, youtubePanelActions: checked });
+	});
+	initializeSettingToggle('selection-toolbar-toggle', generalSettings.selectionToolbar !== false, (checked) => {
+		saveSettings({ ...generalSettings, selectionToolbar: checked });
+	});
+	initializeSettingToggle('reader-auto-chat-toggle', generalSettings.readerAutoChat === true, (checked) => {
+		saveSettings({ ...generalSettings, readerAutoChat: checked });
+	});
+	initializeSettingToggle('editor-auto-chat-toggle', generalSettings.editorAutoChat === true, (checked) => {
+		saveSettings({ ...generalSettings, editorAutoChat: checked });
+	});
+	initializeTripleKeyFields();
+	const sites = document.getElementById('triple-key-sites') as HTMLTextAreaElement | null;
+	if (sites) {
+		sites.value = normalizeSites(generalSettings.tripleKeyBlockedSites).join('\n');
+		sites.addEventListener('input', debounce(() => {
+			saveSettings({ ...generalSettings, tripleKeyBlockedSites: normalizeSites(sites.value.split(/[\n,;\s]+/)) });
+		}, 400));
+		sites.addEventListener('blur', () => { sites.value = normalizeSites(generalSettings.tripleKeyBlockedSites).join('\n'); });
+	}
+	initializeSettingToggle('triple-key-toggle', generalSettings.tripleKeyShortcuts !== false, (checked) => {
+		saveSettings({ ...generalSettings, tripleKeyShortcuts: checked });
+	});
+}
+
+function initializeResetDefaultTemplateButton(): void {
+	const resetDefaultTemplateBtn = document.getElementById('reset-default-template-btn');
+	if (resetDefaultTemplateBtn) {
+		resetDefaultTemplateBtn.addEventListener('click', resetDefaultTemplate);
+	}
+}
+
+function initializeSaveBehaviorDropdown(): void {
+    const dropdown = document.getElementById('save-behavior-dropdown') as HTMLSelectElement;
+    if (!dropdown) return;
+
+    dropdown.value = generalSettings.saveBehavior;
+    dropdown.addEventListener('change', () => {
+        const newValue = dropdown.value as 'addToObsidian' | 'copyToClipboard' | 'saveFile';
+        saveSettings({ saveBehavior: newValue });
+    });
+}
+
+export function resetDefaultTemplate(): void {
+	const defaultTemplate = createDefaultTemplate();
+	const currentTemplates = getTemplates();
+	const defaultIndex = currentTemplates.findIndex((t: Template) => t.name === getMessage('defaultTemplateName'));
+	
+	if (defaultIndex !== -1) {
+		currentTemplates[defaultIndex] = defaultTemplate;
+	} else {
+		currentTemplates.unshift(defaultTemplate);
+	}
+
+	saveTemplateSettings().then(() => {
+		updateTemplateList();
+		showTemplateEditor(defaultTemplate);
+	}).catch(error => {
+		console.error('Failed to reset default template:', error);
+		alert(getMessage('failedToResetTemplate'));
+	});
+}
+
+function initializeExportImportAllSettingsButtons(): void {
+	const exportAllSettingsBtn = document.getElementById('export-all-settings-btn');
+	if (exportAllSettingsBtn) {
+		exportAllSettingsBtn.addEventListener('click', exportAllSettings);
+	}
+
+	const importAllSettingsBtn = document.getElementById('import-all-settings-btn');
+	if (importAllSettingsBtn) {
+		importAllSettingsBtn.addEventListener('click', importAllSettings);
+	}
+}
+
+function initializeExportHighlightsButton(): void {
+	const exportHighlightsBtn = document.getElementById('export-highlights');
+	if (exportHighlightsBtn) {
+		exportHighlightsBtn.addEventListener('click', exportHighlights);
+	}
+
+	const importHighlightsBtn = document.getElementById('import-highlights');
+	if (importHighlightsBtn) {
+		importHighlightsBtn.addEventListener('click', importHighlights);
+	}
+}
+
+function initializeHighlighterSettings(): void {
+	initializeSettingToggle('highlighter-toggle', generalSettings.highlighterEnabled, (checked) => {
+		saveSettings({ ...generalSettings, highlighterEnabled: checked });
+	});
+
+	initializeSettingToggle('highlighter-visibility', generalSettings.alwaysShowHighlights, (checked) => {
+		saveSettings({ ...generalSettings, alwaysShowHighlights: checked });
+	});
+
+	const highlightBehaviorSelect = document.getElementById('highlighter-behavior') as HTMLSelectElement;
+	if (highlightBehaviorSelect) {
+		highlightBehaviorSelect.value = generalSettings.highlightBehavior;
+		highlightBehaviorSelect.addEventListener('change', () => {
+			saveSettings({ ...generalSettings, highlightBehavior: highlightBehaviorSelect.value });
+		});
+	}
+}
+
+async function initializeUsageChart(): Promise<void> {
+	const chartContainer = document.getElementById('usage-chart');
+	const metricSelect = document.getElementById('usage-metric-select') as HTMLSelectElement;
+	const periodSelect = document.getElementById('usage-period-select') as HTMLSelectElement;
+	const aggregationSelect = document.getElementById('usage-aggregation-select') as HTMLSelectElement;
+	if (!chartContainer || !metricSelect || !periodSelect || !aggregationSelect) return;
+
+	const history = await getClipHistory();
+
+	const updateChart = async () => {
+		const options = {
+			timeRange: periodSelect.value as '30d' | 'all',
+			aggregation: aggregationSelect.value as 'day' | 'week' | 'month'
+		};
+
+		const chartData = aggregateUsageData(history, options);
+		await createUsageChart(chartContainer, chartData, metricSelect.value as UsageMetric);
+	};
+
+	// Initialize with default selections
+	await updateChart();
+
+	// Update when any selector changes
+	metricSelect.addEventListener('change', updateChart);
+	periodSelect.addEventListener('change', updateChart);
+	aggregationSelect.addEventListener('change', updateChart);
+}
+
+function initializeSettingDropdown(
+	elementId: string,
+	defaultValue: string,
+	onChange: (newValue: string) => void
+): void {
+	const dropdown = document.getElementById(elementId) as HTMLSelectElement;
+	if (!dropdown) return;
+	dropdown.value = defaultValue;
+	dropdown.addEventListener('change', () => {
+		onChange(dropdown.value);
+	});
+}

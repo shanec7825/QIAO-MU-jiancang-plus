@@ -1,0 +1,2176 @@
+{
+	"activity": {
+		"message": "Atividade"
+	},
+	"addModel": {
+		"message": "+ Adicionar modelo"
+	},
+	"addModelTitle": {
+		"message": "Adicionar modelo"
+	},
+	"addProperty": {
+		"message": "+ Adicionar propriedade"
+	},
+	"addProvider": {
+		"message": "+ Adicionar provedor"
+	},
+	"addProviderTitle": {
+		"message": "Adicionar provedor"
+	},
+	"addToObsidian": {
+		"message": "Adicionar ao Obsidian"
+	},
+	"addVaultPlaceholder": {
+		"message": "Pressione Enter para adicionar um cofre"
+	},
+	"advanced": {
+		"message": "Avançado"
+	},
+	"allHighlights": {
+		"message": "Todos os destaques"
+	},
+	"allProperties": {
+		"message": "Todas as propriedades"
+	},
+	"allTime": {
+		"message": "Todo o tempo"
+	},
+	"alwaysShowHighlights": {
+		"message": "Sempre mostrar marcações"
+	},
+	"alwaysShowHighlightsDescription": {
+		"message": "Exiba suas marcações salvos ao carregar a página. Desative para exibir as marcações somente quando o modo marcador estiver ativado."
+	},
+	"apiKeyMissing": {
+		"message": "Chave API ausente"
+	},
+	"apiKeysWarning": {
+		"message": "Ao usar um provedor externo, você concorda com seus termos e política de privacidade. As solicitações do interpretador são enviadas diretamente ao provedor que você escolher. O Obsidian não coleta nem armazena nenhum dado sobre suas solicitações."
+	},
+	"appendToDaily": {
+		"message": "Adicionar à nota diária, no final"
+	},
+	"appendToExisting": {
+		"message": "Adicionar a uma nota existente, no final"
+	},
+	"autoRunInterpreter": {
+		"message": "Executar automaticamente"
+	},
+	"autoRunInterpreterDescription": {
+		"message": "Execute variáveis de prompt imediatamente se o modelo contiver alguma. Isso consumirá créditos de API com seu provedor de modelo. Desative se você quiser executar o interpretador apenas manualmente."
+	},
+	"behavior": {
+		"message": "Comportamento"
+	},
+	"byDay": {
+		"message": "Dias"
+	},
+	"byMonth": {
+		"message": "Meses"
+	},
+	"byWeek": {
+		"message": "Semanas"
+	},
+	"cancel": {
+		"message": "Cancelar"
+	},
+	"cannotDeleteProvider": {
+		"message": "Não é possível excluir o provedor \"$1\" porque está sendo usado por $2 modelo(s)."
+	},
+	"changelog": {
+		"message": "Registro de alterações"
+	},
+	"chooseFile": {
+		"message": "Escolher um arquivo"
+	},
+	"choosePropertiesFile": {
+		"message": "Escolher arquivo de propriedades"
+	},
+	"chooseSettingsFile": {
+		"message": "Escolher arquivo de configurações"
+	},
+	"chooseTemplateFile": {
+		"message": "Escolher arquivo de modelo"
+	},
+	"clipBehavior": {
+		"message": "Comportamento da captura"
+	},
+	"clipBehaviorDescription": {
+		"message": "Escolha como o conteúdo destacado será salvo no Obsidian. Define a variável $strong_start${{content}}$strong_end$.",
+		"placeholders": {
+			"strong_end": {
+				"content": "</strong>"
+			},
+			"strong_start": {
+				"content": "<strong>"
+			}
+		}
+	},
+	"clipboardError": {
+		"message": "O Obsidian não consegue acessar sua área de transferência. Tente as instruções de solução de problemas aqui: $1",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"close": {
+		"message": "Fechar"
+	},
+	"commandOpenClipper": {
+		"message": "Abrir Obsidian Clipper"
+	},
+	"commandQuickClip": {
+		"message": "Captura rápida"
+	},
+	"commandToggleHighlighter": {
+		"message": "Alternar modo marcador"
+	},
+	"commandToggleReader": {
+		"message": "Alternar vista de leitura"
+	},
+	"confirmDeleteTemplate": {
+		"message": "Tem certeza que deseja deletar o modelo \"$1\"?"
+	},
+	"confirmReplaceSettings": {
+		"message": "Isso substituirá todas as suas configurações atuais, incluindo modelos e propriedades. Tem certeza que deseja continuar?"
+	},
+	"copied": {
+		"message": "Copiado!"
+	},
+	"copyAsJson": {
+		"message": "Copiar como JSON"
+	},
+	"copyToClipboard": {
+		"message": "Copiar para a área de transferência"
+	},
+	"createNewNote": {
+		"message": "Criar nova nota"
+	},
+	"custom": {
+		"message": "Personalizado"
+	},
+	"dailyNoteFormat": {
+		"message": "Formato da nota diária (ex: YYYY-MM-DD)"
+	},
+	"defaultInterpreterContext": {
+		"message": "Contexto padrão do interpretador"
+	},
+	"defaultInterpreterContextDescription": {
+		"message": "O modelo usará este contexto para interpretar variáveis de prompt. Variáveis e filtros podem ser usados aqui."
+	},
+	"defaultTemplateName": {
+		"message": "Padrão"
+	},
+	"delete": {
+		"message": "Deletar"
+	},
+	"deleteAllHighlightsConfirm": {
+		"message": "Tem certeza de que deseja excluir todos os destaques?"
+	},
+	"deleteHighlightsForDomain": {
+		"message": "Excluir todos os destaques deste domínio?"
+	},
+	"deleteHighlightsForPage": {
+		"message": "Excluir todos os destaques desta página?"
+	},
+	"deleteModelConfirm": {
+		"message": "Tem certeza que deseja excluir este modelo?"
+	},
+	"deleteProviderConfirm": {
+		"message": "Tem certeza de que deseja excluir este provedor?"
+	},
+	"disableHighlighter": {
+		"message": "Desativar marcador"
+	},
+	"disableReader": {
+		"message": "Desativar vista de leitura"
+	},
+	"done": {
+		"message": "Concluído"
+	},
+	"dragAndDropFile": {
+		"message": "Arraste e solte o arquivo aqui"
+	},
+	"duplicate": {
+		"message": "Duplicar"
+	},
+	"earlyAccessDescription": {
+		"message": "Use recursos que exigem a $link_start$versão de acesso antecipado$link_end$ mais recente do Obsidian. Atualmente, requer a versão 1.7.2 ou posterior.",
+		"placeholders": {
+			"link_end": {
+				"content": "</a>"
+			},
+			"link_start": {
+				"content": "<a href=\"https://help.obsidian.md/Obsidian/Early+access+versions\" target=\"_blank\">"
+			}
+		}
+	},
+	"earlyAccessFeatures": {
+		"message": "Recursos de acesso antecipado"
+	},
+	"edit": {
+		"message": "Editar"
+	},
+	"editModel": {
+		"message": "Editar modelo"
+	},
+	"editProvider": {
+		"message": "Editar provedor"
+	},
+	"editTemplate": {
+		"message": "Editar modelo"
+	},
+	"embedded": {
+		"message": "Embutido"
+	},
+	"enableHighlighterDescription": {
+		"message": "Demarque o conteúdo de páginas da internet para que possa salvar no Obsidian."
+	},
+	"enableInterpreter": {
+		"message": "Habilitar interpretador"
+	},
+	"enableInterpreterDescription": {
+		"message": "Use linguagem natural para extrair dados das páginas. Por exemplo, você pode usar a sintaxe de modelo $strong_start${{\"um resumo da página\"}}$strong_end$. Requer uma chave API ou modelo personalizado configurado abaixo. $link_start$Saiba mais$link_end$",
+		"placeholders": {
+			"link_end": {
+				"content": "</a>"
+			},
+			"link_start": {
+				"content": "<a href=\"https://help.obsidian.md/web-clipper/interpreter\" target=\"_blank\">"
+			},
+			"strong_end": {
+				"content": "</strong>"
+			},
+			"strong_start": {
+				"content": "<strong>"
+			}
+		}
+	},
+	"enableReader": {
+		"message": "Abrir vista de leitura"
+	},
+	"error": {
+		"message": "Erro"
+	},
+	"export": {
+		"message": "Exportar"
+	},
+	"exportAllSettings": {
+		"message": "Exportar todas as configurações"
+	},
+	"exportAllSettingsDescription": {
+		"message": "Exporta todas as configurações, incluindo modelos e propriedades."
+	},
+	"exportHighlights": {
+		"message": "Exportar marcações"
+	},
+	"exportHighlightsDescription": {
+		"message": "Exporta as marcações para um arquivo."
+	},
+	"exportProperties": {
+		"message": "Exportar propriedades"
+	},
+	"exportPropertiesDescription": {
+		"message": "Salve as propriedades do Web Clipper em um arquivo $strong_start$types.json$strong_end$ que pode ser importado para o cofre do Obsidian, ou para o Web Clipper em outros dispositivos.",
+		"placeholders": {
+			"strong_end": {
+				"content": "</strong>"
+			},
+			"strong_start": {
+				"content": "<strong>"
+			}
+		}
+	},
+	"extensionDescription": {
+		"message": "Salve o conteúdo da internet em um formato privado e durável, que pode ser acessado off-line. A extensão de navegador oficial do Obsidian."
+	},
+	"extensionName": {
+		"message": "Obsidian Web Clipper"
+	},
+	"failedToCopyText": {
+		"message": "Falha ao copiar o texto"
+	},
+	"failedToDeleteTemplate": {
+		"message": "Falha ao deletar modelo. Por favor, tente novamente."
+	},
+	"failedToDuplicateTemplate": {
+		"message": "Falha ao duplicar o modelo. Por favor, tente novamente."
+	},
+	"failedToExportHighlights": {
+		"message": "Falha ao exportar destaques. Por favor, verifique o console para mais detalhes."
+	},
+	"failedToExportSettings": {
+		"message": "Falha ao exportar configurações. Por favor, verifique o console para mais detalhes."
+	},
+	"failedToExtractContent": {
+		"message": "Não foi possível extrair o conteúdo da página."
+	},
+	"failedToImportTemplate": {
+		"message": "Erro ao importar o modelo. Por favor, verifique o arquivo e tente novamente."
+	},
+	"failedToInitialize": {
+		"message": "Por favor, tente recarregar a extensão."
+	},
+	"failedToInitializeContent": {
+		"message": "Não foi possível inicializar o conteúdo da página."
+	},
+	"failedToProcessInterpreter": {
+		"message": "Falha no processamento do intérprete. Por favor, tente novamente."
+	},
+	"failedToResetProviders": {
+		"message": "Falha ao redefinir provedores e modelos"
+	},
+	"failedToResetTemplate": {
+		"message": "Falha ao redefinir o modelo padrão. Por favor, tente novamente."
+	},
+	"failedToSave": {
+		"message": "Falha ao salvar o arquivo"
+	},
+	"failedToSaveFile": {
+		"message": "Falha ao salvar o arquivo"
+	},
+	"failedToSaveProvider": {
+		"message": "Falha ao salvar o provedor. Por favor, tente novamente."
+	},
+	"feedback": {
+		"message": "Comentários"
+	},
+	"feedbackDescription": {
+		"message": "Como podemos melhorar o Web Clipper? Por favor, visite nossa página de ajuda, onde você pode reportar bugs, sugerir recursos e obter ajuda com problemas comuns."
+	},
+	"feedbackTitle": {
+		"message": "Obrigado pelo seu feedback"
+	},
+	"folder": {
+		"message": "Pasta"
+	},
+	"general": {
+		"message": "Geral"
+	},
+	"generalSettings": {
+		"message": "Configurações gerais"
+	},
+	"getApiKeyHere": {
+		"message": "Obtenha sua chave API $1 aqui."
+	},
+	"help": {
+		"message": "Ajuda"
+	},
+	"helpDescription": {
+		"message": "Aprenda a usar o Web Clipper e obtenha ajuda para solucionar problemas."
+	},
+	"highlightInline": {
+		"message": "Realçar o conteúdo da página"
+	},
+	"highlightPage": {
+		"message": "Marcar pagina"
+	},
+	"highlightSelection": {
+		"message": "Destacar"
+	},
+	"highlighter": {
+		"message": "Marcador"
+	},
+	"highlighterOn": {
+		"message": "Marca-texto"
+	},
+	"highlighterSettings": {
+		"message": "Marcador"
+	},
+	"highlights": {
+		"message": "Destaques"
+	},
+	"highlightsImportSuccess": {
+		"message": "$1 destaques importados.",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"highlightsNotFound": {
+		"message": "Destaques não encontrados no artigo"
+	},
+	"history": {
+		"message": "Histórico"
+	},
+	"hotkeys": {
+		"message": "Teclas de atalho"
+	},
+	"import": {
+		"message": "Importar"
+	},
+	"importAllSettings": {
+		"message": "Importar configurações"
+	},
+	"importAllSettingsDescription": {
+		"message": "Importe todas as configurações, incluindo modelos e propriedades. Isso substituirá a configuração atual."
+	},
+	"importFailed": {
+		"message": "Importação falhou. Por favor, verifique o console para mais detalhes."
+	},
+	"importHighlights": {
+		"message": "Importar destaques"
+	},
+	"importHighlightsDescription": {
+		"message": "Importe destaques de um arquivo. Os destaques existentes são mantidos."
+	},
+	"importModalTitle": {
+		"message": "Importar"
+	},
+	"importProperties": {
+		"message": "Importar propriedades"
+	},
+	"importPropertiesDescription": {
+		"message": "Para importar suas propriedades do Obsidian, localize o arquivo $strong_1_start$types.json$strong_1_end$ no pasta $strong_2_start$.obsidian$strong_2_end$ dentro do seu Cofre. Observe que essa pasta é ocultada por padrão na maioria dos sistemas operacionais.",
+		"placeholders": {
+			"strong_1_end": {
+				"content": "</strong>"
+			},
+			"strong_1_start": {
+				"content": "<strong>"
+			},
+			"strong_2_end": {
+				"content": "</strong>"
+			},
+			"strong_2_start": {
+				"content": "<strong>"
+			}
+		}
+	},
+	"importSettings": {
+		"message": "Importar configurações"
+	},
+	"importTemplate": {
+		"message": "Importar modelo"
+	},
+	"interpret": {
+		"message": "interpretar"
+	},
+	"interpreter": {
+		"message": "Intérprete"
+	},
+	"interpreterContext": {
+		"message": "Contexto do intérprete"
+	},
+	"interpreterContextDescription": {
+		"message": "O contexto usado para interpretar variáveis de prompt. Substitui o contexto padrão definido nas $link_start$Configurações do interpretador$link_end$. Variáveis podem ser usadas aqui.",
+		"placeholders": {
+			"link_end": {
+				"content": "</a>"
+			},
+			"link_start": {
+				"content": "<a href=\"?section=templates-home\">"
+			}
+		}
+	},
+	"language": {
+		"message": "Idioma"
+	},
+	"languageDescription": {
+		"message": "Escolha o idioma de exibição para a interface da extensão."
+	},
+	"last30Days": {
+		"message": "Últimos 30 dias"
+	},
+	"lastUsed": {
+		"message": "Usado pela última vez"
+	},
+	"legacyMode": {
+		"message": "Modo legado"
+	},
+	"legacyModeDescription": {
+		"message": "Utiliza o método de captura por URI compatível com o Obsidian 1.6.7 ou versões anteriores. Observe que o tamanho do conteúdo que pode ser capturado é limitado pelo seu navegador e pelo sistema operacional. Algumas páginas podem falhar sem exibir erros."
+	},
+	"loadArticle": {
+		"message": "Ler artigo"
+	},
+	"loading": {
+		"message": "Carregando…"
+	},
+	"modelName": {
+		"message": "Nome do modelo"
+	},
+	"modelNameDescription": {
+		"message": "O nome do modelo que você deseja exibir na interface."
+	},
+	"modelProvider": {
+		"message": "Provedor"
+	},
+	"modelProviderDescription": {
+		"message": "O provedor do modelo, por exemplo Ollama, OpenRouter, Google, etc."
+	},
+	"modelProviderPlaceholder": {
+		"message": "Provedor"
+	},
+	"modelRequiredFields": {
+		"message": "Nome do modelo, Provedor e ID do modelo são obrigatórios."
+	},
+	"models": {
+		"message": "Modelos"
+	},
+	"modelsListFor": {
+		"message": "Lista de modelos para $1"
+	},
+	"more": {
+		"message": "Mais"
+	},
+	"newTemplate": {
+		"message": "Novo modelo"
+	},
+	"noHighlights": {
+		"message": "Não fazer nada"
+	},
+	"noResults": {
+		"message": "Nenhum resultado encontrado"
+	},
+	"noTemplates": {
+		"message": "Nenhum modelo disponível. Por favor, adicione um modelo nas configurações."
+	},
+	"noUnusedProperties": {
+		"message": "Nenhuma propriedade não utilizada encontrada."
+	},
+	"noteContent": {
+		"message": "Conteúdo da nota"
+	},
+	"noteContentDescription": {
+		"message": "Personalize o conteúdo da nota. Use variáveis para preencher os dados da página automaticamente."
+	},
+	"noteLocation": {
+		"message": "Localização da nota"
+	},
+	"noteLocationDescription": {
+		"message": "O caminho ou a pasta da nota."
+	},
+	"noteName": {
+		"message": "Nome da nota"
+	},
+	"noteNameFormat": {
+		"message": "Nome da nota"
+	},
+	"noteNameFormatDescription": {
+		"message": "Formato para o nome do arquivo da nota. Você pode usar variáveis como {{title}}, {{date}} e {{published}} para preencher automaticamente os dados da página. $link_start$Saiba mais$link_end$.",
+		"placeholders": {
+			"link_end": {
+				"content": "</a>"
+			},
+			"link_start": {
+				"content": "<a href=\"https://help.obsidian.md/web-clipper/variables\" target=\"_blank\">"
+			}
+		}
+	},
+	"notesAboutPage": {
+		"message": "Notas sobre esta página..."
+	},
+	"onlyHttpSupported": {
+		"message": "Esta página não pode ser capturada. Somente URLs HTTP e HTTPS são suportados."
+	},
+	"open": {
+		"message": "Abrir"
+	},
+	"openBehaviorDescription": {
+		"message": "Escolha como o Web Clipper abre por padrão."
+	},
+	"openBehaviorTitle": {
+		"message": "Comportamento de abertura"
+	},
+	"openEmbedded": {
+		"message": "Abrir na página"
+	},
+	"openHighlights": {
+		"message": "Abrir destaques"
+	},
+	"openReader": {
+		"message": "Abrir Leitor"
+	},
+	"openSidePanel": {
+		"message": "Abrir painel lateral"
+	},
+	"optional": {
+		"message": "(opcional)"
+	},
+	"orPasteBelow": {
+		"message": "Ou cole o conteúdo abaixo"
+	},
+	"overwriteNote": {
+		"message": "Sobrescrever nota"
+	},
+	"pageCannotBeClipped": {
+		"message": "Esta página não pode ser capturada."
+	},
+	"pageVariables": {
+		"message": "Variáveis da página"
+	},
+	"pagesRead": {
+		"message": "página lida"
+	},
+	"pagesReadPlural": {
+		"message": "páginas lidas"
+	},
+	"pagesSaved": {
+		"message": "página salva"
+	},
+	"pagesSavedPlural": {
+		"message": "páginas salvas"
+	},
+	"pasteJsonHere": {
+		"message": "Cole o JSON aqui"
+	},
+	"pleaseReload": {
+		"message": "Por favor, tente recarregar a página."
+	},
+	"popularModels": {
+		"message": "Modelos populares"
+	},
+	"popularModelsDescription": {
+		"message": "Escolha entre os modelos comumente usados ou insira os detalhes do modelo personalizado."
+	},
+	"popup": {
+		"message": "Popup"
+	},
+	"prependToDaily": {
+		"message": "Adicionar à nota diária, no início"
+	},
+	"prependToExisting": {
+		"message": "Adicionar a uma nota existente, no início"
+	},
+	"preview": {
+		"message": "Pré-visualização"
+	},
+	"processing": {
+		"message": "processando"
+	},
+	"properties": {
+		"message": "Propriedades"
+	},
+	"propertiesSettings": {
+		"message": "Propriedades"
+	},
+	"propertyName": {
+		"message": "nome da propriedade"
+	},
+	"propertyTypeCheckbox": {
+		"message": "Caixa de seleção"
+	},
+	"propertyTypeDate": {
+		"message": "Data"
+	},
+	"propertyTypeDatetime": {
+		"message": "Data & hora"
+	},
+	"propertyTypeMultitext": {
+		"message": "Lista"
+	},
+	"propertyTypeNumber": {
+		"message": "Número"
+	},
+	"propertyTypeText": {
+		"message": "Texto"
+	},
+	"propertyValue": {
+		"message": "valor da propriedade"
+	},
+	"provider": {
+		"message": "Provedor"
+	},
+	"providerApiKey": {
+		"message": "Chave API"
+	},
+	"providerApiKeyDescription": {
+		"message": "Sua chave API para este provedor."
+	},
+	"providerBaseUrl": {
+		"message": "URL base"
+	},
+	"providerBaseUrlDescription": {
+		"message": "A URL do endpoint API para este provedor."
+	},
+	"providerModelId": {
+		"message": "ID do modelo"
+	},
+	"providerModelIdDescription": {
+		"message": "O identificador do modelo do seu provedor. Geralmente um nome curto sem espaços."
+	},
+	"providerModelIdPlaceholder": {
+		"message": "ID do modelo"
+	},
+	"providerName": {
+		"message": "Nome do provedor"
+	},
+	"providerNameDescription": {
+		"message": "Nome de exibição para este provedor."
+	},
+	"providerPreset": {
+		"message": "Predefinição"
+	},
+	"providerPresetDescription": {
+		"message": "Escolha um provedor ou crie um personalizado."
+	},
+	"providerRequiredFields": {
+		"message": "Nome do provedor e URL base são obrigatórios."
+	},
+	"providers": {
+		"message": "Provedores"
+	},
+	"rateExtensionDescription": {
+		"message": "Você está gostando do Web Clipper? Ajude-nos dando uma avaliação."
+	},
+	"read": {
+		"message": "Lidas"
+	},
+	"reader": {
+		"message": "Leitor"
+	},
+	"readerAppearance": {
+		"message": "Aparência"
+	},
+	"readerAppearanceAuto": {
+		"message": "Automático"
+	},
+	"readerAppearanceDark": {
+		"message": "Escuro"
+	},
+	"readerAppearanceDescription": {
+		"message": "Escolha a aparência clara ou escura."
+	},
+	"readerAppearanceLight": {
+		"message": "Claro"
+	},
+	"readerAutoScroll": {
+		"message": "Rolagem automática"
+	},
+	"readerAutoScrollDescription": {
+		"message": "Role automaticamente a transcrição para acompanhar a reprodução."
+	},
+	"readerBlendImages": {
+		"message": "Mesclar imagens"
+	},
+	"readerBlendImagesDescription": {
+		"message": "Mescle as imagens com o plano de fundo da página."
+	},
+	"readerCloseImageViewer": {
+		"message": "Fechar visualizador de imagens"
+	},
+	"readerCollapseComment": {
+		"message": "Recolher comentário"
+	},
+	"readerColorLinks": {
+		"message": "Colorir links"
+	},
+	"readerColorSchemeDefault": {
+		"message": "Padrão"
+	},
+	"readerCurrentPosition": {
+		"message": "Posição atual"
+	},
+	"readerCustomCss": {
+		"message": "CSS personalizado"
+	},
+	"readerCustomCssDescription": {
+		"message": "CSS aplicado automaticamente na visualização de leitura."
+	},
+	"readerDarkTheme": {
+		"message": "Tema do modo escuro"
+	},
+	"readerDarkThemeDescription": {
+		"message": "Use um tema diferente no modo escuro."
+	},
+	"readerError": {
+		"message": "Falha ao extrair o conteúdo."
+	},
+	"readerFont": {
+		"message": "Opções de fonte"
+	},
+	"readerFontDefault": {
+		"message": "Padrão"
+	},
+	"readerFontDescription": {
+		"message": "Adicione fontes instaladas no seu sistema. Pressione Enter para adicionar uma fonte."
+	},
+	"readerFontNotFound": {
+		"message": "Não encontrado"
+	},
+	"readerFontPlaceholder": {
+		"message": "Pressione Enter para adicionar uma fonte"
+	},
+	"readerFontSetDefault": {
+		"message": "Definir como padrão"
+	},
+	"readerFontSize": {
+		"message": "Tamanho base da fonte"
+	},
+	"readerFontSystem": {
+		"message": "Sistema"
+	},
+	"readerFontSystemSans": {
+		"message": "Sem serifa"
+	},
+	"readerFontSystemSerif": {
+		"message": "Com serifa"
+	},
+	"readerFontUnavailable": {
+		"message": "Esta fonte não está disponível aqui — seu navegador pode estar bloqueando fontes personalizadas."
+	},
+	"readerFonts": {
+		"message": "Fontes"
+	},
+	"readerFootnotes": {
+		"message": "Notas de rodapé"
+	},
+	"readerHighlightActiveLine": {
+		"message": "Destacar linha ativa"
+	},
+	"readerHighlightActiveLineDescription": {
+		"message": "Destaque a frase atual na transcrição durante a reprodução."
+	},
+	"readerImages": {
+		"message": "Imagens"
+	},
+	"readerLineHeight": {
+		"message": "Altura da linha"
+	},
+	"readerLineWidth": {
+		"message": "Largura da linha"
+	},
+	"readerLoadFailed": {
+		"message": "Falha ao carregar. A página pode estar bloqueada pelo seu navegador."
+	},
+	"readerLoading": {
+		"message": "Simplificando…"
+	},
+	"readerOn": {
+		"message": "Leitor"
+	},
+	"readerPinPlayer": {
+		"message": "Fixar player"
+	},
+	"readerPinPlayerDescription": {
+		"message": "Mantenha o player de vídeo visível ao rolar pela transcrição."
+	},
+	"readerSettings": {
+		"message": "Configurações do leitor"
+	},
+	"readerTheme": {
+		"message": "Tema"
+	},
+	"readerThemeDescription": {
+		"message": "Escolha as cores usadas na visualização de leitura."
+	},
+	"readerThemeSection": {
+		"message": "Tema"
+	},
+	"readerTranscripts": {
+		"message": "Transcrições"
+	},
+	"readerTypography": {
+		"message": "Tipografia"
+	},
+	"readerUrlPlaceholder": {
+		"message": "Cole uma URL para ler…"
+	},
+	"readerViewFullSize": {
+		"message": "Ver em tamanho real"
+	},
+	"recommended": {
+		"message": "recomendado"
+	},
+	"refresh": {
+		"message": "Atualizar"
+	},
+	"remove": {
+		"message": "Remover"
+	},
+	"removeProperty": {
+		"message": "Remover propriedade"
+	},
+	"removeUnusedProperties": {
+		"message": "Remover propriedades não usadas"
+	},
+	"removeUnusedPropertiesDescription": {
+		"message": "Remove todas as propriedades que não são utilizadas em nenhum modelo."
+	},
+	"removeVault": {
+		"message": "Remover cofre"
+	},
+	"replaceContent": {
+		"message": "Substituir o conteúdo da página"
+	},
+	"reset": {
+		"message": "Redefinir"
+	},
+	"resetDefaultTemplate": {
+		"message": "Redefinir o modelo padrão"
+	},
+	"resetDefaultTemplateDescription": {
+		"message": "Remove quaisquer alterações que você tenha feito no modelo padrão."
+	},
+	"resetProvidersAndModels": {
+		"message": "Redefinir modelos padrão"
+	},
+	"resetProvidersAndModelsDescription": {
+		"message": "Redefina provedores e modelos para as configurações padrão."
+	},
+	"save": {
+		"message": "Salvar"
+	},
+	"saveBehaviorDescription": {
+		"message": "Escolha a opção padrão para salvar páginas. Opções alternativas aparecem no menu suspenso ao lado do botão principal."
+	},
+	"saveBehaviorLabel": {
+		"message": "Comportamento de salvamento"
+	},
+	"saved": {
+		"message": "Salvas"
+	},
+	"saveFile": {
+		"message": "Salvar arquivo..."
+	},
+	"searchHighlightsPlaceholder": {
+		"message": "Pesquisar destaques…"
+	},
+	"searchVariables": {
+		"message": "Procurar variáveis..."
+	},
+	"selectProvider": {
+		"message": "Selecione um provedor"
+	},
+	"selectTemplateToExport": {
+		"message": "Por favor, selecione um modelo para exportar."
+	},
+	"settings": {
+		"message": "Configurações"
+	},
+	"settingsHeading": {
+		"message": "Configurações"
+	},
+	"settingsImportSuccess": {
+		"message": "Todas as configurações foram importadas com sucesso. Por favor, atualize a página para ver as alterações."
+	},
+	"share": {
+		"message": "Compartilhar..."
+	},
+	"shortcutInstructionsBrave": {
+		"message": "Para alterar as atribuições de teclas, acesse $1"
+	},
+	"shortcutInstructionsChrome": {
+		"message": "Para alterar as atribuições de teclas, acesse $1"
+	},
+	"shortcutInstructionsDefault": {
+		"message": "Para alterar as atribuições de teclas, acesse as configurações da extensão no seu navegador."
+	},
+	"shortcutInstructionsEdge": {
+		"message": "Para alterar as atribuições de teclas, acesse $1"
+	},
+	"shortcutInstructionsFirefox": {
+		"message": "Para alterar as atribuições de teclas, acesse $1, clique no ícone de engrenagem e selecione \"Gerenciar atalhos de extensões\"."
+	},
+	"shortcutInstructionsIntro": {
+		"message": "Atalhos de teclado lhe dão rápido acesso aos recursos do Web Clipper."
+	},
+	"shortcutInstructionsSafari": {
+		"message": "Atalhos de teclado não são customizáveis no Safari."
+	},
+	"shortcutNotSet": {
+		"message": "Não definido"
+	},
+	"showActionsButton": {
+		"message": "Mostrar botões de ações"
+	},
+	"showActionsDescription": {
+		"message": "Permite inspecionar as variáveis da página a partir do menu de captura. Útil para visualizar as variáveis que estão disponíveis para uso em modelos."
+	},
+	"showPageVariables": {
+		"message": "Exibir variáveis"
+	},
+	"silentOpen": {
+		"message": "Salvar captura sem abrir a nota"
+	},
+	"silentOpenDescription": {
+		"message": "As notas capturadas serão salvas, mas não serão abertas em uma nova guia. O Obsidian ainda será trazido para o primeiro plano."
+	},
+	"sort": {
+		"message": "Ordenar"
+	},
+	"sortAZ": {
+		"message": "A a Z"
+	},
+	"sortNewOld": {
+		"message": "Mais recentes primeiro"
+	},
+	"sortOldNew": {
+		"message": "Mais antigos primeiro"
+	},
+	"sortZA": {
+		"message": "Z a A"
+	},
+	"specificNoteName": {
+		"message": "Nome da nota específica"
+	},
+	"systemDefault": {
+		"message": "Sistema"
+	},
+	"template": {
+		"message": "Modelo"
+	},
+	"templateCopied": {
+		"message": "Modelo JSON copiado para a área de transferência"
+	},
+	"templateCopyError": {
+		"message": "Falha ao copiar o modelo JSON para a área de transferência"
+	},
+	"templateErrorCount": {
+		"message": "Há um erro no seu modelo."
+	},
+	"templateErrorsCount": {
+		"message": "Há $1 erros no seu modelo."
+	},
+	"templateGroupContent": {
+		"message": "Conteúdo"
+	},
+	"templateGroupLocation": {
+		"message": "Local"
+	},
+	"templateName": {
+		"message": "Nome do modelo"
+	},
+	"templateProperties": {
+		"message": "Propriedades"
+	},
+	"templatePropertiesDescription": {
+		"message": "Propriedades a serem adicionadas ao topo da nota capturada. Use variáveis para preencher automaticamente os dados da página."
+	},
+	"templateTriggers": {
+		"message": "Acionadores do modelo"
+	},
+	"templateTriggersDescription": {
+		"message": "Defina regras para automaticamente selecionar este modelo se ele corresponder a um padrão de URL ou contiver dados do schema.org. Uma regra por linha."
+	},
+	"templateValid": {
+		"message": "A sintaxe do modelo é válida"
+	},
+	"templatesHeading": {
+		"message": "Modelos"
+	},
+	"thinking": {
+		"message": "pensando"
+	},
+	"unknownProvider": {
+		"message": "Provedor desconhecido"
+	},
+	"updateAvailable": {
+		"message": "Uma atualização está disponível."
+	},
+	"usingLatestVersion": {
+		"message": "Você está usando a versão mais recente."
+	},
+	"vault": {
+		"message": "Cofre"
+	},
+	"vaultDescription": {
+		"message": "Selecione o cofre padrão para este modelo. Acesse $link_start$Configurações gerais$link_end$ para adicionar ou remover cofres.",
+		"placeholders": {
+			"link_end": {
+				"content": "</a>"
+			},
+			"link_start": {
+				"content": "<a href=\"?section=clip\">"
+			}
+		}
+	},
+	"vaults": {
+		"message": "Cofres"
+	},
+	"vaultsDescription": {
+		"message": "Por padrão, as notas capturadas são salvas no cofre aberto no momento. Você pode adicionar cofres aqui se quiser ter a opção de salvar em cofres diferentes. Os nomes dos cofres devem corresponder exatamente ao nome do cofre do Obsidian. Pressione $strong_start$Enter$strong_end$ para adicionar um cofre.",
+		"placeholders": {
+			"strong_end": {
+				"content": "</strong>"
+			},
+			"strong_start": {
+				"content": "<strong>"
+			}
+		}
+	},
+	"version": {
+		"message": "Versão"
+	},
+	"navClip": {
+		"message": "Recortar e salvar"
+	},
+	"navLearning": {
+		"message": "Notas de aprendizado"
+	},
+	"groupSaving": {
+		"message": "Salvamento"
+	},
+	"groupSharing": {
+		"message": "Compartilhamento"
+	},
+	"groupBackup": {
+		"message": "Backup e labs"
+	},
+	"headingClip": {
+		"message": "Recorte"
+	},
+	"headingRead": {
+		"message": "Leitura e aprendizado"
+	},
+	"headingAI": {
+		"message": "IA"
+	},
+	"navStudyHome": {
+		"message": "Transcrever e estudar"
+	},
+	"navAsr": {
+		"message": "Reconhecimento de voz"
+	},
+	"navVideoSites": {
+		"message": "Barra de transcrição e sites"
+	},
+	"headingLearn": {
+		"message": "Aprendizado"
+	},
+	"videoSubtitles": {
+		"message": "Legendas de vídeo"
+	},
+	"providerModels": {
+		"message": "Modelos do provedor"
+	},
+	"providerModelsDescription": {
+		"message": "Escolha um modelo do seu provedor configurado ou insira um ID de modelo personalizado."
+	},
+	"providerModelsLoading": {
+		"message": "Buscando modelos do provedor…"
+	},
+	"providerModelsRefresh": {
+		"message": "Atualizar lista de modelos"
+	},
+	"providerModelsEmpty": {
+		"message": "O provedor não retornou modelos. Você pode inserir um ID de modelo manualmente."
+	},
+	"providerModelsFallback": {
+		"message": "Não foi possível ler a lista mais recente, então modelos comuns são mostrados. Atualize para tentar novamente."
+	},
+	"providerModelsFailed": {
+		"message": "Não foi possível buscar modelos. Verifique a URL do provedor, chave de API e rede, depois atualize, ou insira um ID de modelo manualmente."
+	},
+	"providerModelsMissingKey": {
+		"message": "Configure a chave de API do provedor primeiro, ou insira um ID de modelo manualmente."
+	},
+	"providerModelsDeployment": {
+		"message": "Insira o nome da sua implantação Azure como ID do modelo."
+	},
+	"qiaomuPreviewClip": {
+		"message": "Visualizar conteúdo recortado"
+	},
+	"qiaomuEditMarkdown": {
+		"message": "Editar Markdown"
+	},
+	"qiaomuPublicRss": {
+		"message": "Ver o RSS público"
+	},
+	"qiaomuCopyProperty": {
+		"message": "Copiar valor da propriedade"
+	},
+	"qiaomuCopyFailed": {
+		"message": "Falha ao copiar; tente novamente"
+	},
+	"qiaomuCharacters": {
+		"message": "caracteres"
+	},
+	"qiaomuClip": {
+		"message": "Recortar"
+	},
+	"qiaomuReadingMode": {
+		"message": "Modo de leitura"
+	},
+	"qiaomuCopyMarkdown": {
+		"message": "Copiar Markdown"
+	},
+	"qiaomuSaveMarkdown": {
+		"message": "Salvar como Markdown"
+	},
+	"rssShareTitle": {
+		"message": "Compartilhar recortes no Qiaomu RSS"
+	},
+	"rssShareDescription": {
+		"message": "Desativado por padrão. Quando ativado, a opção de compartilhar no recortador fica marcada para você, e os recortes são enviados publicamente ao feed de Envios de Leitores."
+	},
+	"saveSelectionToDiary": {
+		"message": "Salvar seleção na nota diária"
+	},
+	"qiaomuShareRss": {
+		"message": "Compartilhar no Qiaomu RSS"
+	},
+	"qiaomuClipToObsidian": {
+		"message": "Recortar para Obsidian"
+	},
+	"qiaomuContentActions": {
+		"message": "Ações de conteúdo recortado"
+	},
+	"qiaomuAiRetry": {
+		"message": "Tentar novamente"
+	},
+	"qiaomuAiFailed": {
+		"message": "Falha no processamento de IA. Tente novamente, ou escolha um modelo sem prompts de IA."
+	},
+	"qiaomuActionRead": {
+		"message": "Ler"
+	},
+	"qiaomuActionCopy": {
+		"message": "Copiar"
+	},
+	"qiaomuActionDownload": {
+		"message": "Baixar"
+	},
+	"qiaomuDestination": {
+		"message": "Salvar em"
+	},
+	"qiaomuActionEdit": {
+		"message": "Editar"
+	},
+	"qiaomuEditClip": {
+		"message": "Editar propriedades e conteúdo"
+	},
+	"qiaomuTemplate": {
+		"message": "Modelo"
+	},
+	"qiaomuEditorBody": {
+		"message": "Conteúdo"
+	},
+	"qiaomuEditorDone": {
+		"message": "Concluir"
+	},
+	"qiaomuEditorCopied": {
+		"message": "Copiado"
+	},
+	"qiaomuEditorProperties": {
+		"message": "Propriedades"
+	},
+	"qiaomuEditorClip": {
+		"message": "Recortar"
+	},
+	"qiaomuEditorClipped": {
+		"message": "Recortado"
+	},
+	"defaultTemplateTitle": {
+		"message": "Modelo padrão"
+	},
+	"defaultTemplateDescription": {
+		"message": "Usado quando nenhum gatilho de modelo corresponde à página, e para recorte por atalho de teclado."
+	},
+	"tripleKeyTitle": {
+		"message": "Atalhos de triplo toque"
+	},
+	"tripleKeyDescription": {
+		"message": "Pressione uma letra três vezes rapidamente em uma página web para abrir o modo de leitura, abrir o editor, recortar com o modelo padrão, ou abrir o cartão de nota rápida. Ignorado ao digitar em campos de texto."
+	},
+	"qiaomuActionPreview": {
+		"message": "Visualizar"
+	},
+	"qiaomuActionEditShort": {
+		"message": "Editar"
+	},
+	"qiaomuActionNoteShort": {
+		"message": "Nota"
+	},
+	"qiaomuActionReadShort": {
+		"message": "Ler"
+	},
+	"commandOpenEditor": {
+		"message": "Editar o recorte desta página"
+	},
+	"readerFontZhuque": {
+		"message": "Zhuque Fangsong"
+	},
+	"readerFontSongti": {
+		"message": "Songti"
+	},
+	"readerFontKaiti": {
+		"message": "Kaiti"
+	},
+	"readerFontPingfang": {
+		"message": "PingFang / Hei"
+	},
+	"qiaomuHighlightCount": {
+		"message": "$1 destaques nesta página"
+	},
+	"qiaomuChatTitle": {
+		"message": "Chat com IA"
+	},
+	"qiaomuChatPlaceholder": {
+		"message": "Pergunte sobre este artigo… (Enter para enviar, Shift+Enter para nova linha)"
+	},
+	"qiaomuChatNew": {
+		"message": "Novo chat"
+	},
+	"qiaomuChatSend": {
+		"message": "Enviar"
+	},
+	"qiaomuChatStop": {
+		"message": "Parar"
+	},
+	"qiaomuChatContext": {
+		"message": "As respostas usam este artigo ($1 caracteres)"
+	},
+	"qiaomuChatInsert": {
+		"message": "Adicionar à nota"
+	},
+	"qiaomuChatInserted": {
+		"message": "Adicionado à nota"
+	},
+	"qiaomuChatNoModel": {
+		"message": "Nenhum modelo de IA disponível. Adicione ou ative um modelo para começar a fazer perguntas."
+	},
+	"qiaomuChatOpenSettings": {
+		"message": "Configurar modelos de IA"
+	},
+	"qiaomuChatSuggestSummary": {
+		"message": "Resumir este artigo"
+	},
+	"qiaomuChatSuggestPoints": {
+		"message": "Extrair pontos-chave e dados"
+	},
+	"qiaomuChatSuggestTranslate": {
+		"message": "Traduzir para chinês"
+	},
+	"qiaomuChatSuggestCritic": {
+		"message": "O que merece ceticismo?"
+	},
+	"qiaomuChatTruncated": {
+		"message": "artigo truncado"
+	},
+	"qiaomuChatSystem": {
+		"message": "Você é um assistente de leitura. Responda usando o artigo abaixo; diga quando o artigo não cobre algo e nunca invente fatos. Responda no idioma da pergunta, em Markdown conciso."
+	},
+	"qiaomuChatError": {
+		"message": "Não foi possível responder:"
+	},
+	"qiaomuChatHistory": {
+		"message": "Histórico de conversas"
+	},
+	"qiaomuChatNoHistory": {
+		"message": "Nenhuma conversa anterior sobre este artigo"
+	},
+	"qiaomuChatAskSelection": {
+		"message": "Perguntar à IA"
+	},
+	"qiaomuChatAboutSelection": {
+		"message": "Sobre esta passagem selecionada do artigo:"
+	},
+	"qiaomuChatQuoteExplain": {
+		"message": "Explicar esta passagem"
+	},
+	"qiaomuChatQuoteTranslate": {
+		"message": "Traduzir esta passagem"
+	},
+	"qiaomuChatQuoteSummary": {
+		"message": "Resumir esta passagem"
+	},
+	"qiaomuChatQuoteRewrite": {
+		"message": "Reescrever de forma mais concisa"
+	},
+	"youtubeAutoTranscriptTitle": {
+		"message": "Abrir a transcrição do YouTube automaticamente"
+	},
+	"youtubeAutoTranscriptDescription": {
+		"message": "Quando um vídeo abre, expande a transcrição uma vez para que as legendas possam ser copiadas, baixadas e estudadas imediatamente. Se você fechá-la, ela não reabrirá para esse vídeo."
+	},
+	"youtubeHideNativeTitle": {
+		"message": "Ocultar o painel de transcrição próprio do YouTube"
+	},
+	"youtubeHideNativeDescription": {
+		"message": "Após a transcrição abrir automaticamente, oculta o painel próprio do YouTube na coluna direita, já que a barra de legendas já mostra as mesmas linhas. Um painel que você abre manualmente nunca é ocultado."
+	},
+	"learningNotesTitle": {
+		"message": "Fazer anotações nas páginas de leitura e vídeo"
+	},
+	"learningNotesDescription": {
+		"message": "Mostra um botão \"Nota\"; a tecla N também funciona. As notas são anexadas à nota diária de hoje no seu cofre; o assistente local deve ser instalado primeiro."
+	},
+	"learningIncludeQuoteTitle": {
+		"message": "Incluir o texto selecionado"
+	},
+	"learningIncludeQuoteDescription": {
+		"message": "Quando um texto está selecionado ao fazer uma anotação, ele é escrito na nota diária como citação. Você também pode alternar isso por nota."
+	},
+	"learningIncludeSourceTitle": {
+		"message": "Incluir a fonte e o horário do vídeo"
+	},
+	"learningIncludeSourceDescription": {
+		"message": "Escreve o link da página ou vídeo na nota diária, e para vídeos o ponto de tempo também. Você também pode alternar isso por nota."
+	},
+	"youtubePanelReload": {
+		"message": "A extensão foi atualizada — recarregue esta página e tente novamente"
+	},
+	"youtubeBarSubtitles": {
+		"message": "Legendas"
+	},
+	"youtubeBarSettings": {
+		"message": "Configurações"
+	},
+	"youtubeBarExpand": {
+		"message": "Mostrar transcrição"
+	},
+	"youtubeBarCollapse": {
+		"message": "Recolher"
+	},
+	"youtubeBarMore": {
+		"message": "Abra o modo de estudo para ler o restante"
+	},
+	"studyPinVideo": {
+		"message": "Fixar vídeo"
+	},
+	"studyScrollTranscript": {
+		"message": "Rolar transcrição"
+	},
+	"transcriptSearch": {
+		"message": "Buscar na transcrição"
+	},
+	"transcriptSearchClear": {
+		"message": "Limpar busca"
+	},
+	"transcriptSearchNone": {
+		"message": "Nenhum resultado"
+	},
+	"youtubeBarSearch": {
+		"message": "Buscar na transcrição"
+	},
+	"youtubeBarClear": {
+		"message": "Limpar busca"
+	},
+	"youtubeBarNoMatch": {
+		"message": "Nenhum resultado"
+	},
+	"youtubeBarFollow": {
+		"message": "Acompanhando reprodução — clique para desativar"
+	},
+	"youtubeBarFollowOff": {
+		"message": "Não está acompanhando — clique para acompanhar reprodução"
+	},
+	"youtubeBarHere": {
+		"message": "Voltar à linha atual"
+	},
+	"youtubeBarRetry": {
+		"message": "Tentar novamente"
+	},
+	"youtubePanelCardTitle": {
+		"message": "Qiaomu · Estudo"
+	},
+	"youtubePanelCardLoading": {
+		"message": "Lendo a transcrição…"
+	},
+	"youtubePanelCardReady": {
+		"message": "Transcrição pronta — clique em um horário para pular"
+	},
+	"youtubePanelCardNone": {
+		"message": "Nenhuma transcrição encontrada. Tente abrir \"Transcrição\" no YouTube."
+	},
+	"bilibiliBarNone": {
+		"message": "Este vídeo não tem legendas"
+	},
+	"bilibiliBarLogin": {
+		"message": "O Bilibili só fornece legendas para contas conectadas. Faça login e pressione Tentar novamente"
+	},
+	"youtubePanelActionsTitle": {
+		"message": "Barra de transcrição no YouTube e Bilibili"
+	},
+	"youtubePanelActionsDescription": {
+		"message": "Adiciona uma barra de legendas às páginas de vídeo: acompanhe a leitura, copie, baixe, abra a página de estudo; quando um vídeo não tem legendas, gere-as ali mesmo."
+	},
+	"youtubePanelCopy": {
+		"message": "Copiar"
+	},
+	"youtubePanelDownload": {
+		"message": "Baixar"
+	},
+	"youtubePanelStudy": {
+		"message": "Estudo"
+	},
+	"youtubePanelCopied": {
+		"message": "Copiado"
+	},
+	"youtubePanelEmpty": {
+		"message": "Nenhuma linha de transcrição encontrada. Abra a transcrição primeiro."
+	},
+	"readerAutoChatTitle": {
+		"message": "Abrir chat de IA com a página de leitura"
+	},
+	"readerAutoChatDescription": {
+		"message": "Mostra o painel de chat de IA assim que a página de leitura abrir."
+	},
+	"selectionToolbarTitle": {
+		"message": "Barra de ferramentas de seleção"
+	},
+	"selectionToolbarDescription": {
+		"message": "Mostra uma pequena barra de ferramentas ao lado do texto selecionado nas páginas de leitura e edição, com Destacar e Perguntar à IA."
+	},
+	"tripleKeyKeysTitle": {
+		"message": "Teclas de atalho"
+	},
+	"tripleKeyKeysDescription": {
+		"message": "Escolha uma letra ou dígito para cada ação; deixe vazio para desativar a ação. Padrões: Ler A, Editar E, Clip Q, Nota I."
+	},
+	"tripleKeyReset": {
+		"message": "Restaurar padrões"
+	},
+	"tripleKeyInvalid": {
+		"message": "Use uma única letra ou dígito."
+	},
+	"tripleKeyDuplicate": {
+		"message": "A mesma tecla não pode ser usada para duas ações."
+	},
+	"tripleKeySitesTitle": {
+		"message": "Desativar nestes sites"
+	},
+	"tripleKeySitesDescription": {
+		"message": "Um site por linha, por exemplo mail.google.com. Subdomínios estão incluídos. Você também pode desativar para o site atual no menu do clipper."
+	},
+	"tripleKeySiteOff": {
+		"message": "Desativar teclas de triplo toque em $1"
+	},
+	"tripleKeySiteOn": {
+		"message": "Reativar teclas de triplo toque para $1"
+	},
+	"tripleKeySiteDisabled": {
+		"message": "Teclas de triplo toque estão desativadas em $1"
+	},
+	"tripleKeySiteEnabled": {
+		"message": "Teclas de triplo toque estão ativas novamente para $1"
+	},
+	"qiaomuChatPreferences": {
+		"message": "Configurações de chat"
+	},
+	"qiaomuChatPreferencesScope": {
+		"message": "Configurações salvas aplicam-se a todos os chats de artigos e vídeos. Aparência afeta apenas o painel de IA."
+	},
+	"qiaomuChatFont": {
+		"message": "Fonte do chat"
+	},
+	"qiaomuChatFontsystem": {
+		"message": "Padrão do sistema"
+	},
+	"qiaomuChatFontserif": {
+		"message": "Serifada"
+	},
+	"qiaomuChatFontmono": {
+		"message": "Monoespaçada"
+	},
+	"qiaomuChatFontcustom": {
+		"message": "Fonte personalizada"
+	},
+	"qiaomuChatCustomFont": {
+		"message": "Nome da fonte instalada (volta à fonte do sistema se não encontrada)"
+	},
+	"qiaomuChatFontSize": {
+		"message": "Tamanho da fonte do chat"
+	},
+	"qiaomuChatFontPreview": {
+		"message": "Aprenda no seu ritmo. 阅读、提问、理解。"
+	},
+	"qiaomuChatPromptEnabled": {
+		"message": "Usar instruções globais"
+	},
+	"qiaomuChatCustomPrompt": {
+		"message": "Texto de instruções"
+	},
+	"qiaomuChatPromptPlaceholder": {
+		"message": "Por exemplo: resuma primeiro, depois explique. Inclua marcas de tempo ao citar legendas."
+	},
+	"qiaomuChatPromptScope": {
+		"message": "Aplica-se à sua próxima pergunta após salvar; respostas existentes permanecem inalteradas. As instruções são enviadas ao modelo de IA selecionado com a fonte. Instruções de leitura integradas são mantidas."
+	},
+	"qiaomuChatPreferencesReset": {
+		"message": "Restaurar padrões"
+	},
+	"qiaomuChatPreferencesSaveError": {
+		"message": "Não foi possível salvar. Tente novamente; as preferências não foram alteradas."
+	},
+	"qiaomuExpandSidebar": {
+		"message": "Expandir sumário e barra lateral"
+	},
+	"qiaomuCollapseSidebar": {
+		"message": "Recolher sumário e barra lateral"
+	},
+	"qiaomuToc": {
+		"message": "Sumário"
+	},
+	"qiaomuVideoSize": {
+		"message": "Tamanho do vídeo"
+	},
+	"qiaomuTranslateChinese": {
+		"message": "Tradução para chinês"
+	},
+	"qiaomuTranslationRetry": {
+		"message": "Tentar tradução novamente"
+	},
+	"qiaomuTranslationFormatRetry": {
+		"message": "Tentando novamente este grupo de traduções…"
+	},
+	"qiaomuTranslationInvalid": {
+		"message": "O modelo retornou dados de segmento incompletos. Tente novamente."
+	},
+	"qiaomuTranslationProgress": {
+		"message": "Traduzindo"
+	},
+	"qiaomuTranslationNoModel": {
+		"message": "A tradução precisa de um modelo de IA, que não é o mesmo que o reconhecimento de fala usado para legendas."
+	},
+	"qiaomuTranslationDone": {
+		"message": "Tradução concluída"
+	},
+	"qiaomuTranslationTimeout": {
+		"message": "A tradução expirou. Tente novamente para continuar."
+	},
+	"qiaomuTranslationError": {
+		"message": "A tradução falhou. Tente novamente para continuar."
+	},
+	"qiaomuTranslationService": {
+		"message": "Traduza legendas com seu modelo de IA configurado; recorte legendas originais, traduzidas ou bilíngues."
+	},
+	"qiaomuChatSectionAppearance": {
+		"message": "Aparência"
+	},
+	"qiaomuChatSectionInstructions": {
+		"message": "Instruções globais"
+	},
+	"qiaomuChatInstructionsNote": {
+		"message": "Adicionadas a cada pergunta. Use para ajustar idioma, tom e formato das respostas."
+	},
+	"qiaomuChatExamples": {
+		"message": "Experimente:"
+	},
+	"qiaomuChatExampleLang": {
+		"message": "Responda em português"
+	},
+	"qiaomuChatExampleConclusion": {
+		"message": "Conclusão primeiro, depois detalhes"
+	},
+	"qiaomuChatExampleTimestamp": {
+		"message": "Inclua marcas de tempo ao citar legendas"
+	},
+	"qiaomuChatExampleConcise": {
+		"message": "Seja conciso, sem enrolação"
+	},
+	"qiaomuQuickTitle": {
+		"message": "Prompts rápidos"
+	},
+	"qiaomuQuickNote": {
+		"message": "Mostrados acima da entrada; um toque envia. Adicione, edite, exclua ou oculte-os."
+	},
+	"qiaomuQuickNew": {
+		"message": "Novo"
+	},
+	"qiaomuQuickEdit": {
+		"message": "Editar \"$1\""
+	},
+	"qiaomuQuickDelete": {
+		"message": "Excluir \"$1\""
+	},
+	"qiaomuQuickShow": {
+		"message": "Mostrar \"$1\""
+	},
+	"qiaomuQuickName": {
+		"message": "Nome"
+	},
+	"qiaomuQuickBody": {
+		"message": "Prompt enviado ao tocar"
+	},
+	"qiaomuQuickScope": {
+		"message": "Mostrado quando"
+	},
+	"qiaomuQuickScopeArticle": {
+		"message": "Perguntando sobre o artigo"
+	},
+	"qiaomuQuickScopeSelection": {
+		"message": "Após selecionar texto"
+	},
+	"qiaomuQuickDone": {
+		"message": "Concluído"
+	},
+	"qiaomuQuickRequired": {
+		"message": "Insira um nome e um prompt."
+	},
+	"qiaomuQuickEmpty": {
+		"message": "Nenhum prompt rápido ainda."
+	},
+	"qiaomuQuickLimit": {
+		"message": "Você pode manter até 30 prompts rápidos."
+	},
+	"qiaomuQuickResetDefaults": {
+		"message": "Restaurar prompts integrados"
+	},
+	"qiaomuQuickUnfinished": {
+		"message": "Conclua ou cancele o prompt que está editando primeiro."
+	},
+	"qiaomuChatFontreader": {
+		"message": "Igual à fonte de leitura"
+	},
+	"providerSignInLabel": {
+		"message": "Conta"
+	},
+	"providerSignInButton": {
+		"message": "Entrar"
+	},
+	"providerSignInPaste": {
+		"message": "Cole o endereço da página em que terminou"
+	},
+	"providerSignInPasteButton": {
+		"message": "Continuar"
+	},
+	"providerSignInOpen": {
+		"message": "Aguardando você concluir na aba do navegador…"
+	},
+	"providerSignInDone": {
+		"message": "Conectado como $1",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"providerSignInChatGPT": {
+		"message": "Entrar no ChatGPT"
+	},
+	"providerSignInCodex": {
+		"message": "Entrar no Codex"
+	},
+	"providerSignInTokenDance": {
+		"message": "Autorizar 词元跳动"
+	},
+	"providerSignInNoteChatGPT": {
+		"message": "Usa o limite do seu plano ChatGPT. Não precisa de chave de API."
+	},
+	"providerSignInNoteCodex": {
+		"message": "Usa o limite do seu plano Codex. Não precisa de chave de API."
+	},
+	"providerSignInNoteTokenDance": {
+		"message": "Confirme no navegador e uma chave é criada para você."
+	},
+	"providerSignInOpenRouter": {
+		"message": "Entrar com OpenRouter"
+	},
+	"providerSignInNoteOpenRouter": {
+		"message": "Confirme no navegador e uma chave é criada para você. Não precisa copiar uma."
+	},
+	"qiaomuModelSearch": {
+		"message": "Buscar modelos"
+	},
+	"qiaomuModelNone": {
+		"message": "Nenhum modelo correspondente"
+	},
+	"qiaomuModelManage": {
+		"message": "Adicionar ou gerenciar provedores"
+	},
+	"qiaomuModelPlan": {
+		"message": "Plano"
+	},
+	"providerSignInAgain": {
+		"message": "Entrar novamente"
+	},
+	"pdAddProviderTitle": {
+		"message": "Adicionar provedor"
+	},
+	"pdEditProviderTitle": {
+		"message": "Editar provedor"
+	},
+	"pdSearchProviders": {
+		"message": "Buscar provedores…"
+	},
+	"pdGroupAccount": {
+		"message": "Entre com sua conta · não precisa de chave"
+	},
+	"pdGroupRelay": {
+		"message": "Gateways · uma chave, vários modelos"
+	},
+	"pdGroupProvider": {
+		"message": "Provedores"
+	},
+	"pdGroupLocal": {
+		"message": "Neste computador"
+	},
+	"pdGroupCustom": {
+		"message": "Outro"
+	},
+	"pdCustomName": {
+		"message": "Personalizado"
+	},
+	"pdCustomSub": {
+		"message": "Qualquer endpoint compatível"
+	},
+	"pdAdded": {
+		"message": "Adicionado"
+	},
+	"pdNoMatch": {
+		"message": "Nenhum provedor correspondente"
+	},
+	"pdFieldNamePlaceholder": {
+		"message": "Nome do provedor"
+	},
+	"pdPasteWrong": {
+		"message": "Esse não é o endereço onde o login terminou. Copie novamente."
+	},
+	"pdLocalNote": {
+		"message": "Executa neste computador. Nenhuma chave necessária."
+	},
+	"pdGetKey": {
+		"message": "Obter chave de API"
+	},
+	"pdFieldUrl": {
+		"message": "Endereço do endpoint"
+	},
+	"pdUrlHintCustom": {
+		"message": "O endpoint de chat, por exemplo https://example.com/v1/chat/completions"
+	},
+	"pdUrlHint": {
+		"message": "Normalmente não é necessário alterar."
+	},
+	"pdFieldKey": {
+		"message": "Chave de API"
+	},
+	"pdFieldKeyOr": {
+		"message": "Chave de API (preenchida automaticamente após autorização)"
+	},
+	"pdShow": {
+		"message": "Mostrar"
+	},
+	"pdHide": {
+		"message": "Ocultar"
+	},
+	"pdAdvanced": {
+		"message": "Endereço do endpoint"
+	},
+	"pdNeedName": {
+		"message": "Insira um nome."
+	},
+	"pdNeedUrl": {
+		"message": "Insira o endereço do endpoint."
+	},
+	"pdNeedLogin": {
+		"message": "Faça login primeiro."
+	},
+	"pdNeedKey": {
+		"message": "Insira uma chave de API."
+	},
+	"pdBack": {
+		"message": "Voltar"
+	},
+	"pdAddProviderButton": {
+		"message": "Adicionar provedor"
+	},
+	"pdAddModelTitle": {
+		"message": "Adicionar modelos"
+	},
+	"pdNoProviders": {
+		"message": "Adicione um provedor primeiro e depois escolha seus modelos."
+	},
+	"pdPickProvider": {
+		"message": "Provedor"
+	},
+	"pdSearchModels": {
+		"message": "Buscar modelos…"
+	},
+	"pdManual": {
+		"message": "Inserir ID de modelo manualmente"
+	},
+	"pdManualNamePlaceholder": {
+		"message": "Igual ao ID"
+	},
+	"pdManualName": {
+		"message": "Nome de exibição (opcional)"
+	},
+	"pdAddModels": {
+		"message": "Adicionar $1 modelos",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"pdAddModelsNone": {
+		"message": "Adicionar modelos"
+	},
+	"pdRecommended": {
+		"message": "Recomendado"
+	},
+	"pdPickProviderFirst": {
+		"message": "Escolha um provedor acima."
+	},
+	"pdReasonTimeout": {
+		"message": "tempo esgotado"
+	},
+	"pdReasonFormat": {
+		"message": "não é uma lista de modelos"
+	},
+	"pdReasonNetwork": {
+		"message": "bloqueado ou inacessível"
+	},
+	"pdEdit": {
+		"message": "Editar"
+	},
+	"pdDelete": {
+		"message": "Excluir"
+	},
+	"pdDuplicate": {
+		"message": "Duplicar"
+	},
+	"failedToSaveModel": {
+		"message": "Não foi possível salvar o modelo. Tente novamente."
+	},
+	"navAiModels": {
+		"message": "Modelos de IA"
+	},
+	"aiModelsIntro": {
+		"message": "Esses modelos alimentam tradução, chat de IA e interpretação por IA. Configure os serviços de reconhecimento de legendas em Reconhecimento de fala ASR."
+	},
+	"aiModelsGotoAsr": {
+		"message": "Configurar reconhecimento de fala"
+	},
+	"asrIntroOther": {
+		"message": "Esta seção transforma fala em legendas. Configure modelos para tradução, chat de IA e interpretação em Configurações de modelo de IA."
+	},
+	"asrGotoModels": {
+		"message": "Configurar modelos de IA"
+	},
+	"qiaomuTranslationSetupModel": {
+		"message": "Configurar modelo de tradução"
+	},
+	"subtitleLanguage": {
+		"message": "Idioma das legendas"
+	},
+	"subtitleGenFromAudio": {
+		"message": "Reconhecer o áudio…"
+	},
+	"audioPlay": {
+		"message": "Reproduzir"
+	},
+	"audioPause": {
+		"message": "Pausar"
+	},
+	"audioBack": {
+		"message": "Voltar 15 s"
+	},
+	"audioForward": {
+		"message": "Avançar 30 s"
+	},
+	"audioSpeed": {
+		"message": "Velocidade de reprodução"
+	},
+	"audioSeek": {
+		"message": "Posição"
+	},
+	"audioRefreshing": {
+		"message": "A nova transcrição está pronta — atualizando…"
+	},
+	"audioStudyNone": {
+		"message": "Ainda não há legendas para esta mídia. Quando criadas, as linhas acompanham a reprodução."
+	},
+	"audioTabTranscript": {
+		"message": "Transcrição"
+	},
+	"audioTabNotes": {
+		"message": "Mostrar notas"
+	},
+	"webReading": {
+		"message": "Lendo este endereço…"
+	},
+	"subtitleGenOffline": {
+		"message": "O assistente local não está conectado. Instale-o ou verifique sua conexão em Recorte e salvamento."
+	},
+	"audioTabAbout": {
+		"message": "Descrição"
+	},
+	"audioChooseFile": {
+		"message": "Escolher arquivo de áudio ou vídeo…"
+	},
+	"audioChooseHint": {
+		"message": "Você também pode soltar um arquivo aqui. Ele é apenas entregue ao assistente local, nunca enviado; formatos mp3, m4a, wav, flac, mp4 e similares funcionam."
+	},
+	"audioBadType": {
+		"message": "Este tipo de arquivo não é suportado."
+	},
+	"audioSending": {
+		"message": "Entregando o arquivo ao assistente local…"
+	},
+	"audioSendFailed": {
+		"message": "Não foi possível entregar o arquivo"
+	},
+	"subtitleGenOffer": {
+		"message": "Gerar legendas"
+	},
+	"subtitleGenChecking": {
+		"message": "Verificando este computador…"
+	},
+	"subtitleGenConfirm": {
+		"message": "Este vídeo não tem legendas. Elas podem ser geradas neste computador: o áudio é baixado e reconhecido por um modelo de fala neste computador, e nada é enviado."
+	},
+	"subtitleGenConfirmModel": {
+		"message": "A primeira execução também baixa um modelo de reconhecimento (cerca de 1,6 GB)."
+	},
+	"subtitleGenStart": {
+		"message": "Gerar legendas"
+	},
+	"subtitleGenCancel": {
+		"message": "Cancelar"
+	},
+	"subtitleGenRunning": {
+		"message": "Gerando legendas"
+	},
+	"subtitleGenModel": {
+		"message": "Primeiro uso: baixando o modelo de reconhecimento (cerca de 1,6 GB)…"
+	},
+	"subtitleGenFailed": {
+		"message": "Não foi possível gerar legendas"
+	},
+	"subtitleGenRetry": {
+		"message": "Tentar novamente"
+	},
+	"subtitleGenLangAuto": {
+		"message": "Detectar idioma"
+	},
+	"subtitleGenLangLabel": {
+		"message": "Idioma falado no vídeo"
+	},
+	"subtitleGenNeedsLogin": {
+		"message": "O site requer uma sessão autenticada para baixar áudio. Com sua permissão, apenas as informações de login necessárias para o site atual são passadas ao assistente local para este download. Seu arquivo temporário é excluído quando a tarefa é concluída, falha ou é cancelada."
+	},
+	"subtitleGenLoginRetry": {
+		"message": "Tentar novamente com meu login do navegador"
+	},
+	"subtitleGenGenerated": {
+		"message": "Gerado por reconhecimento de fala; pode conter erros de reconhecimento"
+	},
+	"subtitleGenOutdated": {
+		"message": "O assistente local está desatualizado. Atualize-o em Recorte e salvamento e verifique novamente."
+	},
+	"subtitleGenMissing": {
+		"message": "Ferramentas necessárias para gerar legendas estão ausentes. Configure o reconhecimento de fala, instale as ferramentas necessárias ou um mecanismo local, e verifique novamente."
+	},
+	"subtitleGenCloudSetup": {
+		"message": "Reconhecimento em nuvem não está configurado. Adicione ou complete um serviço em Reconhecimento de fala ASR e verifique novamente."
+	},
+	"subtitleGenConfirmCloud": {
+		"message": "Este vídeo não tem legendas. Elas podem ser geradas: o áudio é baixado e enviado para {service} para reconhecimento. O áudio sai deste computador e é cobrado por esse serviço."
+	},
+	"subtitleGenConfirmLocalService": {
+		"message": "Este vídeo não tem legendas. Elas podem ser geradas: o áudio é baixado e entregue a um serviço de reconhecimento executando neste computador. Ele não sai deste computador."
+	},
+	"subtitleGenBusy": {
+		"message": "Outro vídeo está sendo processado. Tente novamente quando terminar."
+	},
+	"subtitleGenCopy": {
+		"message": "Copiar comando"
+	},
+	"subtitleGenCopied": {
+		"message": "Copiado"
+	},
+	"subtitleGenRecheck": {
+		"message": "Verificar novamente"
+	},
+	"subtitleGenConfirmInstall": {
+		"message": "Isso precisa de \"{name}\" instalado neste computador primeiro (cerca de {size}, incluindo o modelo de reconhecimento). A geração inicia automaticamente quando estiver pronto; nenhum áudio é enviado."
+	},
+	"subtitleGenInstallStart": {
+		"message": "Instalar e gerar legendas"
+	},
+	"subtitleGenInstalling": {
+		"message": "Instalando"
+	},
+	"subtitleGenInstallFailed": {
+		"message": "Falha na instalação"
+	},
+	"subtitleGenEngine": {
+		"message": "Mecanismo de reconhecimento"
+	},
+	"subtitleGenDlgTitle": {
+		"message": "Gerar legendas"
+	},
+	"subtitleGenDlgSub": {
+		"message": "Escolha como transformar a fala em legendas temporizadas."
+	},
+	"subtitleGenRememberHint": {
+		"message": "Não mostrar este diálogo novamente"
+	},
+	"subtitleGenAsk": {
+		"message": "Escolha como reconhecer"
+	},
+	"subtitleGenStartCloud": {
+		"message": "Gerar legendas"
+	},
+	"subtitleGenAddService": {
+		"message": "+ Adicionar serviço em nuvem…"
+	},
+	"subtitleGenRemember": {
+		"message": "Começar imediatamente"
+	},
+	"subtitleGenRegenerate": {
+		"message": "Gerar novamente com outro modelo"
+	},
+	"subtitleGenGeneratedVia": {
+		"message": "Gerado por {via}; pode conter erros de reconhecimento"
+	},
+	"Language": {
+		"message": "javascript"
+	},
+	"Attribute": {
+		"message": "style"
+	},
+	"Tag": {
+		"message": "span"
+	},
+	"Format": {
+		"message": "D [de] MMMM [de] YYYY"
+	},
+	"Search": {
+		"message": "/[aeiou]/g"
+	},
+	"Replacement": {
+		"message": ""
+	},
+	"Suffix": {
+		"message": "..."
+	},
+	"Type": {
+		"message": "note"
+	},
+	"Title": {
+		"message": ""
+	},
+	"Expression": {
+		"message": "-10"
+	},
+	"Separator": {
+		"message": ","
+	},
+	"Mode": {
+		"message": "values"
+	},
+	"Direction": {
+		"message": "desc"
+	},
+	"Selector": {
+		"message": ".ad"
+	},
+	"xBarNone": {
+		"message": "Ainda sem legendas — elas podem ser geradas por reconhecimento de fala"
+	},
+	"podcastBarNone": {
+		"message": "Ainda sem legendas — elas podem ser geradas por reconhecimento de fala"
+	},
+	"subtitleGenSetupHelper": {
+		"message": "Instalar ou atualizar o assistente local"
+	},
+	"subtitleGenSetupRecognition": {
+		"message": "Configurar reconhecimento de fala"
+	},
+	"subtitleAutoGenerated": {
+		"message": "gerado automaticamente"
+	},
+	"contextSavePage": {
+		"message": "Salvar esta página"
+	},
+	"contextAddHighlight": {
+		"message": "Adicionar aos destaques"
+	}
+}

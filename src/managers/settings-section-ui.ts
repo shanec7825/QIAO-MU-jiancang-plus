@@ -1,0 +1,137 @@
+import browser from '../utils/browser-polyfill';
+import { updateUrl } from '../utils/routing';
+import { generalSettings } from '../utils/storage-utils';
+import { updatePromptContextVisibility } from './interpreter-settings';
+import { initializePropertyTypesManager } from './property-types-manager';
+
+export type SettingsSection = 'general' | 'study' | 'asr' | 'clip' | 'learning' | 'video' | 'properties' | 'highlighter' | 'interpreter' | 'asr-models' | 'about' | 'reader' | 'templates' | 'templates-home';
+
+export function showSettingsSection(requested: SettingsSection | 'video', templateId?: string): void {
+	// Subtitle bar settings now sit on the Subtitles and transcription page.
+	const section: SettingsSection = requested === 'video' ? 'asr' : requested === 'properties' ? 'templates-home' : requested;
+	const sections = document.querySelectorAll('.settings-section');
+	const sidebarItems = document.querySelectorAll('#sidebar li[data-section]');
+
+	sections.forEach(s => s.classList.remove('active'));
+	sidebarItems.forEach(item => item.classList.remove('active'));
+
+	const selectedSection = document.getElementById(`${section}-section`);
+	// Editing a template keeps its list highlighted in the menu.
+	const selectedSidebarItem = document.querySelector(`#sidebar li[data-section="${section === 'templates' ? 'templates-home' : section}"]`);
+
+	if (selectedSection) {
+		selectedSection.classList.add('active');
+	}
+	if (selectedSidebarItem) {
+		selectedSidebarItem.classList.add('active');
+	}
+
+	updateUrl(section, templateId);
+	// The study page lists what was studied last: look again whenever it is opened.
+	if (section === 'study') document.dispatchEvent(new CustomEvent('qiaomu-study-shown'));
+
+	if (section === 'templates-home') {
+		initializePropertyTypesManager();
+	}
+
+	if (section === 'templates') {
+		const templateEditor = document.getElementById('template-editor');
+		if (templateEditor) {
+			templateEditor.style.display = 'block';
+		}
+	}
+
+	updatePromptContextVisibility();
+}
+
+function updateSidebarActiveState(activeSection: string): void {
+	document.querySelectorAll('#sidebar li').forEach(item => item.classList.remove('active'));
+	const activeItem = document.querySelector(`#sidebar li[data-section="${activeSection}"]`);
+	if (activeItem) activeItem.classList.add('active');
+}
+
+function updateTemplateListActiveState(templateId: string): void {
+	const templateListItems = document.querySelectorAll('#template-list li');
+	templateListItems.forEach(item => {
+		item.classList.remove('active');
+		if ((item as HTMLElement).dataset.id === templateId) {
+			item.classList.add('active');
+		}
+	});
+}
+
+export function initializeSidebar(): void {
+	const sidebar = document.getElementById('sidebar');
+	const settingsContainer = document.getElementById('settings');
+	const templateList = document.getElementById('template-list');
+	const hamburgerMenu = document.getElementById('hamburger-menu');
+	const sidebarTitle = document.getElementById('settings-sidebar-title');
+
+	if (sidebarTitle) {
+		sidebarTitle.addEventListener('click', () => {
+			showSettingsSection('general');
+		});
+	}
+
+	// A note that points at another page of settings.
+	document.addEventListener('click', event => {
+		const link = (event.target as HTMLElement).closest<HTMLElement>('[data-goto-section]');
+		const section = link?.dataset.gotoSection;
+		if (section === 'clip' || section === 'asr' || section === 'asr-models' || section === 'interpreter' || section === 'templates-home') { event.preventDefault(); showSettingsSection(section); const target = link?.dataset.gotoTarget; if (target) document.getElementById(target)?.scrollIntoView({ block: 'start' }); }
+	});
+
+	if (sidebar) {
+		sidebar.addEventListener('click', (event) => {
+			const target = event.target as HTMLElement;
+			const link = target.closest('li[data-href]') as HTMLElement | null;
+			// A door to a page of its own (transcribe and study), not a page of settings.
+			if (link?.dataset.href) { void browser.tabs.create({ url: browser.runtime.getURL(link.dataset.href) }); return; }
+			const li = target.closest('li[data-section]') as HTMLElement | null;
+			const section = li?.dataset.section;
+			if (section === 'general'
+				|| section === 'study'
+				|| section === 'asr'
+				|| section === 'clip'
+				|| section === 'learning'
+				|| section === 'video'
+				|| section === 'properties'
+				|| section === 'highlighter'
+				|| section === 'interpreter'
+				|| section === 'asr-models'
+				|| section === 'about'
+				|| section === 'reader'
+				|| section === 'templates-home') {
+				showSettingsSection(section as SettingsSection);
+			}
+			if (settingsContainer) {
+				settingsContainer.classList.remove('sidebar-open');
+			}
+			if (hamburgerMenu) {
+				hamburgerMenu.classList.remove('is-active');
+			}
+		});
+	}
+
+	if (templateList) {
+		templateList.addEventListener('click', (event) => {
+			const target = event.target as HTMLElement;
+			const listItem = target.closest('li') as HTMLElement;
+			if (listItem && listItem.dataset.id) {
+				showSettingsSection('templates', listItem.dataset.id);
+				if (settingsContainer) {
+					settingsContainer.classList.remove('sidebar-open');
+				}
+				if (hamburgerMenu) {
+					hamburgerMenu.classList.remove('is-active');
+				}
+			}
+		});
+	}
+
+	if (hamburgerMenu && settingsContainer) {
+		hamburgerMenu.addEventListener('click', () => {
+			settingsContainer.classList.toggle('sidebar-open');
+			hamburgerMenu.classList.toggle('is-active');
+		});
+	}
+}

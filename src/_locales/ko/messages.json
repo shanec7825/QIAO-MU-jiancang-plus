@@ -1,0 +1,2176 @@
+{
+	"activity": {
+		"message": "활동"
+	},
+	"addModel": {
+		"message": "+ 모델 추가"
+	},
+	"addModelTitle": {
+		"message": "모델 추가"
+	},
+	"addProperty": {
+		"message": "+ 속성 추가하기"
+	},
+	"addProvider": {
+		"message": "+ 공급자 추가"
+	},
+	"addProviderTitle": {
+		"message": "제공자 추가"
+	},
+	"addToObsidian": {
+		"message": "Obsidian에 추가하기"
+	},
+	"addVaultPlaceholder": {
+		"message": "볼트(보관소)를 추가하려면 엔터를 누르세요."
+	},
+	"advanced": {
+		"message": "고급 설정"
+	},
+	"allHighlights": {
+		"message": "모든 하이라이트"
+	},
+	"allProperties": {
+		"message": "모든 속성"
+	},
+	"allTime": {
+		"message": "전체 시간"
+	},
+	"alwaysShowHighlights": {
+		"message": "하이라이트 항상 표시"
+	},
+	"alwaysShowHighlightsDescription": {
+		"message": "웹페이지를 로드할 때 저장된 하이라이트를 표시합니다. 하이라이트 모드가 활성화된 경우에만 하이라이트를 표시하려면 이 옵션을 끄십시오."
+	},
+	"apiKeyMissing": {
+		"message": "API 키가 없습니다"
+	},
+	"apiKeysWarning": {
+		"message": "외부 제공자를 사용하면 해당 제공자의 이용 약관 및 개인정보 보호정책에 동의하는 것입니다. 인터프리터 요청은 선택한 제공자에게 직접 전송됩니다. Obsidian은 요청에 대한 데이터를 수집하거나 저장하지 않습니다."
+	},
+	"appendToDaily": {
+		"message": "데일리 노트 맨 아래에 추가"
+	},
+	"appendToExisting": {
+		"message": "기존에 있는 노트 맨 아래에 추가"
+	},
+	"autoRunInterpreter": {
+		"message": "자동 실행"
+	},
+	"autoRunInterpreterDescription": {
+		"message": "템플릿에 프롬프트 변수가 포함되어 있는 경우 즉시 실행합니다. 이는 모델 제공자의 API 크레딧을 소비합니다. 인터프리터를 수동으로만 실행하려면 끄십시오."
+	},
+	"behavior": {
+		"message": "동작 방식"
+	},
+	"byDay": {
+		"message": "일"
+	},
+	"byMonth": {
+		"message": "월"
+	},
+	"byWeek": {
+		"message": "주"
+	},
+	"cancel": {
+		"message": "취소"
+	},
+	"cannotDeleteProvider": {
+		"message": "\"$1\" 공급자를 삭제할 수 없습니다. 이는 $2 모델에서 사용 중이기 때문입니다."
+	},
+	"changelog": {
+		"message": "변경 내역"
+	},
+	"chooseFile": {
+		"message": "파일을 선택하세요"
+	},
+	"choosePropertiesFile": {
+		"message": "속성 파일 선택"
+	},
+	"chooseSettingsFile": {
+		"message": "설정 파일을 선택하십시오"
+	},
+	"chooseTemplateFile": {
+		"message": "템플릿 파일을 선택하세요"
+	},
+	"clipBehavior": {
+		"message": "클립 동작 방식"
+	},
+	"clipBehaviorDescription": {
+		"message": "하이라이트 표시된 내용이 Obsidian에 저장되는 방식을 선택하세요. $strong_start${{content}}$strong_end$ 변수를 정의합니다.",
+		"placeholders": {
+			"strong_end": {
+				"content": "</strong>"
+			},
+			"strong_start": {
+				"content": "<strong>"
+			}
+		}
+	},
+	"clipboardError": {
+		"message": "Obsidian이 클립보드에 접근할 수 없습니다. 여기의 문제 해결 안내를 시도해 보세요: $1",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"close": {
+		"message": "닫기"
+	},
+	"commandOpenClipper": {
+		"message": "Obsidian Clipper 열기"
+	},
+	"commandQuickClip": {
+		"message": "퀵 클립"
+	},
+	"commandToggleHighlighter": {
+		"message": "하이라이터 모드 전환"
+	},
+	"commandToggleReader": {
+		"message": "독서 뷰 전환"
+	},
+	"confirmDeleteTemplate": {
+		"message": "템플릿을 삭제하시겠습니까? \"$1\"?"
+	},
+	"confirmReplaceSettings": {
+		"message": "이 작업은 현재의 모든 설정, 템플릿 및 속성을 대체합니다. 계속하시겠습니까?"
+	},
+	"copied": {
+		"message": "복사되었습니다!"
+	},
+	"copyAsJson": {
+		"message": "JSON으로 복사하기"
+	},
+	"copyToClipboard": {
+		"message": "클립보드에 복사하기"
+	},
+	"createNewNote": {
+		"message": "새 노트 만들기"
+	},
+	"custom": {
+		"message": "사용자 정의"
+	},
+	"dailyNoteFormat": {
+		"message": "데일리 노트 형식 (e.g., YYYY-MM-DD)"
+	},
+	"defaultInterpreterContext": {
+		"message": "기본 인터프리터 컨텍스트"
+	},
+	"defaultInterpreterContextDescription": {
+		"message": "모델이 프롬프트 변수를 해석하는 데 사용할 컨텍스트입니다. 변수와 필터를 사용할 수 있습니다."
+	},
+	"defaultTemplateName": {
+		"message": "기본 템플릿"
+	},
+	"delete": {
+		"message": "삭제"
+	},
+	"deleteAllHighlightsConfirm": {
+		"message": "모든 하이라이트를 삭제하시겠습니까?"
+	},
+	"deleteHighlightsForDomain": {
+		"message": "이 도메인의 모든 하이라이트를 삭제하시겠습니까?"
+	},
+	"deleteHighlightsForPage": {
+		"message": "이 페이지의 모든 하이라이트를 삭제하시겠습니까?"
+	},
+	"deleteModelConfirm": {
+		"message": "이 모델을 삭제하시겠습니까?"
+	},
+	"deleteProviderConfirm": {
+		"message": "이 공급자를 삭제하시겠습니까?"
+	},
+	"disableHighlighter": {
+		"message": "하이라이터 끄기"
+	},
+	"disableReader": {
+		"message": "독서 뷰 비활성화"
+	},
+	"done": {
+		"message": "완료"
+	},
+	"dragAndDropFile": {
+		"message": "여기에 파일을 드래그 앤 드롭하세요"
+	},
+	"duplicate": {
+		"message": "복제"
+	},
+	"earlyAccessDescription": {
+		"message": "Obsidian의 최신 $link_start$얼리 액세스 (early access) 버전$link_end$이 필요한 기능을 사용합니다. 현재 Obsidian 1.7.2 이상이 필요합니다.",
+		"placeholders": {
+			"link_end": {
+				"content": "</a>"
+			},
+			"link_start": {
+				"content": "<a href=\"https://help.obsidian.md/Obsidian/Early+access+versions\" target=\"_blank\">"
+			}
+		}
+	},
+	"earlyAccessFeatures": {
+		"message": "얼리 액세스 기능"
+	},
+	"edit": {
+		"message": "편집"
+	},
+	"editModel": {
+		"message": "모델 편집"
+	},
+	"editProvider": {
+		"message": "공급자 편집"
+	},
+	"editTemplate": {
+		"message": "템플릿 편집"
+	},
+	"embedded": {
+		"message": "임베디드"
+	},
+	"enableHighlighterDescription": {
+		"message": "하이라이트한 웹페이지 내용을 Obsidian에 저장합니다."
+	},
+	"enableInterpreter": {
+		"message": "인터프리터 활성화"
+	},
+	"enableInterpreterDescription": {
+		"message": "자연어를 사용하여 페이지에서 데이터를 추출합니다. 예를 들어, $strong_start${{\"페이지 요약\"}}$strong_end$ 템플릿 구문을 사용할 수 있습니다. API 키 또는 아래에서 구성된 사용자 지정 모델이 필요합니다. $link_start$자세히 알아보기$link_end$",
+		"placeholders": {
+			"link_end": {
+				"content": "</a>"
+			},
+			"link_start": {
+				"content": "<a href=\"https://help.obsidian.md/web-clipper/interpreter\" target=\"_blank\">"
+			},
+			"strong_end": {
+				"content": "</strong>"
+			},
+			"strong_start": {
+				"content": "<strong>"
+			}
+		}
+	},
+	"enableReader": {
+		"message": "독서 뷰 열기"
+	},
+	"error": {
+		"message": "에러"
+	},
+	"export": {
+		"message": "내보내기"
+	},
+	"exportAllSettings": {
+		"message": "모든 설정 내보내기"
+	},
+	"exportAllSettingsDescription": {
+		"message": "템플릿 및 속성을 포함한 모든 설정 내보내기."
+	},
+	"exportHighlights": {
+		"message": "하이라이트 내보내기"
+	},
+	"exportHighlightsDescription": {
+		"message": "하이라이트를 파일로 내보내기."
+	},
+	"exportProperties": {
+		"message": "속성 내보내기"
+	},
+	"exportPropertiesDescription": {
+		"message": "Obsidian Vault 또는 다른 장치의 Web Clipper로 가져올 수 있는 $strong_start$types.json$strong_end$ 파일에 Web Clipper 속성을 저장합니다.",
+		"placeholders": {
+			"strong_end": {
+				"content": "</strong>"
+			},
+			"strong_start": {
+				"content": "<strong>"
+			}
+		}
+	},
+	"extensionDescription": {
+		"message": "웹 콘텐츠를 저장하여 오프라인에서도 접근할 수 있는 개인적이고 내구성 있는 형식으로 보관하세요. Obsidian의 공식 브라우저 확장 프로그램입니다."
+	},
+	"extensionName": {
+		"message": "Obsidian Web Clipper"
+	},
+	"failedToCopyText": {
+		"message": "텍스트를 복사하지 못했습니다"
+	},
+	"failedToDeleteTemplate": {
+		"message": "템플릿을 삭제하지 못했습니다. 다시 시도해 주세요."
+	},
+	"failedToDuplicateTemplate": {
+		"message": "템플릿 복제에 실패했습니다. 다시 시도해 주세요."
+	},
+	"failedToExportHighlights": {
+		"message": "하이라이트 내보내기에 실패했습니다. 자세한 내용은 콘솔을 확인해 주세요."
+	},
+	"failedToExportSettings": {
+		"message": "설정 내보내기에 실패했습니다. 자세한 내용은 콘솔을 확인해 주세요."
+	},
+	"failedToExtractContent": {
+		"message": "페이지 콘텐츠를 추출하지 못했습니다."
+	},
+	"failedToImportTemplate": {
+		"message": "템플릿 가져오기 오류. 파일을 확인하고 다시 시도해 주세요."
+	},
+	"failedToInitialize": {
+		"message": "확장 프로그램을 다시 로드해 주세요."
+	},
+	"failedToInitializeContent": {
+		"message": "페이지 콘텐츠를 초기화하지 못했습니다."
+	},
+	"failedToProcessInterpreter": {
+		"message": "인터프리터 처리에 실패했습니다. 다시 시도해 주세요."
+	},
+	"failedToResetProviders": {
+		"message": "공급자 및 모델 재설정 실패"
+	},
+	"failedToResetTemplate": {
+		"message": "템플릿을 초기화하지 못했습니다. 다시 시도해 주세요."
+	},
+	"failedToSave": {
+		"message": "파일을 저장하지 못했습니다"
+	},
+	"failedToSaveFile": {
+		"message": "파일을 저장하지 못했습니다"
+	},
+	"failedToSaveProvider": {
+		"message": "제공자 저장에 실패했습니다. 다시 시도해 주세요."
+	},
+	"feedback": {
+		"message": "피드백"
+	},
+	"feedbackDescription": {
+		"message": "웹 클리퍼를 어떻게 개선할 수 있을까요? 버그를 보고하고, 기능을 제안하고, 일반적인 문제를 해결하는 데 도움이 되는 도움말 페이지를 방문해 주세요."
+	},
+	"feedbackTitle": {
+		"message": "피드백 감사합니다"
+	},
+	"folder": {
+		"message": "Folder"
+	},
+	"general": {
+		"message": "일반"
+	},
+	"generalSettings": {
+		"message": "일반 설정"
+	},
+	"getApiKeyHere": {
+		"message": "여기에서 $1 API 키를 받으세요."
+	},
+	"help": {
+		"message": "도움말"
+	},
+	"helpDescription": {
+		"message": "Web Clipper 사용 방법을 알아보고 문제 해결을 위한 도움을 받으세요."
+	},
+	"highlightInline": {
+		"message": "페이지 내용 인라인 하이라이트"
+	},
+	"highlightPage": {
+		"message": "페이지 하이라이트"
+	},
+	"highlightSelection": {
+		"message": "하이라이트"
+	},
+	"highlighter": {
+		"message": "하이라이터"
+	},
+	"highlighterOn": {
+		"message": "하이라이터"
+	},
+	"highlighterSettings": {
+		"message": "하이라이터 설정"
+	},
+	"highlights": {
+		"message": "하이라이트"
+	},
+	"highlightsImportSuccess": {
+		"message": "하이라이트 $1개를 가져왔습니다.",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"highlightsNotFound": {
+		"message": "문서에서 하이라이트를 찾을 수 없습니다"
+	},
+	"history": {
+		"message": "기록"
+	},
+	"hotkeys": {
+		"message": "단축키"
+	},
+	"import": {
+		"message": "들여오기"
+	},
+	"importAllSettings": {
+		"message": "모든 설정 들여오기"
+	},
+	"importAllSettingsDescription": {
+		"message": "템플릿과 속성을 포함한 모든 설정을 들여옵니다. 현재 구성이 대체됩니다."
+	},
+	"importFailed": {
+		"message": "가져오기 실패했습니다. 자세한 내용은 콘솔을 확인해 주세요."
+	},
+	"importHighlights": {
+		"message": "하이라이트 가져오기"
+	},
+	"importHighlightsDescription": {
+		"message": "파일에서 하이라이트를 가져옵니다. 기존 하이라이트는 유지됩니다."
+	},
+	"importModalTitle": {
+		"message": "수입"
+	},
+	"importProperties": {
+		"message": "속성 들여오기"
+	},
+	"importPropertiesDescription": {
+		"message": "Obsidian에서 속성을 가져오려면 보괏소 내의 $strong_2_start$.obsidian$strong_2_end$ 폴더에서 $strong_1_start$types.json$strong_1_end$ 파일을 찾으세요. 이 폴더는 대부분의 운영 체제에서 기본적으로 숨겨져 있습니다.",
+		"placeholders": {
+			"strong_1_end": {
+				"content": "</strong>"
+			},
+			"strong_1_start": {
+				"content": "<strong>"
+			},
+			"strong_2_end": {
+				"content": "</strong>"
+			},
+			"strong_2_start": {
+				"content": "<strong>"
+			}
+		}
+	},
+	"importSettings": {
+		"message": "설정 가져오기"
+	},
+	"importTemplate": {
+		"message": "템플릿 가져오기"
+	},
+	"interpret": {
+		"message": "해석"
+	},
+	"interpreter": {
+		"message": "인터프리터"
+	},
+	"interpreterContext": {
+		"message": "인터프리터 컨텍스트"
+	},
+	"interpreterContextDescription": {
+		"message": "프롬프트 변수를 해석하는 데 사용되는 컨텍스트입니다. $link_start$인프리터 설정$link_end$에 정의된 기본 컨텍스트를 재정의합니다. 여기서 변수를 사용할 수 있습니다.",
+		"placeholders": {
+			"link_end": {
+				"content": "</a>"
+			},
+			"link_start": {
+				"content": "<a href=\"?section=templates-home\">"
+			}
+		}
+	},
+	"language": {
+		"message": "언어"
+	},
+	"languageDescription": {
+		"message": "확장 프로그램 인터페이스의 표시 언어를 선택하세요."
+	},
+	"last30Days": {
+		"message": "지난 30일"
+	},
+	"lastUsed": {
+		"message": "마지막으로 사용된 보관소"
+	},
+	"legacyMode": {
+		"message": "레거시 모드"
+	},
+	"legacyModeDescription": {
+		"message": "Obsidian 1.6.7 이하 버전과 호환되는 URI 클리핑 방법을 사용합니다. 클립할 수 있는 내용량은 브라우저와 OS에 따라 제한됩니다. 일부 페이지는 오류 없이 실패할 수 있습니다."
+	},
+	"loadArticle": {
+		"message": "문서 읽기"
+	},
+	"loading": {
+		"message": "로딩 중…"
+	},
+	"modelName": {
+		"message": "모델 이름"
+	},
+	"modelNameDescription": {
+		"message": "인터페이스에 표시할 모델 이름입니다."
+	},
+	"modelProvider": {
+		"message": "제공자"
+	},
+	"modelProviderDescription": {
+		"message": "모델 제공자 (예: Ollama, OpenRouter, Google 등)"
+	},
+	"modelProviderPlaceholder": {
+		"message": "공급자"
+	},
+	"modelRequiredFields": {
+		"message": "모델 이름, 제공자, 그리고 모델 ID가 필요합니다."
+	},
+	"models": {
+		"message": "모델"
+	},
+	"modelsListFor": {
+		"message": "$1에 대한 모델 목록"
+	},
+	"more": {
+		"message": "더 보기"
+	},
+	"newTemplate": {
+		"message": "새 템플릿"
+	},
+	"noHighlights": {
+		"message": "하이라이트 없음"
+	},
+	"noResults": {
+		"message": "결과가 없습니다"
+	},
+	"noTemplates": {
+		"message": "템플릿 없음. 설정에서 템플릿을 추가하세요."
+	},
+	"noUnusedProperties": {
+		"message": "사용하지 않는 속성이 발견되지 않았습니다."
+	},
+	"noteContent": {
+		"message": "노트 내용"
+	},
+	"noteContentDescription": {
+		"message": "노트의 내용을 사용자 정의합니다. 변수를 사용하여 페이지의 데이터를 미리 채울 수 있습니다."
+	},
+	"noteLocation": {
+		"message": "노트"
+	},
+	"noteLocationDescription": {
+		"message": "노트의 폴더 또는 파일 경로"
+	},
+	"noteName": {
+		"message": "노트 이름"
+	},
+	"noteNameFormat": {
+		"message": "노트 이름 형식"
+	},
+	"noteNameFormatDescription": {
+		"message": "노트의 파일 이름 형식입니다. {{title}}, {{date}} 및 {{published}}와 같은 변수를 사용하여 페이지의 데이터를 미리 채울 수 있습니다. $link_start$자세히 알아보기$link_end$.",
+		"placeholders": {
+			"link_end": {
+				"content": "</a>"
+			},
+			"link_start": {
+				"content": "<a href=\"https://help.obsidian.md/web-clipper/variables\" target=\"_blank\">"
+			}
+		}
+	},
+	"notesAboutPage": {
+		"message": "이 페이지에 대한 메모..."
+	},
+	"onlyHttpSupported": {
+		"message": "이 페이지는 클립할 수 없습니다. http 및 https URL만 지원됩니다."
+	},
+	"open": {
+		"message": "열기"
+	},
+	"openBehaviorDescription": {
+		"message": "웹 클리퍼가 기본적으로 어떻게 열리는지 선택하십시오."
+	},
+	"openBehaviorTitle": {
+		"message": "열기 동작"
+	},
+	"openEmbedded": {
+		"message": "페이지에서 열기"
+	},
+	"openHighlights": {
+		"message": "하이라이트 열기"
+	},
+	"openReader": {
+		"message": "리더 열기"
+	},
+	"openSidePanel": {
+		"message": "사이드 패널 열기"
+	},
+	"optional": {
+		"message": "(선택사항)"
+	},
+	"orPasteBelow": {
+		"message": "아래에 내용을 붙여넣으세요."
+	},
+	"overwriteNote": {
+		"message": "노트 덮어쓰기"
+	},
+	"pageCannotBeClipped": {
+		"message": "이 페이지는 클립할 수 없습니다."
+	},
+	"pageVariables": {
+		"message": "페이지 변수"
+	},
+	"pagesRead": {
+		"message": "페이지 읽음"
+	},
+	"pagesReadPlural": {
+		"message": "페이지들을 읽음"
+	},
+	"pagesSaved": {
+		"message": "페이지 저장됨"
+	},
+	"pagesSavedPlural": {
+		"message": "페이지들이 저장됨"
+	},
+	"pasteJsonHere": {
+		"message": "여기에 JSON을 붙여넣으세요"
+	},
+	"pleaseReload": {
+		"message": "페이지를 다시 로드해 주세요."
+	},
+	"popularModels": {
+		"message": "인기 모델"
+	},
+	"popularModelsDescription": {
+		"message": "일반적으로 사용되는 모델 중에서 선택하거나 사용자 정의 모델 세부 정보를 입력하세요."
+	},
+	"popup": {
+		"message": "팝업"
+	},
+	"prependToDaily": {
+		"message": "데일리 노트 맨 위에 추가"
+	},
+	"prependToExisting": {
+		"message": "기존에 있는 노트 맨 위에 추가"
+	},
+	"preview": {
+		"message": "미리보기"
+	},
+	"processing": {
+		"message": "처리 중"
+	},
+	"properties": {
+		"message": "속성"
+	},
+	"propertiesSettings": {
+		"message": "속성 설정"
+	},
+	"propertyName": {
+		"message": "속성 이름"
+	},
+	"propertyTypeCheckbox": {
+		"message": "체크박스"
+	},
+	"propertyTypeDate": {
+		"message": "날짜"
+	},
+	"propertyTypeDatetime": {
+		"message": "날짜 & 시간"
+	},
+	"propertyTypeMultitext": {
+		"message": "목록"
+	},
+	"propertyTypeNumber": {
+		"message": "번호"
+	},
+	"propertyTypeText": {
+		"message": "텍스트"
+	},
+	"propertyValue": {
+		"message": "속성 값"
+	},
+	"provider": {
+		"message": "공급자"
+	},
+	"providerApiKey": {
+		"message": "API 키"
+	},
+	"providerApiKeyDescription": {
+		"message": "이 공급자를 위한 API 키입니다."
+	},
+	"providerBaseUrl": {
+		"message": "기본 URL"
+	},
+	"providerBaseUrlDescription": {
+		"message": "이 제공자를 위한 API 엔드포인트 URL입니다."
+	},
+	"providerModelId": {
+		"message": "모델 ID"
+	},
+	"providerModelIdDescription": {
+		"message": "제공자의 모델 식별자입니다. 일반적으로 공백이 없는 짧은 이름입니다."
+	},
+	"providerModelIdPlaceholder": {
+		"message": "모델 ID"
+	},
+	"providerName": {
+		"message": "제공자 이름"
+	},
+	"providerNameDescription": {
+		"message": "이 공급자의 표시 이름."
+	},
+	"providerPreset": {
+		"message": "프리셋"
+	},
+	"providerPresetDescription": {
+		"message": "공급자를 선택하거나 사용자 정의 공급자를 생성하십시오."
+	},
+	"providerRequiredFields": {
+		"message": "공급자 이름과 기본 URL이 필요합니다."
+	},
+	"providers": {
+		"message": "제공자"
+	},
+	"rateExtensionDescription": {
+		"message": "웹 클리퍼를 즐기고 계신가요? 평가를 통해 우리를 도와주세요."
+	},
+	"read": {
+		"message": "읽음"
+	},
+	"reader": {
+		"message": "리더"
+	},
+	"readerAppearance": {
+		"message": "모양"
+	},
+	"readerAppearanceAuto": {
+		"message": "자동"
+	},
+	"readerAppearanceDark": {
+		"message": "어둡게"
+	},
+	"readerAppearanceDescription": {
+		"message": "밝은 모양 또는 어두운 모양을 선택하세요."
+	},
+	"readerAppearanceLight": {
+		"message": "밝게"
+	},
+	"readerAutoScroll": {
+		"message": "자동 스크롤"
+	},
+	"readerAutoScrollDescription": {
+		"message": "재생을 따라가도록 스크립트를 자동으로 스크롤합니다."
+	},
+	"readerBlendImages": {
+		"message": "이미지 블렌딩"
+	},
+	"readerBlendImagesDescription": {
+		"message": "이미지를 페이지 배경과 블렌딩합니다."
+	},
+	"readerCloseImageViewer": {
+		"message": "이미지 뷰어 닫기"
+	},
+	"readerCollapseComment": {
+		"message": "댓글 접기"
+	},
+	"readerColorLinks": {
+		"message": "링크 색상"
+	},
+	"readerColorSchemeDefault": {
+		"message": "기본값"
+	},
+	"readerCurrentPosition": {
+		"message": "현재 위치"
+	},
+	"readerCustomCss": {
+		"message": "사용자 지정 CSS"
+	},
+	"readerCustomCssDescription": {
+		"message": "읽기 보기에서 자동으로 적용되는 CSS입니다."
+	},
+	"readerDarkTheme": {
+		"message": "다크 모드 테마"
+	},
+	"readerDarkThemeDescription": {
+		"message": "다크 모드에서 다른 테마를 사용합니다."
+	},
+	"readerError": {
+		"message": "콘텐츠를 추출하지 못했습니다."
+	},
+	"readerFont": {
+		"message": "글꼴 옵션"
+	},
+	"readerFontDefault": {
+		"message": "기본값"
+	},
+	"readerFontDescription": {
+		"message": "시스템에 설치된 글꼴을 추가하세요. Enter를 눌러 글꼴을 추가합니다."
+	},
+	"readerFontNotFound": {
+		"message": "찾을 수 없음"
+	},
+	"readerFontPlaceholder": {
+		"message": "Enter를 눌러 글꼴을 추가하세요"
+	},
+	"readerFontSetDefault": {
+		"message": "기본값으로 설정"
+	},
+	"readerFontSize": {
+		"message": "기본 글꼴 크기"
+	},
+	"readerFontSystem": {
+		"message": "시스템"
+	},
+	"readerFontSystemSans": {
+		"message": "산세리프"
+	},
+	"readerFontSystemSerif": {
+		"message": "세리프"
+	},
+	"readerFontUnavailable": {
+		"message": "이 글꼴은 여기에서 사용할 수 없습니다. 브라우저가 사용자 지정 글꼴을 차단하고 있을 수 있습니다."
+	},
+	"readerFonts": {
+		"message": "글꼴"
+	},
+	"readerFootnotes": {
+		"message": "각주"
+	},
+	"readerHighlightActiveLine": {
+		"message": "활성 줄 강조"
+	},
+	"readerHighlightActiveLineDescription": {
+		"message": "재생 중 스크립트에서 현재 문장을 강조 표시합니다."
+	},
+	"readerImages": {
+		"message": "이미지"
+	},
+	"readerLineHeight": {
+		"message": "줄 높이"
+	},
+	"readerLineWidth": {
+		"message": "줄 너비"
+	},
+	"readerLoadFailed": {
+		"message": "불러오지 못했습니다. 브라우저에서 이 페이지가 차단되었을 수 있습니다."
+	},
+	"readerLoading": {
+		"message": "정리 중…"
+	},
+	"readerOn": {
+		"message": "리더"
+	},
+	"readerPinPlayer": {
+		"message": "플레이어 고정"
+	},
+	"readerPinPlayerDescription": {
+		"message": "스크립트를 스크롤하는 동안에도 비디오 플레이어를 계속 표시합니다."
+	},
+	"readerSettings": {
+		"message": "리더 설정"
+	},
+	"readerTheme": {
+		"message": "테마"
+	},
+	"readerThemeDescription": {
+		"message": "읽기 보기에서 사용할 색상을 선택하세요."
+	},
+	"readerThemeSection": {
+		"message": "테마"
+	},
+	"readerTranscripts": {
+		"message": "스크립트"
+	},
+	"readerTypography": {
+		"message": "타이포그래피"
+	},
+	"readerUrlPlaceholder": {
+		"message": "읽을 URL을 붙여넣기…"
+	},
+	"readerViewFullSize": {
+		"message": "원본 크기로 보기"
+	},
+	"recommended": {
+		"message": "추천"
+	},
+	"refresh": {
+		"message": "새로 고침"
+	},
+	"remove": {
+		"message": "제거"
+	},
+	"removeProperty": {
+		"message": "속성 제거"
+	},
+	"removeUnusedProperties": {
+		"message": "사용하지 않는 속성 제거"
+	},
+	"removeUnusedPropertiesDescription": {
+		"message": "어떤 템플릿에서도 사용되지 않는 모든 속성을 제거합니다."
+	},
+	"removeVault": {
+		"message": "볼트 제거"
+	},
+	"replaceContent": {
+		"message": "페이지 내용 바꾸기"
+	},
+	"reset": {
+		"message": "초기화"
+	},
+	"resetDefaultTemplate": {
+		"message": "기본 템플릿으로 초기화"
+	},
+	"resetDefaultTemplateDescription": {
+		"message": "기본 템플릿으로 초기화하여 템플릿에 대한 모든 사용자 정의를 제거합니다."
+	},
+	"resetProvidersAndModels": {
+		"message": "기본 모델 재설정"
+	},
+	"resetProvidersAndModelsDescription": {
+		"message": "공급자와 모델을 기본 설정으로 재설정합니다."
+	},
+	"save": {
+		"message": "저장"
+	},
+	"saveBehaviorDescription": {
+		"message": "페이지 저장을 위한 기본 옵션을 선택하세요. 대체 옵션은 주 버튼 옆의 드롭다운 메뉴에 표시됩니다."
+	},
+	"saveBehaviorLabel": {
+		"message": "저장 동작"
+	},
+	"saved": {
+		"message": "저장됨"
+	},
+	"saveFile": {
+		"message": "파일 저장..."
+	},
+	"searchHighlightsPlaceholder": {
+		"message": "하이라이트 검색…"
+	},
+	"searchVariables": {
+		"message": "변수 검색..."
+	},
+	"selectProvider": {
+		"message": "공급자를 선택하십시오"
+	},
+	"selectTemplateToExport": {
+		"message": "내보낼 템플릿을 선택해 주세요."
+	},
+	"settings": {
+		"message": "설정"
+	},
+	"settingsHeading": {
+		"message": "설정"
+	},
+	"settingsImportSuccess": {
+		"message": "모든 설정이 성공적으로 가져와졌습니다. 변경 사항을 확인하려면 페이지를 새로 고치십시오."
+	},
+	"share": {
+		"message": "공유..."
+	},
+	"shortcutInstructionsBrave": {
+		"message": "키보드 단축키를 변경하려면 $1로 이동하세요"
+	},
+	"shortcutInstructionsChrome": {
+		"message": "키보드 단축키를 변경하려면 $1로 이동하세요"
+	},
+	"shortcutInstructionsDefault": {
+		"message": "키보드 단축키를 변경하려면 브라우저 확장 프로그램 설정으로 이동하세요."
+	},
+	"shortcutInstructionsEdge": {
+		"message": "키보드 단축키를 변경하려면 $1로 이동하세요"
+	},
+	"shortcutInstructionsFirefox": {
+		"message": "키보드 단축키를 변경하려면 $1로 이동하여 설정 아이콘을 클릭한 다음 \"부가 기능 단축키 관리\"를 선택하세요."
+	},
+	"shortcutInstructionsIntro": {
+		"message": "키보드 단축키를 사용하면 클리퍼 기능에 빠르게 액세스할 수 있습니다."
+	},
+	"shortcutInstructionsSafari": {
+		"message": "키보드 단축키는 Safari에서 사용자 정의할 수 없습니다."
+	},
+	"shortcutNotSet": {
+		"message": "설정되지 않음"
+	},
+	"showActionsButton": {
+		"message": "작업 버튼 표시"
+	},
+	"showActionsDescription": {
+		"message": "클리퍼 메뉴에서 페이지 변수를 확인할 수 있습니다. 템플릿에서 사용할 수 있는 변수를 확인하는 데 유용합니다."
+	},
+	"showPageVariables": {
+		"message": "페이지 변수 표시"
+	},
+	"silentOpen": {
+		"message": "클립한 노트 열지 않고 저장"
+	},
+	"silentOpenDescription": {
+		"message": "클립된 노트는 저장되지만 새 탭으로 열리지 않습니다. Obsidian은 포그라운드에서 실행됩니다."
+	},
+	"sort": {
+		"message": "정렬"
+	},
+	"sortAZ": {
+		"message": "A→Z"
+	},
+	"sortNewOld": {
+		"message": "최신순"
+	},
+	"sortOldNew": {
+		"message": "오래된 순"
+	},
+	"sortZA": {
+		"message": "Z→A"
+	},
+	"specificNoteName": {
+		"message": "특정 노트 이름"
+	},
+	"systemDefault": {
+		"message": "시스템 기본값"
+	},
+	"template": {
+		"message": "템플릿"
+	},
+	"templateCopied": {
+		"message": "클립보드에 템플릿 JSON을 복사했습니다."
+	},
+	"templateCopyError": {
+		"message": "템플릿 JSON을 클립보드에 복사하는 데 실패했습니다."
+	},
+	"templateErrorCount": {
+		"message": "템플릿에 오류가 있습니다."
+	},
+	"templateErrorsCount": {
+		"message": "템플릿에 오류가 $1개 있습니다."
+	},
+	"templateGroupContent": {
+		"message": "콘텐츠"
+	},
+	"templateGroupLocation": {
+		"message": "위치"
+	},
+	"templateName": {
+		"message": "템플릿 이름"
+	},
+	"templateProperties": {
+		"message": "템플릿 속성"
+	},
+	"templatePropertiesDescription": {
+		"message": "클립된 노트의 맨 위에 추가할 속성입니다. 변수를 사용하여 페이지에서 데이터를 미리 채울 수 있습니다."
+	},
+	"templateTriggers": {
+		"message": "템플릿 트리거"
+	},
+	"templateTriggersDescription": {
+		"message": "이 템플릿을 자동으로 선택하도록 URL 패턴과 schema.org 데이터를 포함하는 경우에 대한 규칙을 정의하세요. 한 줄에 하나의 규칙을 작성하세요."
+	},
+	"templateValid": {
+		"message": "템플릿 구문이 유효합니다"
+	},
+	"templatesHeading": {
+		"message": "템플릿"
+	},
+	"thinking": {
+		"message": "생각 중"
+	},
+	"unknownProvider": {
+		"message": "알 수 없는 제공자"
+	},
+	"updateAvailable": {
+		"message": "업데이트가 있습니다."
+	},
+	"usingLatestVersion": {
+		"message": "최신 버전을 사용 중입니다."
+	},
+	"vault": {
+		"message": "보관소"
+	},
+	"vaultDescription": {
+		"message": "이 템플릿의 기본 보관소를 선택합니다. 보관소를 추가하거나 제거하려면 $link_start$일반 설정$link_end$으로 이동하세요.",
+		"placeholders": {
+			"link_end": {
+				"content": "</a>"
+			},
+			"link_start": {
+				"content": "<a href=\"?section=clip\">"
+			}
+		}
+	},
+	"vaults": {
+		"message": "보관소"
+	},
+	"vaultsDescription": {
+		"message": "기본적으로 클립된 노트는 현재 열려 있는 보관소에 저장됩니다. 다른 보관소에 저장하는 옵션을 원하는 경우 여기에 추가할 수 있습니다. 보관소 이름은 Obsidian 볼트 이름과 정확히 일치해야 합니다. 보관소를 추가하려면 $strong_start$엔터$strong_end$를 누르세요.",
+		"placeholders": {
+			"strong_end": {
+				"content": "</strong>"
+			},
+			"strong_start": {
+				"content": "<strong>"
+			}
+		}
+	},
+	"version": {
+		"message": "버전"
+	},
+	"navClip": {
+		"message": "클리핑 및 저장"
+	},
+	"navLearning": {
+		"message": "학습 노트"
+	},
+	"groupSaving": {
+		"message": "저장"
+	},
+	"groupSharing": {
+		"message": "공유"
+	},
+	"groupBackup": {
+		"message": "백업 및 실험실"
+	},
+	"headingClip": {
+		"message": "클리핑"
+	},
+	"headingRead": {
+		"message": "읽기 및 학습"
+	},
+	"headingAI": {
+		"message": "AI"
+	},
+	"navStudyHome": {
+		"message": "전사 및 학습"
+	},
+	"navAsr": {
+		"message": "음성 인식"
+	},
+	"navVideoSites": {
+		"message": "전사 바 및 사이트"
+	},
+	"headingLearn": {
+		"message": "학습"
+	},
+	"videoSubtitles": {
+		"message": "동영상 자막"
+	},
+	"providerModels": {
+		"message": "제공자 모델"
+	},
+	"providerModelsDescription": {
+		"message": "설정된 제공자에서 모델을 선택하거나 사용자 정의 모델 ID를 입력하세요."
+	},
+	"providerModelsLoading": {
+		"message": "제공자 모델 가져오는 중…"
+	},
+	"providerModelsRefresh": {
+		"message": "모델 목록 새로고침"
+	},
+	"providerModelsEmpty": {
+		"message": "제공자가 모델을 반환하지 않았습니다. 모델 ID를 직접 입력할 수 있습니다."
+	},
+	"providerModelsFallback": {
+		"message": "최신 목록을 읽을 수 없어 일반 모델을 표시합니다. 새로고침해서 다시 시도하세요."
+	},
+	"providerModelsFailed": {
+		"message": "모델을 가져올 수 없습니다. 제공자 URL, API 키 및 네트워크를 확인한 후 새로고침하거나 모델 ID를 직접 입력하세요."
+	},
+	"providerModelsMissingKey": {
+		"message": "먼저 제공자 API 키를 설정하거나 모델 ID를 직접 입력하세요."
+	},
+	"providerModelsDeployment": {
+		"message": "Azure 배포 이름을 모델 ID로 입력하세요."
+	},
+	"qiaomuPreviewClip": {
+		"message": "클리핑 콘텐츠 미리보기"
+	},
+	"qiaomuEditMarkdown": {
+		"message": "Markdown 편집"
+	},
+	"qiaomuPublicRss": {
+		"message": "공개 RSS 보기"
+	},
+	"qiaomuCopyProperty": {
+		"message": "속성 값 복사"
+	},
+	"qiaomuCopyFailed": {
+		"message": "복사 실패. 다시 시도하세요"
+	},
+	"qiaomuCharacters": {
+		"message": "자"
+	},
+	"qiaomuClip": {
+		"message": "클립"
+	},
+	"qiaomuReadingMode": {
+		"message": "읽기 모드"
+	},
+	"qiaomuCopyMarkdown": {
+		"message": "Markdown 복사"
+	},
+	"qiaomuSaveMarkdown": {
+		"message": "Markdown으로 저장"
+	},
+	"rssShareTitle": {
+		"message": "클립을 Qiaomu RSS로 공유"
+	},
+	"rssShareDescription": {
+		"message": "기본적으로 꺼져 있습니다. 켜면 클리퍼의 공유 옵션이 자동으로 체크되며 클립이 독자 제출 피드에 공개적으로 제출됩니다."
+	},
+	"saveSelectionToDiary": {
+		"message": "선택 항목을 일일 노트에 저장"
+	},
+	"qiaomuShareRss": {
+		"message": "Qiaomu RSS로 공유"
+	},
+	"qiaomuClipToObsidian": {
+		"message": "Obsidian에 클립"
+	},
+	"qiaomuContentActions": {
+		"message": "클리핑 콘텐츠 작업"
+	},
+	"qiaomuAiRetry": {
+		"message": "재시도"
+	},
+	"qiaomuAiFailed": {
+		"message": "AI 처리 실패. 다시 시도하거나 AI 프롬프트가 없는 템플릿을 선택하세요."
+	},
+	"qiaomuActionRead": {
+		"message": "읽기"
+	},
+	"qiaomuActionCopy": {
+		"message": "복사"
+	},
+	"qiaomuActionDownload": {
+		"message": "다운로드"
+	},
+	"qiaomuDestination": {
+		"message": "저장 위치"
+	},
+	"qiaomuActionEdit": {
+		"message": "편집"
+	},
+	"qiaomuEditClip": {
+		"message": "속성 및 콘텐츠 편집"
+	},
+	"qiaomuTemplate": {
+		"message": "템플릿"
+	},
+	"qiaomuEditorBody": {
+		"message": "콘텐츠"
+	},
+	"qiaomuEditorDone": {
+		"message": "완료"
+	},
+	"qiaomuEditorCopied": {
+		"message": "복사됨"
+	},
+	"qiaomuEditorProperties": {
+		"message": "속성"
+	},
+	"qiaomuEditorClip": {
+		"message": "클립"
+	},
+	"qiaomuEditorClipped": {
+		"message": "클리핑됨"
+	},
+	"defaultTemplateTitle": {
+		"message": "기본 템플릿"
+	},
+	"defaultTemplateDescription": {
+		"message": "템플릿 트리거가 페이지와 일치하지 않을 때, 그리고 키보드 단축키 클리핑에 사용됩니다."
+	},
+	"tripleKeyTitle": {
+		"message": "3회 연속 단축키"
+	},
+	"tripleKeyDescription": {
+		"message": "웹 페이지에서 문자를 세 번 빠르게 눌러 읽기 모드 열기, 편집기 열기, 기본 템플릿으로 클립하기 또는 빠른 노트 카드 열기를 실행합니다. 텍스트 필드에 입력 중일 때는 무시됩니다."
+	},
+	"qiaomuActionPreview": {
+		"message": "미리보기"
+	},
+	"qiaomuActionEditShort": {
+		"message": "편집"
+	},
+	"qiaomuActionNoteShort": {
+		"message": "노트"
+	},
+	"qiaomuActionReadShort": {
+		"message": "읽기"
+	},
+	"commandOpenEditor": {
+		"message": "이 페이지의 클립 편집"
+	},
+	"readerFontZhuque": {
+		"message": "Zhuque Fangsong"
+	},
+	"readerFontSongti": {
+		"message": "Songti"
+	},
+	"readerFontKaiti": {
+		"message": "Kaiti"
+	},
+	"readerFontPingfang": {
+		"message": "PingFang / Hei"
+	},
+	"qiaomuHighlightCount": {
+		"message": "이 페이지의 하이라이트 $1개"
+	},
+	"qiaomuChatTitle": {
+		"message": "AI 채팅"
+	},
+	"qiaomuChatPlaceholder": {
+		"message": "이 글에 대해 질문하세요… (Enter로 전송, Shift+Enter로 줄바꿈)"
+	},
+	"qiaomuChatNew": {
+		"message": "새 채팅"
+	},
+	"qiaomuChatSend": {
+		"message": "전송"
+	},
+	"qiaomuChatStop": {
+		"message": "중지"
+	},
+	"qiaomuChatContext": {
+		"message": "답변은 이 글을 사용합니다 ($1자)"
+	},
+	"qiaomuChatInsert": {
+		"message": "노트에 추가"
+	},
+	"qiaomuChatInserted": {
+		"message": "노트에 추가됨"
+	},
+	"qiaomuChatNoModel": {
+		"message": "사용 가능한 AI 모델이 없습니다. 질문을 시작하려면 모델을 추가하거나 활성화하세요."
+	},
+	"qiaomuChatOpenSettings": {
+		"message": "AI 모델 설정"
+	},
+	"qiaomuChatSuggestSummary": {
+		"message": "이 글 요약하기"
+	},
+	"qiaomuChatSuggestPoints": {
+		"message": "핵심 사항 및 데이터 추출"
+	},
+	"qiaomuChatSuggestTranslate": {
+		"message": "중국어로 번역"
+	},
+	"qiaomuChatSuggestCritic": {
+		"message": "무엇을 의심해야 하나요?"
+	},
+	"qiaomuChatTruncated": {
+		"message": "글 잘림"
+	},
+	"qiaomuChatSystem": {
+		"message": "당신은 독서 도우미입니다. 아래 글을 사용하여 답변하고, 글에 다루지 않은 내용이 있으면 그렇게 말하며 사실을 절대 만들어내지 마세요. 질문의 언어로, 간결한 Markdown으로 답변하세요."
+	},
+	"qiaomuChatError": {
+		"message": "답변할 수 없습니다:"
+	},
+	"qiaomuChatHistory": {
+		"message": "대화 기록"
+	},
+	"qiaomuChatNoHistory": {
+		"message": "이 글에 대한 이전 대화가 없습니다"
+	},
+	"qiaomuChatAskSelection": {
+		"message": "AI에게 물어보기"
+	},
+	"qiaomuChatAboutSelection": {
+		"message": "글에서 선택한 이 구절에 대해:"
+	},
+	"qiaomuChatQuoteExplain": {
+		"message": "이 구절 설명하기"
+	},
+	"qiaomuChatQuoteTranslate": {
+		"message": "이 구절 번역하기"
+	},
+	"qiaomuChatQuoteSummary": {
+		"message": "이 구절 요약하기"
+	},
+	"qiaomuChatQuoteRewrite": {
+		"message": "더 간결하게 다시 쓰기"
+	},
+	"youtubeAutoTranscriptTitle": {
+		"message": "YouTube 전사를 자동으로 열기"
+	},
+	"youtubeAutoTranscriptDescription": {
+		"message": "동영상이 열리면 자막을 바로 복사, 다운로드 및 학습할 수 있도록 전사를 한 번 펼칩니다. 닫으면 해당 동영상에 대해 다시 열리지 않습니다."
+	},
+	"youtubeHideNativeTitle": {
+		"message": "YouTube 자체 전사 패널 숨기기"
+	},
+	"youtubeHideNativeDescription": {
+		"message": "전사가 자동으로 열린 후 자막 바에 이미 동일한 줄이 표시되므로 오른쪽 열의 YouTube 자체 패널을 숨깁니다. 직접 연 패널은 절대 숨겨지지 않습니다."
+	},
+	"learningNotesTitle": {
+		"message": "읽기 및 동영상 페이지에서 노트 작성"
+	},
+	"learningNotesDescription": {
+		"message": "\"노트\" 버튼을 표시하며, N 키도 작동합니다. 노트는 보관함의 오늘 일일 노트에 추가되며, 먼저 로컬 도우미를 설치해야 합니다."
+	},
+	"learningIncludeQuoteTitle": {
+		"message": "선택한 텍스트 포함"
+	},
+	"learningIncludeQuoteDescription": {
+		"message": "노트를 작성할 때 텍스트가 선택되어 있으면 일일 노트에 인용문으로 작성합니다. 노트별로 전환할 수도 있습니다."
+	},
+	"learningIncludeSourceTitle": {
+		"message": "출처 및 동영상 시간 포함"
+	},
+	"learningIncludeSourceDescription": {
+		"message": "일일 노트에 페이지 또는 동영상의 링크를 작성하고, 동영상의 경우 시간도 작성합니다. 노트별로 전환할 수도 있습니다."
+	},
+	"youtubePanelReload": {
+		"message": "확장 프로그램이 업데이트되었습니다. 이 페이지를 새로고침한 후 다시 시도하세요"
+	},
+	"youtubeBarSubtitles": {
+		"message": "자막"
+	},
+	"youtubeBarSettings": {
+		"message": "설정"
+	},
+	"youtubeBarExpand": {
+		"message": "전사 표시"
+	},
+	"youtubeBarCollapse": {
+		"message": "접기"
+	},
+	"youtubeBarMore": {
+		"message": "나머지를 읽으려면 학습 모드를 여세요"
+	},
+	"studyPinVideo": {
+		"message": "동영상 고정"
+	},
+	"studyScrollTranscript": {
+		"message": "스크립트 스크롤"
+	},
+	"transcriptSearch": {
+		"message": "스크립트 검색"
+	},
+	"transcriptSearchClear": {
+		"message": "검색 지우기"
+	},
+	"transcriptSearchNone": {
+		"message": "결과 없음"
+	},
+	"youtubeBarSearch": {
+		"message": "스크립트 검색"
+	},
+	"youtubeBarClear": {
+		"message": "검색 지우기"
+	},
+	"youtubeBarNoMatch": {
+		"message": "결과 없음"
+	},
+	"youtubeBarFollow": {
+		"message": "재생 따라가기 중 — 클릭하여 끄기"
+	},
+	"youtubeBarFollowOff": {
+		"message": "따라가기 꺼짐 — 클릭하여 재생 따라가기"
+	},
+	"youtubeBarHere": {
+		"message": "현재 줄로 돌아가기"
+	},
+	"youtubeBarRetry": {
+		"message": "다시 시도"
+	},
+	"youtubePanelCardTitle": {
+		"message": "Qiaomu · 학습"
+	},
+	"youtubePanelCardLoading": {
+		"message": "스크립트 읽는 중…"
+	},
+	"youtubePanelCardReady": {
+		"message": "스크립트 준비됨 — 시간을 클릭하여 이동"
+	},
+	"youtubePanelCardNone": {
+		"message": "스크립트를 찾을 수 없습니다. YouTube에서 \"스크립트\"를 열어보세요."
+	},
+	"bilibiliBarNone": {
+		"message": "이 동영상에는 자막이 없습니다"
+	},
+	"bilibiliBarLogin": {
+		"message": "Bilibili는 로그인한 계정에만 자막을 제공합니다. 로그인한 후 다시 시도를 누르세요"
+	},
+	"youtubePanelActionsTitle": {
+		"message": "YouTube 및 Bilibili 스크립트 바"
+	},
+	"youtubePanelActionsDescription": {
+		"message": "동영상 페이지에 자막 바 추가: 함께 읽기, 복사, 다운로드, 학습 페이지 열기; 동영상에 자막이 없으면 바로 생성하세요."
+	},
+	"youtubePanelCopy": {
+		"message": "복사"
+	},
+	"youtubePanelDownload": {
+		"message": "다운로드"
+	},
+	"youtubePanelStudy": {
+		"message": "학습"
+	},
+	"youtubePanelCopied": {
+		"message": "복사됨"
+	},
+	"youtubePanelEmpty": {
+		"message": "스크립트 줄을 찾을 수 없습니다. 먼저 스크립트를 여세요."
+	},
+	"readerAutoChatTitle": {
+		"message": "읽기 페이지와 함께 AI 채팅 열기"
+	},
+	"readerAutoChatDescription": {
+		"message": "읽기 페이지가 열리면 바로 AI 채팅 패널을 표시합니다."
+	},
+	"selectionToolbarTitle": {
+		"message": "선택 도구 모음"
+	},
+	"selectionToolbarDescription": {
+		"message": "읽기 및 편집 페이지에서 선택한 텍스트 옆에 하이라이트와 AI에게 질문이 있는 작은 도구 모음을 표시합니다."
+	},
+	"tripleKeyKeysTitle": {
+		"message": "단축키"
+	},
+	"tripleKeyKeysDescription": {
+		"message": "각 동작에 하나의 문자 또는 숫자를 선택하세요. 비워두면 동작이 꺼집니다. 기본값: 읽기 A, 편집 E, 클립 Q, 노트 I."
+	},
+	"tripleKeyReset": {
+		"message": "기본값 복원"
+	},
+	"tripleKeyInvalid": {
+		"message": "문자 또는 숫자 하나를 사용하세요."
+	},
+	"tripleKeyDuplicate": {
+		"message": "같은 키를 두 동작에 사용할 수 없습니다."
+	},
+	"tripleKeySitesTitle": {
+		"message": "이 사이트에서 끄기"
+	},
+	"tripleKeySitesDescription": {
+		"message": "한 줄에 한 사이트씩, 예: mail.google.com. 하위 도메인이 포함됩니다. 클리퍼 메뉴에서 현재 사이트를 끌 수도 있습니다."
+	},
+	"tripleKeySiteOff": {
+		"message": "$1에서 세 번 누르기 키 끄기"
+	},
+	"tripleKeySiteOn": {
+		"message": "$1에서 세 번 누르기 키 다시 켜기"
+	},
+	"tripleKeySiteDisabled": {
+		"message": "$1에서 세 번 누르기 키가 꺼져 있습니다"
+	},
+	"tripleKeySiteEnabled": {
+		"message": "$1에서 세 번 누르기 키가 다시 켜졌습니다"
+	},
+	"qiaomuChatPreferences": {
+		"message": "채팅 설정"
+	},
+	"qiaomuChatPreferencesScope": {
+		"message": "저장된 설정은 모든 기사 및 동영상 채팅에 적용됩니다. 모양은 AI 패널에만 영향을 줍니다."
+	},
+	"qiaomuChatFont": {
+		"message": "채팅 글꼴"
+	},
+	"qiaomuChatFontsystem": {
+		"message": "시스템 기본값"
+	},
+	"qiaomuChatFontserif": {
+		"message": "세리프"
+	},
+	"qiaomuChatFontmono": {
+		"message": "고정폭"
+	},
+	"qiaomuChatFontcustom": {
+		"message": "사용자 지정 글꼴"
+	},
+	"qiaomuChatCustomFont": {
+		"message": "설치된 글꼴 이름 (시스템 글꼴로 대체됨)"
+	},
+	"qiaomuChatFontSize": {
+		"message": "채팅 글꼴 크기"
+	},
+	"qiaomuChatFontPreview": {
+		"message": "나만의 속도로 배우세요. 阅读、提问、理解。"
+	},
+	"qiaomuChatPromptEnabled": {
+		"message": "전역 지침 사용"
+	},
+	"qiaomuChatCustomPrompt": {
+		"message": "지침 텍스트"
+	},
+	"qiaomuChatPromptPlaceholder": {
+		"message": "예: 먼저 요약한 다음 설명하세요. 자막을 인용할 때 타임스탬프를 포함하세요."
+	},
+	"qiaomuChatPromptScope": {
+		"message": "저장 후 다음 질문에 적용됩니다. 기존 답변은 변경되지 않습니다. 지침은 소스와 함께 선택한 AI 모델로 전송됩니다. 기본 읽기 지침은 유지됩니다."
+	},
+	"qiaomuChatPreferencesReset": {
+		"message": "기본값 재설정"
+	},
+	"qiaomuChatPreferencesSaveError": {
+		"message": "저장할 수 없습니다. 다시 시도하세요. 환경설정이 변경되지 않았습니다."
+	},
+	"qiaomuExpandSidebar": {
+		"message": "개요 및 사이드바 펼치기"
+	},
+	"qiaomuCollapseSidebar": {
+		"message": "개요 및 사이드바 접기"
+	},
+	"qiaomuToc": {
+		"message": "개요"
+	},
+	"qiaomuVideoSize": {
+		"message": "동영상 크기"
+	},
+	"qiaomuTranslateChinese": {
+		"message": "중국어 번역"
+	},
+	"qiaomuTranslationRetry": {
+		"message": "번역 다시 시도"
+	},
+	"qiaomuTranslationFormatRetry": {
+		"message": "이 번역 그룹을 다시 시도하는 중…"
+	},
+	"qiaomuTranslationInvalid": {
+		"message": "모델이 불완전한 세그먼트 데이터를 반환했습니다. 다시 시도하세요."
+	},
+	"qiaomuTranslationProgress": {
+		"message": "번역 중"
+	},
+	"qiaomuTranslationNoModel": {
+		"message": "번역에는 AI 모델이 필요하며, 자막에 사용되는 음성 인식과는 다릅니다."
+	},
+	"qiaomuTranslationDone": {
+		"message": "번역 완료"
+	},
+	"qiaomuTranslationTimeout": {
+		"message": "번역 시간 초과. 다시 시도하여 계속하세요."
+	},
+	"qiaomuTranslationError": {
+		"message": "번역 실패. 다시 시도하여 계속하세요."
+	},
+	"qiaomuTranslationService": {
+		"message": "구성된 AI 모델로 자막을 번역합니다. 원본, 번역 또는 이중 언어 자막을 클립하세요."
+	},
+	"qiaomuChatSectionAppearance": {
+		"message": "모양"
+	},
+	"qiaomuChatSectionInstructions": {
+		"message": "전역 지침"
+	},
+	"qiaomuChatInstructionsNote": {
+		"message": "모든 질문에 추가됩니다. 답변의 언어, 어조 및 형식을 고정하는 데 사용하세요."
+	},
+	"qiaomuChatExamples": {
+		"message": "시도해보세요:"
+	},
+	"qiaomuChatExampleLang": {
+		"message": "중국어로 답변"
+	},
+	"qiaomuChatExampleConclusion": {
+		"message": "결론 먼저, 그 다음 세부사항"
+	},
+	"qiaomuChatExampleTimestamp": {
+		"message": "자막을 인용할 때 타임스탬프 포함"
+	},
+	"qiaomuChatExampleConcise": {
+		"message": "간결하게, 군더더기 없이"
+	},
+	"qiaomuQuickTitle": {
+		"message": "빠른 프롬프트"
+	},
+	"qiaomuQuickNote": {
+		"message": "입력 위에 표시됩니다. 한 번 탭하면 전송됩니다. 추가, 편집, 삭제 또는 숨기세요."
+	},
+	"qiaomuQuickNew": {
+		"message": "새로 만들기"
+	},
+	"qiaomuQuickEdit": {
+		"message": "\"$1\" 편집"
+	},
+	"qiaomuQuickDelete": {
+		"message": "\"$1\" 삭제"
+	},
+	"qiaomuQuickShow": {
+		"message": "\"$1\" 표시"
+	},
+	"qiaomuQuickName": {
+		"message": "이름"
+	},
+	"qiaomuQuickBody": {
+		"message": "탭할 때 전송되는 프롬프트"
+	},
+	"qiaomuQuickScope": {
+		"message": "표시 시점"
+	},
+	"qiaomuQuickScopeArticle": {
+		"message": "기사에 대해 질문할 때"
+	},
+	"qiaomuQuickScopeSelection": {
+		"message": "텍스트 선택 후"
+	},
+	"qiaomuQuickDone": {
+		"message": "완료"
+	},
+	"qiaomuQuickRequired": {
+		"message": "이름과 프롬프트를 입력하세요."
+	},
+	"qiaomuQuickEmpty": {
+		"message": "아직 빠른 프롬프트가 없습니다."
+	},
+	"qiaomuQuickLimit": {
+		"message": "최대 30개의 빠른 프롬프트를 보관할 수 있습니다."
+	},
+	"qiaomuQuickResetDefaults": {
+		"message": "기본 프롬프트 복원"
+	},
+	"qiaomuQuickUnfinished": {
+		"message": "먼저 편집 중인 프롬프트를 완료하거나 취소하세요."
+	},
+	"qiaomuChatFontreader": {
+		"message": "읽기 글꼴과 동일"
+	},
+	"providerSignInLabel": {
+		"message": "계정"
+	},
+	"providerSignInButton": {
+		"message": "로그인"
+	},
+	"providerSignInPaste": {
+		"message": "종료된 페이지의 주소를 붙여넣으세요"
+	},
+	"providerSignInPasteButton": {
+		"message": "계속"
+	},
+	"providerSignInOpen": {
+		"message": "브라우저 탭에서 완료하기를 기다리는 중…"
+	},
+	"providerSignInDone": {
+		"message": "$1(으)로 로그인됨",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"providerSignInChatGPT": {
+		"message": "ChatGPT에 로그인"
+	},
+	"providerSignInCodex": {
+		"message": "Codex에 로그인"
+	},
+	"providerSignInTokenDance": {
+		"message": "词元跳动 승인"
+	},
+	"providerSignInNoteChatGPT": {
+		"message": "ChatGPT 플랜 허용량을 사용합니다. API 키가 필요하지 않습니다."
+	},
+	"providerSignInNoteCodex": {
+		"message": "Codex 플랜 허용량을 사용합니다. API 키가 필요하지 않습니다."
+	},
+	"providerSignInNoteTokenDance": {
+		"message": "브라우저에서 확인하면 키가 자동으로 생성됩니다."
+	},
+	"providerSignInOpenRouter": {
+		"message": "OpenRouter로 로그인"
+	},
+	"providerSignInNoteOpenRouter": {
+		"message": "브라우저에서 확인하면 키가 자동으로 생성됩니다. 복사할 필요가 없습니다."
+	},
+	"qiaomuModelSearch": {
+		"message": "모델 검색"
+	},
+	"qiaomuModelNone": {
+		"message": "일치하는 모델 없음"
+	},
+	"qiaomuModelManage": {
+		"message": "공급자 추가 또는 관리"
+	},
+	"qiaomuModelPlan": {
+		"message": "플랜"
+	},
+	"providerSignInAgain": {
+		"message": "다시 로그인"
+	},
+	"pdAddProviderTitle": {
+		"message": "공급자 추가"
+	},
+	"pdEditProviderTitle": {
+		"message": "공급자 편집"
+	},
+	"pdSearchProviders": {
+		"message": "공급자 검색…"
+	},
+	"pdGroupAccount": {
+		"message": "계정으로 로그인 · 키 불필요"
+	},
+	"pdGroupRelay": {
+		"message": "게이트웨이 · 하나의 키, 여러 모델"
+	},
+	"pdGroupProvider": {
+		"message": "공급자"
+	},
+	"pdGroupLocal": {
+		"message": "이 컴퓨터에서"
+	},
+	"pdGroupCustom": {
+		"message": "기타"
+	},
+	"pdCustomName": {
+		"message": "사용자 지정"
+	},
+	"pdCustomSub": {
+		"message": "호환 가능한 모든 엔드포인트"
+	},
+	"pdAdded": {
+		"message": "추가됨"
+	},
+	"pdNoMatch": {
+		"message": "일치하는 공급자 없음"
+	},
+	"pdFieldNamePlaceholder": {
+		"message": "공급자 이름"
+	},
+	"pdPasteWrong": {
+		"message": "로그인이 완료된 주소가 아닙니다. 다시 복사하세요."
+	},
+	"pdLocalNote": {
+		"message": "이 컴퓨터에서 실행됩니다. 키가 필요하지 않습니다."
+	},
+	"pdGetKey": {
+		"message": "API 키 받기"
+	},
+	"pdFieldUrl": {
+		"message": "엔드포인트 주소"
+	},
+	"pdUrlHintCustom": {
+		"message": "채팅 엔드포인트 주소, 예: https://example.com/v1/chat/completions"
+	},
+	"pdUrlHint": {
+		"message": "일반적으로 변경할 필요가 없습니다."
+	},
+	"pdFieldKey": {
+		"message": "API 키"
+	},
+	"pdFieldKeyOr": {
+		"message": "API 키 (인증 후 자동으로 입력됩니다)"
+	},
+	"pdShow": {
+		"message": "표시"
+	},
+	"pdHide": {
+		"message": "숨기기"
+	},
+	"pdAdvanced": {
+		"message": "엔드포인트 주소"
+	},
+	"pdNeedName": {
+		"message": "이름을 입력하세요."
+	},
+	"pdNeedUrl": {
+		"message": "엔드포인트 주소를 입력하세요."
+	},
+	"pdNeedLogin": {
+		"message": "먼저 로그인하세요."
+	},
+	"pdNeedKey": {
+		"message": "API 키를 입력하세요."
+	},
+	"pdBack": {
+		"message": "뒤로"
+	},
+	"pdAddProviderButton": {
+		"message": "제공자 추가"
+	},
+	"pdAddModelTitle": {
+		"message": "모델 추가"
+	},
+	"pdNoProviders": {
+		"message": "먼저 제공자를 추가한 다음 모델을 선택하세요."
+	},
+	"pdPickProvider": {
+		"message": "제공자"
+	},
+	"pdSearchModels": {
+		"message": "모델 검색…"
+	},
+	"pdManual": {
+		"message": "모델 ID 직접 입력"
+	},
+	"pdManualNamePlaceholder": {
+		"message": "ID와 동일"
+	},
+	"pdManualName": {
+		"message": "표시 이름 (선택)"
+	},
+	"pdAddModels": {
+		"message": "$1개 모델 추가",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"pdAddModelsNone": {
+		"message": "모델 추가"
+	},
+	"pdRecommended": {
+		"message": "권장"
+	},
+	"pdPickProviderFirst": {
+		"message": "위에서 제공자를 선택하세요."
+	},
+	"pdReasonTimeout": {
+		"message": "시간 초과"
+	},
+	"pdReasonFormat": {
+		"message": "모델 목록이 아님"
+	},
+	"pdReasonNetwork": {
+		"message": "차단되었거나 연결할 수 없음"
+	},
+	"pdEdit": {
+		"message": "편집"
+	},
+	"pdDelete": {
+		"message": "삭제"
+	},
+	"pdDuplicate": {
+		"message": "복제"
+	},
+	"failedToSaveModel": {
+		"message": "모델을 저장할 수 없습니다. 다시 시도하세요."
+	},
+	"navAiModels": {
+		"message": "AI 모델"
+	},
+	"aiModelsIntro": {
+		"message": "이 모델은 번역, AI 채팅 및 AI 해석 기능을 제공합니다. ASR 음성 인식에서 자막 인식 서비스를 설정하세요."
+	},
+	"aiModelsGotoAsr": {
+		"message": "음성 인식 설정"
+	},
+	"asrIntroOther": {
+		"message": "이 섹션은 음성을 자막으로 변환합니다. AI 모델 설정에서 번역, AI 채팅 및 해석용 모델을 설정하세요."
+	},
+	"asrGotoModels": {
+		"message": "AI 모델 설정"
+	},
+	"qiaomuTranslationSetupModel": {
+		"message": "번역 모델 설정"
+	},
+	"subtitleLanguage": {
+		"message": "자막 언어"
+	},
+	"subtitleGenFromAudio": {
+		"message": "오디오 인식…"
+	},
+	"audioPlay": {
+		"message": "재생"
+	},
+	"audioPause": {
+		"message": "일시정지"
+	},
+	"audioBack": {
+		"message": "15초 뒤로"
+	},
+	"audioForward": {
+		"message": "30초 앞으로"
+	},
+	"audioSpeed": {
+		"message": "재생 속도"
+	},
+	"audioSeek": {
+		"message": "위치"
+	},
+	"audioRefreshing": {
+		"message": "새 스크립트가 준비되었습니다 — 새로고침 중…"
+	},
+	"audioStudyNone": {
+		"message": "이 미디어에는 아직 자막이 없습니다. 생성되면 재생과 함께 자막이 표시됩니다."
+	},
+	"audioTabTranscript": {
+		"message": "스크립트"
+	},
+	"audioTabNotes": {
+		"message": "노트 표시"
+	},
+	"webReading": {
+		"message": "이 주소를 읽는 중…"
+	},
+	"subtitleGenOffline": {
+		"message": "로컬 도우미가 연결되지 않았습니다. 클리핑 및 저장에서 설치하거나 연결을 확인하세요."
+	},
+	"audioTabAbout": {
+		"message": "설명"
+	},
+	"audioChooseFile": {
+		"message": "오디오 또는 비디오 파일 선택…"
+	},
+	"audioChooseHint": {
+		"message": "여기에 파일을 끌어다 놓을 수도 있습니다. 파일은 로컬 도우미로만 전달되며 업로드되지 않습니다. mp3, m4a, wav, flac, mp4 등의 형식이 지원됩니다."
+	},
+	"audioBadType": {
+		"message": "이 파일 형식은 지원되지 않습니다."
+	},
+	"audioSending": {
+		"message": "로컬 도우미로 파일 전달 중…"
+	},
+	"audioSendFailed": {
+		"message": "파일을 전달할 수 없습니다"
+	},
+	"subtitleGenOffer": {
+		"message": "자막 생성"
+	},
+	"subtitleGenChecking": {
+		"message": "이 컴퓨터 확인 중…"
+	},
+	"subtitleGenConfirm": {
+		"message": "이 비디오에는 자막이 없습니다. 이 컴퓨터에서 자막을 생성할 수 있습니다. 오디오가 다운로드되어 이 컴퓨터의 음성 모델로 인식되며 업로드되지 않습니다."
+	},
+	"subtitleGenConfirmModel": {
+		"message": "최초 실행 시 인식 모델(약 1.6 GB)도 다운로드됩니다."
+	},
+	"subtitleGenStart": {
+		"message": "자막 생성"
+	},
+	"subtitleGenCancel": {
+		"message": "취소"
+	},
+	"subtitleGenRunning": {
+		"message": "자막 생성 중"
+	},
+	"subtitleGenModel": {
+		"message": "최초 사용: 인식 모델(약 1.6 GB) 다운로드 중…"
+	},
+	"subtitleGenFailed": {
+		"message": "자막을 생성할 수 없습니다"
+	},
+	"subtitleGenRetry": {
+		"message": "재시도"
+	},
+	"subtitleGenLangAuto": {
+		"message": "언어 감지"
+	},
+	"subtitleGenLangLabel": {
+		"message": "비디오의 음성 언어"
+	},
+	"subtitleGenNeedsLogin": {
+		"message": "사이트에서 오디오를 다운로드하려면 로그인된 세션이 필요합니다. 사용자의 허가가 있으면 현재 사이트에 필요한 로그인 정보만 이 다운로드를 위해 로컬 도우미로 전달됩니다. 임시 파일은 작업이 완료, 실패 또는 취소되면 삭제됩니다."
+	},
+	"subtitleGenLoginRetry": {
+		"message": "브라우저 로그인으로 재시도"
+	},
+	"subtitleGenGenerated": {
+		"message": "음성 인식으로 생성됨; 인식 오류가 있을 수 있습니다"
+	},
+	"subtitleGenOutdated": {
+		"message": "로컬 도우미가 오래되었습니다. 클리핑 및 저장에서 업데이트한 후 다시 확인하세요."
+	},
+	"subtitleGenMissing": {
+		"message": "자막 생성에 필요한 도구가 없습니다. 음성 인식을 설정하고 필요한 도구나 로컬 엔진을 설치한 후 다시 확인하세요."
+	},
+	"subtitleGenCloudSetup": {
+		"message": "클라우드 인식이 설정되지 않았습니다. ASR 음성 인식에서 서비스를 추가하거나 완료한 후 다시 확인하세요."
+	},
+	"subtitleGenConfirmCloud": {
+		"message": "이 비디오에는 자막이 없습니다. 자막을 생성할 수 있습니다. 오디오가 다운로드되어 {service}로 전송되어 인식됩니다. 오디오가 이 컴퓨터를 떠나며 해당 서비스에서 요금이 청구됩니다."
+	},
+	"subtitleGenConfirmLocalService": {
+		"message": "이 비디오에는 자막이 없습니다. 자막을 생성할 수 있습니다. 오디오가 다운로드되어 이 컴퓨터에서 실행 중인 인식 서비스로 전달됩니다. 이 컴퓨터를 떠나지 않습니다."
+	},
+	"subtitleGenBusy": {
+		"message": "다른 비디오를 처리 중입니다. 완료되면 다시 시도하세요."
+	},
+	"subtitleGenCopy": {
+		"message": "명령 복사"
+	},
+	"subtitleGenCopied": {
+		"message": "복사됨"
+	},
+	"subtitleGenRecheck": {
+		"message": "다시 확인"
+	},
+	"subtitleGenConfirmInstall": {
+		"message": "먼저 이 컴퓨터에 \"{name}\"를 설치해야 합니다(인식 모델 포함 약 {size}). 준비되면 자동으로 생성이 시작되며 오디오는 업로드되지 않습니다."
+	},
+	"subtitleGenInstallStart": {
+		"message": "설치 및 자막 생성"
+	},
+	"subtitleGenInstalling": {
+		"message": "설치 중"
+	},
+	"subtitleGenInstallFailed": {
+		"message": "설치 실패"
+	},
+	"subtitleGenEngine": {
+		"message": "인식 엔진"
+	},
+	"subtitleGenDlgTitle": {
+		"message": "자막 생성"
+	},
+	"subtitleGenDlgSub": {
+		"message": "음성을 시간 지정 자막으로 변환하는 방법을 선택하세요."
+	},
+	"subtitleGenRememberHint": {
+		"message": "앞으로 이 대화 상자 건너뛰기"
+	},
+	"subtitleGenAsk": {
+		"message": "인식 방법 선택"
+	},
+	"subtitleGenStartCloud": {
+		"message": "자막 생성"
+	},
+	"subtitleGenAddService": {
+		"message": "+ 클라우드 서비스 추가…"
+	},
+	"subtitleGenRemember": {
+		"message": "바로 시작"
+	},
+	"subtitleGenRegenerate": {
+		"message": "다른 모델로 다시 생성"
+	},
+	"subtitleGenGeneratedVia": {
+		"message": "{via}로 생성됨; 인식 오류가 있을 수 있습니다"
+	},
+	"Language": {
+		"message": "javascript"
+	},
+	"Attribute": {
+		"message": "style"
+	},
+	"Tag": {
+		"message": "span"
+	},
+	"Format": {
+		"message": "YYYY년 M월 D일"
+	},
+	"Search": {
+		"message": "/[aeiou]/g"
+	},
+	"Replacement": {
+		"message": ""
+	},
+	"Suffix": {
+		"message": "..."
+	},
+	"Type": {
+		"message": "note"
+	},
+	"Title": {
+		"message": ""
+	},
+	"Expression": {
+		"message": "-10"
+	},
+	"Separator": {
+		"message": ","
+	},
+	"Mode": {
+		"message": "values"
+	},
+	"Direction": {
+		"message": "desc"
+	},
+	"Selector": {
+		"message": ".ad"
+	},
+	"xBarNone": {
+		"message": "아직 자막이 없습니다 — 음성 인식으로 생성할 수 있습니다"
+	},
+	"podcastBarNone": {
+		"message": "아직 자막이 없습니다 — 음성 인식으로 생성할 수 있습니다"
+	},
+	"subtitleGenSetupHelper": {
+		"message": "로컬 도우미 설치 또는 업데이트"
+	},
+	"subtitleGenSetupRecognition": {
+		"message": "음성 인식 설정"
+	},
+	"subtitleAutoGenerated": {
+		"message": "자동 생성"
+	},
+	"contextSavePage": {
+		"message": "이 페이지 저장"
+	},
+	"contextAddHighlight": {
+		"message": "하이라이트에 추가"
+	}
+}
