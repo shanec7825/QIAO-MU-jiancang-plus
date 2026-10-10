@@ -44,11 +44,11 @@ export async function mountYouTubeStudy(doc: Document, article: HTMLElement, tit
 			: t('未获取到字幕：视频可能没有字幕，或 YouTube 暂时限制了获取。打开原页转写文稿后再进入学习模式可重试。');
 		return;
 	}
-	mountTranslation(article, controls, status);
+	mountTranslation(article, controls, status, url);
 	if (existingChat) return;
 	await loadSettings();
 	chat = mountClipChat({
-		onLearningRecord: quote => { void learningNotes(doc)?.open({quote}); },
+		onLearningRecord: (quote, category) => { void learningNotes(doc)?.open({quote, category}); },
 		onLearningAi: aiSupplement => { void learningNotes(doc)?.open({aiSupplement}); },
 		getContext: () => ({ title, url, markdown: t('以下是视频字幕文稿，时间戳对应播放位置。仅依据文稿回答；文稿没有的信息请明确说明。\n\n{0}', [text]) }),
 		onInsert: answer => {

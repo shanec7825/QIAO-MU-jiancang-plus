@@ -2,6 +2,17 @@ import { describe, expect, it, vi } from 'vitest';
 import { LOCAL_BACKUP_KEY, isBackedUpKey, pickLocalBackup, restoreLocalBackup, splitImport } from './local-backup';
 
 describe('local data backup', () => {
+ it('includes persisted Chinese subtitle translations in export and restore',()=>{
+  const key='qiaomuTranslation1:'+'a'.repeat(64),value={version:1,entries:[[0,'你好']]};
+  expect(splitImport({[LOCAL_BACKUP_KEY]:pickLocalBackup({[key]:value})}).local).toEqual({[key]:value});
+ });
+	it('backs up and restores English expressions alongside other local user data', () => {
+		const key = 'qiaomuEnglishExpression1:' + 'a'.repeat(64);
+		const entry = { text: 'look forward to', note: '期待', timestamp: 42 };
+		const backup = pickLocalBackup({ [key]: entry });
+		expect(splitImport({ [LOCAL_BACKUP_KEY]: backup }).local).toEqual({ [key]: entry });
+		expect(isBackedUpKey('qiaomuEnglishExpression1X')).toBe(false);
+	});
 	it('keeps the user content of storage.local and leaves caches, device ids and jobs out', () => {
 		const backup = pickLocalBackup({
 			highlights: { a: 1 }, history: [1], domains: {}, qiaomuChatIndex: [], qiaomuChatPreferences: { fontSize: 14 }, qiaomuChatModel: 'm1',

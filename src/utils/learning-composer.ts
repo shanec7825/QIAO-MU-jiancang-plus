@@ -12,7 +12,7 @@ import { youtubeVideoId } from './youtube-url';
 
 import { t } from './ui-text';
 type Services = Pick<typeof records, 'createLearningDraft' | 'loadLearningDraft' | 'persistLearningDraft' | 'getDailyTarget' | 'saveLearningRecord' | 'dispatchLearningRecord'> & Partial<Pick<typeof records, 'addAttachments' | 'pickAttachments' | 'discardAttachments'>>;
-export interface LearningEntry { quote?: string; aiSupplement?: string }
+export interface LearningEntry { category?: records.LearningCategory; quote?: string; aiSupplement?: string }
 export interface LearningNotes { button: HTMLButtonElement; open: (entry?: LearningEntry) => Promise<void>; dispose: () => void; updateSource: (getSource: () => LearningSource, getHighlights?: () => string[]) => void }
 const mounts = new WeakMap<Document, LearningNotes>();
 export const learningNotes = (doc: Document) => mounts.get(doc);
@@ -94,7 +94,7 @@ export function mountLearningNotes(options: { doc: Document; getSource: () => Le
       inert.querySelectorAll('script,style').forEach(element => element.remove());
       const text = inert.body.textContent?.trim(); if (!text) continue;
       const choice = node('button', text, 'learning-highlight-choice'); choice.type = 'button';
-      choice.onclick = () => { if (busy || loading) return; quoteInput.value = text; timeInput.value = ''; showQuote(); updateChip(); pendingQuote = ''; replaceQuote.hidden = true; void persist(); };
+      choice.onclick = () => { if (busy || loading) return; if (draft?.formatVersion === 2) draft.category = 'note'; quoteInput.value = text; timeInput.value = ''; showQuote(); updateChip(); pendingQuote = ''; replaceQuote.hidden = true; void persist(); };
       highlightList.append(choice);
     }
     if (!highlightList.childElementCount) highlightList.append(node('p', t('此来源暂无高亮')));
@@ -130,6 +130,7 @@ export function mountLearningNotes(options: { doc: Document; getSource: () => Le
   const notify = (message: string) => { notice.textContent = message; notice.hidden = false; clearTimeout(noticeTimer); noticeTimer = setTimeout(() => {notice.hidden = true;}, 8000); };
   form.append(header, reflection.wrap, quoteBlock, replaceQuote, aiDetails, attachList, tools, highlightDetails, details, uriDetails, status, footer); dialog.append(form); doc.body.append(dialog);
   let draft: LearningRecordDraft | undefined, origin: LearningSource | undefined, target: DailyTargetResult = { status: 'unavailable' };
+  let pendingCategory: records.LearningCategory | undefined;
   let pendingQuote = '', pendingTime: number | undefined, busy = false, loading = false, generation = 0, writeQueue = Promise.resolve(), lastTime: number | undefined;
   let timedFrameSrc = '', targetLoading = false, includeQuote = true, includeSource = true;
   let attachments: DraftAttachment[] = [], attaching = 0;
@@ -225,8 +226,8 @@ export function mountLearningNotes(options: { doc: Document; getSource: () => Le
       if (entry.quote && draft && !loading) {
         // The card is non-modal, so a new selection can arrive while it is open: fill an empty excerpt, otherwise offer it.
         const at = learningTimestamp(doc);
-        if (!quoteInput.value.trim()) { quoteInput.value = entry.quote; if (at !== undefined && time.wrap.hidden === false && timeInput.value === '') timeInput.value = String(Math.floor(at)); showQuote(); updateChip(); void persist(); }
-        else if (entry.quote !== quoteInput.value) { pendingQuote = entry.quote; pendingTime = at; replaceQuote.hidden = false; }
+        if (!quoteInput.value.trim()) { quoteInput.value = entry.quote; draft.category = entry.category || 'note'; if (at !== undefined && time.wrap.hidden === false && timeInput.value === '') timeInput.value = String(Math.floor(at)); showQuote(); updateChip(); void persist(); }
+        else if (entry.quote !== quoteInput.value) { pendingQuote = entry.quote; pendingCategory = entry.category || 'note'; pendingTime = at; replaceQuote.hidden = false; }
       }
       if (entry.aiSupplement && draft) { aiInput.value = [aiInput.value, entry.aiSupplement].filter(Boolean).join('\n\n'); aiDetails.hidden = false; aiDetails.open = true; void persist(); }
       reflectionInput.focus(); return;
@@ -252,7 +253,7 @@ export function mountLearningNotes(options: { doc: Document; getSource: () => Le
       const [restored, fresh] = await Promise.all([service.loadLearningDraft(origin), service.getDailyTarget()]);
       if (current !== generation) return;
       draft = restored || service.createLearningDraft(origin, entry); target = fresh;
-      if (restored && entry.quote && entry.quote !== restored.quote) { pendingQuote = entry.quote; pendingTime = origin.timestampSeconds; replaceQuote.hidden = false; }
+      if (restored && entry.quote && entry.quote !== restored.quote) { pendingQuote = entry.quote; pendingCategory = entry.category || 'note'; pendingTime = origin.timestampSeconds; replaceQuote.hidden = false; }
       if (restored && entry.aiSupplement) draft.aiSupplement = [draft.aiSupplement, entry.aiSupplement].filter(Boolean).join('\n\n');
       paintDraft(); paintTarget(); draftNote.textContent = restored ? t('已恢复草稿') : ''; updateButtons();
       if (entry.aiSupplement) { aiDetails.hidden = false; aiDetails.open = true; }
@@ -316,7 +317,7 @@ export function mountLearningNotes(options: { doc: Document; getSource: () => Le
   quoteToggle.onclick = () => { if (busy || loading) return; includeQuote = !includeQuote; remember('learningIncludeQuote', includeQuote); updateChip(); void persist(); };
   sourceToggle.onclick = () => { if (busy || loading) return; includeSource = !includeSource; remember('learningIncludeSource', includeSource); updateChip(); void persist(); };
   removeAi.onclick = () => { if (busy || loading) return; aiInput.value = ''; aiDetails.hidden = true; void persist(); };
-  replaceQuote.onclick = () => { if (busy || loading) return; quoteInput.value = pendingQuote; timeInput.value = pendingTime === undefined ? '' : String(Math.floor(pendingTime)); pendingQuote = ''; pendingTime = undefined; replaceQuote.hidden = true; showQuote(); updateChip(); void persist(); };
+  replaceQuote.onclick = () => { if (busy || loading) return; quoteInput.value = pendingQuote; if (draft?.formatVersion === 2) draft.category = pendingCategory || 'note'; pendingCategory = undefined; timeInput.value = pendingTime === undefined ? '' : String(Math.floor(pendingTime)); pendingQuote = ''; pendingTime = undefined; replaceQuote.hidden = true; showQuote(); updateChip(); void persist(); };
   button.onclick = () => { void open({ quote: learningSelection(doc) }); };
   const onMessage = (event: MessageEvent) => {
     const iframe = doc.querySelector<HTMLIFrameElement>('article iframe[src*="youtube.com/embed/"]');

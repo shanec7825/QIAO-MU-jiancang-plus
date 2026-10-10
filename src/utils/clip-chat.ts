@@ -11,6 +11,8 @@ import { showClipStatus } from './clip-bar';
 import { CHAT_PREFERENCES_KEY, DEFAULT_CHAT_PREFERENCES, MAX_QUICK_PROMPTS, QuickPrompt, normalizeChatPreferences, chatFontFamily, chatSystemPrompt, defaultQuickPrompts, visibleQuickPrompts } from './chat-preferences';
 import { createModelPicker } from './model-picker';
 import { learningSelection } from './learning-composer';
+import { mountEnglishExpressions } from './english-expressions';
+import { downloadChatAnswer } from './chat-export';
 
 import { t } from './ui-text';
 export interface ClipChatOptions {
@@ -20,7 +22,7 @@ export interface ClipChatOptions {
 	onInsert: (text: string) => void | Promise<void>;
 	// Reading page only: turn the selection into a highlight.
 	onHighlight?: () => void;
-	onLearningRecord?: (text: string) => void;
+	onLearningRecord?: (text: string, category?: import('./learning-record').LearningCategory) => void;
 	onLearningAi?: (answer: string) => void;
 }
 
@@ -363,6 +365,15 @@ export function mountClipChat(options: ClipChatOptions): { toggle: (open?: boole
 			diary.addEventListener('click', () => options.onLearningAi!(answer));
 			actions.append(diary);
 		}
+		for (const format of ['md', 'html'] as const) {
+			const download = el('button', 'clip-chat-action', format === 'md' ? '下载 MD' : '下载 HTML');
+			download.type = 'button';
+			download.addEventListener('click', () => {
+				try { downloadChatAnswer(answer, `${options.getContext().title} · 学习材料`, format); }
+				catch { showClipStatus('下载失败，请重试或复制回答'); }
+			});
+			actions.append(download);
+		}
 		wrap.appendChild(actions);
 	}
 
@@ -557,13 +568,28 @@ export function mountClipChat(options: ClipChatOptions): { toggle: (open?: boole
 		refreshQuote();
 		input.focus();
 	}
-	mountSelectionPill(askAbout, options.onHighlight, options.onLearningRecord);
+	const expressions = mountEnglishExpressions(document, {
+		getSource: () => { const {title, url} = options.getContext(); return {title, url}; },
+		onDiary: options.onLearningRecord ? text => options.onLearningRecord!(text, 'expression') : undefined,
+		onChat: async prompt => {
+			if (controller) throw new Error('请先等待当前 AI 回答完成，或点击停止。');
+			if (panel.hidden) toggle(true);
+			await populateModels();
+			if (!enabledChatModels().length) throw new Error('请先在 AI 模型设置中配置并启用模型。');
+			quote = ''; refreshQuote();
+			input.value = prompt;
+			input.focus();
+			showClipStatus('已加入选中的英语表达，请在 AI Chat 点击发送。');
+		},
+	});
+	mountSelectionPill(askAbout, options.onHighlight, options.onLearningRecord, expressions);
 
 	return { toggle: () => toggle() };
 }
 
 // One small capsule next to the selection: Highlight (reading page) and Ask AI. Can be turned off in the settings.
-function mountSelectionPill(onAsk: (text: string) => void, onHighlight?: () => void, onLearningRecord?: (text: string) => void) {
+function mountSelectionPill(onAsk: (text: string) => void, onHighlight?: () => void, onLearningRecord?: (text: string) => void,
+	expressions?: { canCollect: () => boolean; collect: () => Promise<void> }) {
 	const pill = el('div', 'clip-ask-pill');
 	pill.hidden = true;
 	pill.setAttribute('role', 'toolbar');
@@ -577,6 +603,10 @@ function mountSelectionPill(onAsk: (text: string) => void, onHighlight?: () => v
 	};
 	let text = '';
 	const hide = () => { pill.hidden = true; };
+	const collect = segment(NotebookPen, '收藏表达');
+	collect.hidden = true;
+	collect.addEventListener('click', () => { hide(); void expressions?.collect(); });
+	if (expressions) pill.appendChild(collect);
 	if (onHighlight) {
 		const highlight = segment(Highlighter, getMessage('highlightSelection'));
 		highlight.addEventListener('click', () => { hide(); onHighlight(); });
@@ -605,7 +635,8 @@ function mountSelectionPill(onAsk: (text: string) => void, onHighlight?: () => v
 		const { clientX, clientY } = event;
 		setTimeout(() => {
 			text = enabled ? selectedArticleText() : '';
-			if (text.length < 2) { hide(); return; }
+			collect.hidden = !enabled || !expressions?.canCollect();
+			if (!text.length || (text.length < 2 && collect.hidden)) { hide(); return; }
 			pill.hidden = false;
 			const width = pill.offsetWidth || 120;
 			pill.style.left = `${Math.min(Math.max(8, clientX - width / 2), window.innerWidth - width - 8)}px`;

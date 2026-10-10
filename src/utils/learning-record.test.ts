@@ -9,7 +9,7 @@ beforeEach(()=>{env.data={};env.send.mockReset();env.send.mockImplementation(asy
 it('writes one compact entry: time + source + clickable video time, the user\'s own Markdown intact, untrusted text neutralised',()=>{
  const draft=createLearningDraft({...source,title:'x](javascript:alert(1))<img>',url:'https://www.youtube.com/watch?v=abc12345678',kind:'youtube',timestampSeconds:3725.9},{reflection:'我的 **原话** [[链接]] #标签',quote:'[音乐]\n<script>attack</script> ![[secret]]',aiSupplement:'AI 的补充'});const body=serializeLearningRecord(draft);
  const [head,...rest]=body.split('\n\n');
- expect(head).toMatch(/^#### \d\d:\d\d · \[x\\\]\(javascript:alert\(1\)\)img\]\(https:\/\/www\.youtube\.com\/watch\?v=abc12345678&t=3725\) · \[1:02:05\]\(https:\/\/www\.youtube\.com\/watch\?v=abc12345678&t=3725\)$/);
+ expect(head).toMatch(/^#### \d\d:\d\d · 学习笔记 · \[x\\\]\(javascript:alert\(1\)\)img\]\(https:\/\/www\.youtube\.com\/watch\?v=abc12345678&t=3725\) · \[1:02:05\]\(https:\/\/www\.youtube\.com\/watch\?v=abc12345678&t=3725\)$/);
  expect(rest[0]).toBe('我的 **原话** [[链接]] #标签');
  expect(rest[1]).toBe('> [!quote] 原文摘录\n> [音乐]\n> &lt;script>attack&lt;/script> !\\[\\[secret]]');
  expect(rest[2]).toBe('> [!info] AI 补充（我选择加入）\n> AI 的补充');expect(body).not.toContain('<img>');expect(body).not.toContain('<script>');
@@ -17,7 +17,7 @@ it('writes one compact entry: time + source + clickable video time, the user\'s 
 it('links Bilibili times, labels a plain thought and formats short clocks',()=>{
  const video=serializeLearningRecord(createLearningDraft({title:'B 站',url:'https://www.bilibili.com/video/BV1cSec6tEux/?p=2',timestampSeconds:75},{reflection:'x'}));
  expect(video).toContain('[1:15](https://www.bilibili.com/video/BV1cSec6tEux/?p=2&t=75)');
- expect(serializeLearningRecord(createLearningDraft({title:''},{reflection:'想法'}))).toMatch(/^#### \d\d:\d\d · 随手记\n\n想法$/);
+ expect(serializeLearningRecord(createLearningDraft({title:''},{reflection:'想法'}))).toMatch(/^#### \d\d:\d\d · 学习笔记 · 随手记\n\n想法\n\n- \[ \] 已掌握$/);
  expect(serializeLearningRecord(createLearningDraft({title:'网页',url:'https://example.com/a',timestampSeconds:9},{reflection:'x'}))).not.toContain('t=9');
 });
 it('accepts thought-only or quote-only and rejects empty, unsafe URLs, invalid time or huge text',()=>{
@@ -97,7 +97,7 @@ it('retains an unknown URI response as uncertain so retry cannot duplicate dispa
 it('omits the quote and the source link/time from the entry on request, keeps them otherwise',()=>{
  const draft=createLearningDraft({title:'Video',url:'https://www.youtube.com/watch?v=abc12345678',kind:'youtube',timestampSeconds:75},{reflection:'mine',quote:'quoted words'});
  const full=serializeLearningRecord(draft);expect(full).toContain('quoted words');expect(full).toContain('[Video]');
- const bare=serializeLearningRecord({...draft,omit:{quote:true,source:true}});expect(bare).not.toContain('quoted words');expect(bare).not.toContain('youtube');expect(bare.split('\n')[0]).toMatch(/^#### \d\d:\d\d$/);expect(bare).toContain('mine');
+ const bare=serializeLearningRecord({...draft,omit:{quote:true,source:true}});expect(bare).not.toContain('quoted words');expect(bare).not.toContain('youtube');expect(bare.split('\n')[0]).toMatch(/^#### \d\d:\d\d · 学习笔记$/);expect(bare).toContain('mine');
  expect(()=>serializeLearningRecord({...draft,reflection:'',omit:{quote:true}})).toThrow();
 });
 it('shortens a very long source title in the diary link but keeps the full address',()=>{
@@ -114,7 +114,7 @@ const id1='a'.repeat(32), id2='b'.repeat(32);
 const withFiles=(...ids:string[])=>({...createLearningDraft(source,{reflection:'想法'}),attachments:ids.map(id=>({id,name:id.slice(0,3)+'.png',size:10,kind:'image' as const}))});
 it('lists each attachment as a marker the helper replaces with the real link, and accepts an attachment-only note',()=>{
  const body=serializeLearningRecord(withFiles(id1,id2));
- expect(body.endsWith(`想法\n\n${attachmentMarker(id1)}\n\n${attachmentMarker(id2)}`)).toBe(true);
+ expect(body.endsWith(`想法\n\n${attachmentMarker(id1)}\n\n${attachmentMarker(id2)}\n\n- [ ] 已掌握`)).toBe(true);
  expect(serializeLearningRecord({...createLearningDraft({title:'随手记'}),attachments:withFiles(id1).attachments})).toContain(attachmentMarker(id1));
  expect(()=>serializeLearningRecord(createLearningDraft(source))).toThrow('空记录');
  expect(()=>serializeLearningRecord(withFiles('../../etc'))).toThrow('附件');expect(()=>serializeLearningRecord(withFiles(id1,id1))).toThrow('附件');
@@ -155,4 +155,24 @@ it('reports a missing helper and a cancelled picker without throwing',async()=>{
  env.send.mockRejectedValue(new Error('no helper'));expect(await pickAttachments()).toMatchObject({items:[],errors:[expect.stringContaining('助手')]});
  env.send.mockResolvedValue({ok:false,cancelled:true});expect(await pickAttachments()).toMatchObject({cancelled:true,items:[]});
  env.send.mockClear();discardAttachments([]);expect(env.send).not.toHaveBeenCalled();discardAttachments([id1]);expect(env.send.mock.calls[0][0].payload).toEqual({mode:'discard',ids:[id1]});
+});
+
+it('labels expression and AI entries while keeping legacy retry content unchanged',()=>{
+ const expression=createLearningDraft(source,{quote:'look forward to',category:'expression'});
+ expect(serializeLearningRecord(expression).split('\n')[0]).toContain(' · 英语表达 · ');
+ expect(serializeLearningRecord(expression).endsWith('- [ ] 已掌握')).toBe(true);
+ expect(serializeLearningRecord(createLearningDraft(source,{aiSupplement:'practice'})).split('\n')[0]).toContain(' · AI 学习 · ');
+ const legacy={...expression};delete legacy.formatVersion;delete legacy.category;
+ const content=serializeLearningRecord(legacy);
+ expect(content.split('\n')[0]).not.toContain('英语表达');
+ expect(content).not.toContain('- [ ] 已掌握');
+});
+it('upgrades an unsent legacy draft but preserves a pending save verbatim', async()=>{
+ const legacy=createLearningDraft(source,{quote:'original'});delete legacy.formatVersion;delete legacy.category;
+ await persistLearningDraft(legacy);
+ expect((await loadLearningDraft(source))?.formatVersion).toBe(2);
+ env.data[`qiaomuLearningPending:${legacy.captureId}`]={content:serializeLearningRecord(legacy)};
+ const restored=(await loadLearningDraft(source))!;
+ expect(restored.formatVersion).toBeUndefined();
+ expect(serializeLearningRecord(restored)).toBe(serializeLearningRecord(legacy));
 });

@@ -6,14 +6,15 @@ export interface DraftAttachment { id: string; name: string; size: number; kind:
 export const ATTACHMENT_ID = /^[0-9a-f]{32}$/;
 export const MAX_ATTACHMENTS = 20;
 // `omit` keeps the text in the draft but leaves it out of the diary entry (the quote, or the source link and video time).
-export interface LearningRecordDraft { captureId: string; createdAt: string; source: LearningSource; originSource?: LearningSource; reflection: string; quote: string; aiSupplement?: string; attachments?: DraftAttachment[]; omit?: { quote?: boolean; source?: boolean } }
+export type LearningCategory = 'note' | 'expression' | 'ai';
+export interface LearningRecordDraft { formatVersion?: 2; category?: LearningCategory; captureId: string; createdAt: string; source: LearningSource; originSource?: LearningSource; reflection: string; quote: string; aiSupplement?: string; attachments?: DraftAttachment[]; omit?: { quote?: boolean; source?: boolean } }
 import type { HelperProblem } from './helper-install';
 import { t } from './ui-text';
 export interface DailyTargetResult { status: 'ready' | 'unavailable' | 'unsupported' | 'invalid'; vault?: string; date?: string; relativePath?: string; targetToken?: string; error?: string; problem?: HelperProblem }
 export interface LearningSaveResult { status: 'saved' | 'dispatched' | 'unconfirmed' | 'failed' | 'cancelled' | 'target-changed'; captureId: string; vault?: string; date?: string; relativePath?: string; error?: string; duplicate?: boolean; target?: DailyTargetResult }
 
-export function createLearningDraft(source: LearningSource, initial: Partial<Pick<LearningRecordDraft, 'reflection' | 'quote' | 'aiSupplement'>> = {}): LearningRecordDraft {
-	return { captureId: crypto.randomUUID(), createdAt: new Date().toISOString(), source: { ...source }, originSource: { ...source }, reflection: initial.reflection || '', quote: initial.quote || '', ...(initial.aiSupplement ? { aiSupplement: initial.aiSupplement } : {}) };
+export function createLearningDraft(source: LearningSource, initial: Partial<Pick<LearningRecordDraft, 'reflection' | 'quote' | 'aiSupplement' | 'category'>> = {}): LearningRecordDraft {
+	return { formatVersion: 2, category: initial.category || (initial.aiSupplement && !initial.quote && !initial.reflection ? 'ai' : 'note'), captureId: crypto.randomUUID(), createdAt: new Date().toISOString(), source: { ...source }, originSource: { ...source }, reflection: initial.reflection || '', quote: initial.quote || '', ...(initial.aiSupplement ? { aiSupplement: initial.aiSupplement } : {}) };
 }
 const timed = <T>(job: Promise<T>, ms: number): Promise<T> => new Promise((resolve, reject) => { const timer = setTimeout(() => reject(new Error(t('保存响应超时'))), ms); job.then(value => { clearTimeout(timer); resolve(value); }, error => { clearTimeout(timer); reject(error); }); });
 const sourceKey = (source: LearningSource) => `qiaomuLearningDraft:${encodeURIComponent(source.url || 'thought')}`;
@@ -22,7 +23,13 @@ export async function loadLearningDraft(source: LearningSource): Promise<Learnin
     const id = (await browser.storage.local.get(sourceKey(source)))[sourceKey(source)];
     if (typeof id !== 'string' || !/^[a-zA-Z0-9-]{8,80}$/.test(id)) return null;
     const value = (await browser.storage.local.get(recordKey(source, id)))[recordKey(source, id)] as LearningRecordDraft | undefined;
-    return value?.captureId && typeof value.reflection === 'string' && typeof value.quote === 'string' ? value : null;
+    if (!value?.captureId || typeof value.reflection !== 'string' || typeof value.quote !== 'string') return null;
+    if (value.formatVersion !== 2) {
+        const pending = (await browser.storage.local.get(pendingKey(value.captureId)))[pendingKey(value.captureId)];
+        const dispatched = (await browser.storage.local.get(uriKey(value.captureId)))[uriKey(value.captureId)];
+        if (!pending && !dispatched) return {...value, formatVersion:2, category:value.aiSupplement && !value.quote && !value.reflection ? 'ai' : 'note'};
+    }
+    return value;
 }
 export async function persistLearningDraft(draft: LearningRecordDraft, originSource: LearningSource = draft.originSource || draft.source): Promise<void> {
     draft.originSource = { ...originSource };
@@ -63,7 +70,9 @@ export function serializeLearningRecord(draft: LearningRecordDraft): string {
     const clock = `${String(created.getHours()).padStart(2,'0')}:${String(created.getMinutes()).padStart(2,'0')}`;
     const source = draft.source;
     if (source.timestampSeconds !== undefined && (!Number.isFinite(source.timestampSeconds) || source.timestampSeconds < 0)) throw new Error(t('视频时间无效'));
-    const head = [clock];
+    // Older pending saves must keep their exact serialized content for idempotent retries.
+    const modern = draft.formatVersion === 2;
+    const head = modern ? [clock, draft.category === 'expression' ? '英语表达' : draft.category === 'ai' ? 'AI 学习' : '学习笔记'] : [clock];
     if (draft.omit?.source) { /* clock only */ }
     else if (source.url) {
         const url = new URL(source.url); if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) throw new Error(t('来源链接只支持不含凭证的 http(s) 地址'));
@@ -82,6 +91,7 @@ export function serializeLearningRecord(draft: LearningRecordDraft): string {
     if (draft.aiSupplement?.trim()) blocks.push(callout('info', t('AI 补充（我选择加入）'), draft.aiSupplement));
     // The helper replaces each marker with the wiki link of the copied file once it knows the final file name.
     for (const item of attachments) blocks.push(attachmentMarker(item.id));
+    if (modern) blocks.push('- [ ] 已掌握');
     const content = blocks.join('\n\n');
     if (new TextEncoder().encode(content).length > 4 * 1024 * 1024) throw new Error(t('记录超过 4 MB，请缩短摘录'));
     return content;

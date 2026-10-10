@@ -1,0 +1,32 @@
+{
+  "extensionId": "jniolfihillilkoajpnonlbkhfkiicoo",
+  "version": "1.15.8",
+  "versionName": "1.15.8 · 英语表达定制版 3",
+  "testsPassed": 116,
+  "typecheck": "passed",
+  "build": "passed",
+  "offlineBrowserTest": "passed",
+  "changedSourceFiles": [
+    "src/utils/english-expressions.ts",
+    "src/utils/english-expressions.test.ts",
+    "src/utils/chat-export.ts",
+    "src/utils/chat-export.test.ts",
+    "src/styles/english-expressions.scss",
+    "src/utils/clip-chat.ts",
+    "src/styles/clip-chat.scss",
+    "src/utils/local-backup.ts",
+    "src/utils/local-backup.test.ts",
+    "src/manifest.chrome.json",
+    "src/utils/learning-record.ts",
+    "src/utils/learning-record.test.ts",
+    "src/utils/learning-composer.ts",
+    "src/utils/learning-composer.test.ts",
+    "src/utils/reader-preview-shell.ts",
+    "src/utils/youtube-study.ts",
+    "src/utils/translation-cache.ts",
+    "src/utils/translation-cache.test.ts",
+    "src/utils/youtube-translation.ts",
+    "src/utils/youtube-translation.test.ts"
+  ],
+  "zipSha256": "82cf497d2f8d12701d8530511dbe6a2b7df6ddc362b0805185b576248b48415b"
+}

@@ -15,7 +15,7 @@ const EXACT = new Set([
 ]);
 if (__LOCAL_EDITION__) EXACT.add('qiaomuDownloadChoice');
 // One entry per article chat, per learning-note draft (and its record), and per clip waiting to be submitted.
-const PREFIXES = ['qiaomuChat:', 'qiaomuLearningDraft:', 'qiaomuPending:'];
+const PREFIXES = ['qiaomuChat:', 'qiaomuLearningDraft:', 'qiaomuPending:', 'qiaomuEnglishExpression1:', 'qiaomuTranslation1:'];
 
 export const isBackedUpKey = (key: string): boolean => EXACT.has(key) || PREFIXES.some(prefix => key.startsWith(prefix));
 

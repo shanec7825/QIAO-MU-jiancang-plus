@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-const state = vi.hoisted(() => ({stream:vi.fn(), send:vi.fn(), models:[{id:'model',name:'Model'}]}));
-vi.mock('./browser-polyfill', () => ({default:{runtime:{sendMessage:(...args:unknown[])=>state.send(...args)}}}));
+import { webcrypto } from 'node:crypto';
+const state = vi.hoisted(() => ({data:{} as Record<string,any>,stream:vi.fn(), send:vi.fn(), models:[{id:'model',name:'Model'}]}));
+vi.mock('./browser-polyfill', () => ({default:{storage:{local:{get:async(key:string)=>({[key]:state.data[key]}),set:async(value:Record<string,any>)=>Object.assign(state.data,structuredClone(value))}},runtime:{sendMessage:(...args:unknown[])=>state.send(...args)}}}));
 vi.mock('./chat-llm', () => ({enabledChatModels:()=>state.models, streamChat:(...args:unknown[])=>state.stream(...args)}));
 vi.mock('./storage-utils', () => ({loadSettings:async()=>{},getLocalStorage:async()=> 'model'}));
 vi.mock('./i18n', () => ({getMessage:(key:string)=>key}));
@@ -9,15 +10,41 @@ import { translationBatches, parseTranslation, mountTranslation, TRANSLATION_SYS
 import { transcriptText } from './youtube-study';
 afterEach(()=>vi.useRealTimers());
 const flush=async()=>{for(let i=0;i<200;i++)await Promise.resolve();};
-function setup(texts=['English source','Another segment']) {
+function setup(texts=['English source','Another segment'],url='') {
 	document.body.innerHTML='<article><div class="toolbar"><span role="status"></span></div><div class="youtube transcript"></div></article>';
 	const article=document.querySelector('article')!;
 	for(const text of texts){const segment=document.createElement('p'); segment.className='transcript-segment'; const strong=document.createElement('strong');strong.textContent='0:12';segment.append(strong,document.createTextNode(text));article.querySelector('.transcript')!.append(segment);}
-	mountTranslation(article,article.querySelector('.toolbar')!,article.querySelector('[role=status]')!);
+	mountTranslation(article,article.querySelector('.toolbar')!,article.querySelector('[role=status]')!,url);
 	return {article, input:article.querySelector<HTMLInputElement>('input')!};
 }
 const response=(options:{messages:{content:string}[]})=>JSON.stringify(JSON.parse(options.messages[0].content).map(({id,text}:{id:number,text:string})=>({id,text:`中文 ${text}`})));
-beforeEach(()=>{vi.clearAllMocks();state.models=[{id:'model',name:'Model'}];state.stream.mockImplementation(async options=>response(options));});
+beforeEach(()=>{vi.clearAllMocks();state.data={};vi.stubGlobal('crypto',webcrypto);state.models=[{id:'model',name:'Model'}];state.stream.mockImplementation(async options=>response(options));});
+
+const complete=async()=>{await new Promise(resolve=>setTimeout(resolve,20));await flush();};
+it('reopens a translated video entirely from local storage without a configured model',async()=>{
+ const url='https://www.youtube.com/watch?v=abcdefghijk';
+ setup(undefined,url).input.click();await complete();
+ expect(state.stream).toHaveBeenCalledTimes(1);
+ state.stream.mockClear();state.models=[];
+ const reopened=setup(undefined,'https://youtu.be/abcdefghijk?t=42');reopened.input.click();await complete();
+ expect(reopened.article.querySelectorAll('.transcript-translation')).toHaveLength(2);
+ expect(reopened.article.textContent).toContain('中文 English source');
+ expect(state.stream).not.toHaveBeenCalled();
+});
+it('reuses saved parts and requests only missing paragraphs on a new page',async()=>{
+ const url='https://www.youtube.com/watch?v=abcdefghijk';
+ setup(undefined,url).input.click();await complete();
+ const saved=Object.values(state.data)[0];saved.entries=saved.entries.filter((entry:any)=>entry[0]===0);
+ state.stream.mockClear();const reopened=setup(undefined,url);reopened.input.click();await complete();
+ expect(JSON.parse(state.stream.mock.calls[0][0].messages[0].content).map((p:any)=>p.id)).toEqual([1]);
+ expect(reopened.article.querySelectorAll('.transcript-translation')).toHaveLength(2);
+});
+it('does not apply a saved translation after the source subtitles change',async()=>{
+ const url='https://www.youtube.com/watch?v=abcdefghijk';setup(undefined,url).input.click();await complete();
+ state.stream.mockClear();setup(['New captions'],url).input.click();await complete();
+ expect(state.stream).toHaveBeenCalledTimes(1);
+ expect(JSON.parse(state.stream.mock.calls[0][0].messages[0].content)[0].text).toBe('New captions');
+});
 
 it('bounds requests and rejects missing, duplicate or unknown segment identifiers',()=>{
 	const batches=translationBatches(['a'.repeat(12000),...Array(20).fill('Text')]);

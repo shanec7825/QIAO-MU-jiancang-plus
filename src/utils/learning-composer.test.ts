@@ -141,3 +141,15 @@ it('releases files that finish staging after the card was closed', async()=>{
  await notes.open();pasteFiles(new File(['x'],'a.png'));await tick();click('[aria-label="关闭并保留草稿"]');await tick();
  done({items:[attached('a')],errors:[]});await tick();expect(services.discardAttachments).toHaveBeenCalledWith([attached('a').id]);
 });
+
+it('changes the diary category only when the offered expression excerpt is accepted',async()=>{
+ await notes.open({quote:'original quote'});
+ await notes.open({quote:'look forward to',category:'expression'});
+ click('.learning-primary');await tick();
+ expect(services.saveLearningRecord.mock.calls[0][0].category).toBe('note');
+ await notes.open({quote:'original quote'});
+ await notes.open({quote:'look forward to',category:'expression'});
+ const replace=Array.from(document.querySelectorAll('button')).find(b=>b.textContent?.includes('改用本次'))!;
+ replace.click();await tick();click('.learning-primary');await tick();
+ expect(services.saveLearningRecord.mock.calls[1][0].category).toBe('expression');
+});

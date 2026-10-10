@@ -1,4 +1,5 @@
 // AI chat panel next to the article (reading and editing pages).
+@import 'english-expressions';
 :root { --clip-chat-width: 400px; }
 .clip-chat {
 	position: fixed; top: var(--clip-bar-offset); right: 0; bottom: 0; z-index: 800; width: var(--clip-chat-width); max-width: 100vw; display: flex; flex-direction: column;

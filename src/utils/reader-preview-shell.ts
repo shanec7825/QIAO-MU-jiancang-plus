@@ -24,7 +24,7 @@ export function mountReaderPreviewShell(draft: ClipPreview, pending = false) {
 	Reader.onEdit = openEditor;
  const learning = mountLearningNotes({ doc: document, getSource: () => ({title: draft.clip.title, url: draft.clip.url}), getHighlights });
 	const chat = mountClipChat({
-		onLearningRecord: text => { void learning.open({quote:text}); },
+		onLearningRecord: (text, category) => { void learning.open({quote:text, category}); },
 		onLearningAi: answer => { void learning.open({aiSupplement:answer}); },
 		onHighlight: () => Reader.highlightSelection(document),
 		getContext: () => ({ title: draft.clip.title, url: draft.clip.url, markdown: videoKey(draft.clip.url) ? transcriptText(document.querySelector('article')!) || t('尚未获取视频字幕文稿，请明确说明无法依据文稿回答。') : draft.clip.markdown }),

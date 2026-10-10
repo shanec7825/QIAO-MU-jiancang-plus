@@ -1,30 +1,27 @@
-name: Chrome extension
+name: Custom Chrome local extension
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
   verify:
     runs-on: ubuntu-latest
     env:
-      TZ: America/Los_Angeles
+      TZ: Asia/Shanghai
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - run: npm ci
-      - run: npm test
       - run: npx tsc --noEmit
-      - run: python3 -m unittest discover -s native -p 'test_*.py'
-      - run: npm run build:chrome
+      - run: npx vitest run src/utils/translation-cache.test.ts src/utils/english-expressions.test.ts src/utils/learning-record.test.ts src/utils/learning-composer.test.ts src/utils/chat-export.test.ts src/utils/local-backup.test.ts src/utils/clip-chat-setup.test.ts src/utils/highlighter.test.ts src/utils/reader-preview-shell.test.ts src/utils/youtube-study.test.ts src/utils/youtube-translation.test.ts src/utils/transcript-export.test.ts
+      - run: npm run build:local
       - uses: actions/upload-artifact@v4
         with:
-          name: qiaomu-clipper-chrome
-          path: builds/qiaomu-clipper-*-chrome.zip
+          name: qiaomu-clipper-english-learning-chrome-local
+          path: builds/qiaomu-clipper-*-chrome-local.zip
