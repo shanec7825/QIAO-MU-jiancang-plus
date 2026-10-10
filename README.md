@@ -15,7 +15,7 @@
 
 ## 安装
 
-1. 下载本仓库 `packages/qiaomu-clipper-1.15.8-english-learning-chrome-local.zip` 并解压。
+1. 从 [Releases 发布页](https://github.com/shanec7825/QIAO-MU-jiancang-plus/releases/tag/v1.15.8-english-learning.3) 下载 Chrome local ZIP 并解压；仓库的 `packages/` 目录也保留同一安装包。
 2. 在 Chrome 打开 `chrome://extensions`，开启开发者模式，选择「加载已解压的扩展程序」。
 3. 已有本地版建议保留原扩展目录，将新文件覆盖进去并点击「重新加载」，然后重新打开阅读模式。固定扩展 ID 为 `jniolfihillilkoajpnonlbkhfkiicoo`。
 4. 按 [native/README.md](native/README.md) 安装 **1.15.8** 的本地 helper，并选择 Obsidian 笔记库。此次定制不更改 helper 协议。
