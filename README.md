@@ -1,8 +1,10 @@
 # 乔木剪藏 · 英语学习定制版
 
-基于 [joeseesun/qiaomu-clipper](https://github.com/joeseesun/qiaomu-clipper) 的正式版本 **1.15.8**，保留上游 MIT 许可证。此仓库维护个人英语学习功能的定制改动，当前版本名称为 **1.15.8 · 英语表达定制版 3**。
+基于 [joeseesun/qiaomu-clipper](https://github.com/joeseesun/qiaomu-clipper) 的正式版本 **1.15.8**，保留上游 MIT 许可证。此仓库维护个人英语学习功能的定制改动，当前版本名称为 **1.15.8 · 英语表达定制版 4**。
 
 ## 新增功能
+
+- 暂停视频或选中字幕文字时停止自动跟随滚动，避免手动滚动后 10 秒回跳；继续播放并清除选文后可正常跟随。
 
 - 字幕中收藏英文单词或搭配，保留原句、来源、时间戳与自己的释义；收藏后更新标记和数量，不弹出面板。
 - 在英语表达面板中将普通字幕划线与表达收藏互相转换，保留注释；支持当前字幕中可明确定位的单句英文，长度 1–180 字符。
@@ -15,7 +17,7 @@
 
 ## 安装
 
-1. 从 [Releases 发布页](https://github.com/shanec7825/QIAO-MU-jiancang-plus/releases/tag/v1.15.8-english-learning.3) 下载 Chrome local ZIP 并解压；仓库的 `packages/` 目录也保留同一安装包。
+1. 从 [Releases 发布页](https://github.com/shanec7825/QIAO-MU-jiancang-plus/releases/tag/v1.15.8-english-learning.4) 下载 Chrome local ZIP 并解压；仓库的 `packages/` 目录也保留同一安装包。
 2. 在 Chrome 打开 `chrome://extensions`，开启开发者模式，选择「加载已解压的扩展程序」。
 3. 已有本地版建议保留原扩展目录，将新文件覆盖进去并点击「重新加载」，然后重新打开阅读模式。固定扩展 ID 为 `jniolfihillilkoajpnonlbkhfkiicoo`。
 4. 按 [native/README.md](native/README.md) 安装 **1.15.8** 的本地 helper，并选择 Obsidian 笔记库。此次定制不更改 helper 协议。
@@ -36,9 +38,9 @@ npm run build:local
 
 ## 验证
 
-已通过 116 项相关测试、TypeScript 类型检查和 Chrome 本地版构建。隔离浏览器验证了收藏不弹窗、表达与划线互换、日记类型和勾选框、AI 导出，以及整页重载后从本地恢复中文翻译且不再调用 AI。测试使用模拟日记助手和模型。
+已通过 122 项相关测试、TypeScript 类型检查和 Chrome 本地版构建。隔离浏览器验证了收藏不弹窗、表达与划线互换、日记类型和勾选框、AI 导出，以及整页重载后从本地恢复中文翻译且不再调用 AI。测试使用模拟日记助手和模型。
 
-仓库同步时补齐旧测试的浏览器事件模拟，全量 **918 项测试**已通过。GitHub Actions 使用 Node.js 22 运行全量测试和构建。
+仓库同步时补齐旧测试的浏览器事件模拟，全量 **924 项测试**已通过。GitHub Actions 使用 Node.js 22 运行全量测试和构建。
 
 ```sh
 npx vitest run src/utils/translation-cache.test.ts src/utils/english-expressions.test.ts src/utils/learning-record.test.ts src/utils/learning-composer.test.ts src/utils/chat-export.test.ts src/utils/local-backup.test.ts src/utils/clip-chat-setup.test.ts src/utils/highlighter.test.ts src/utils/reader-preview-shell.test.ts src/utils/youtube-study.test.ts src/utils/youtube-translation.test.ts src/utils/transcript-export.test.ts

@@ -4,7 +4,7 @@
 	"name": "乔木剪藏 · Obsidian + RSS",
 	"homepage_url": "https://github.com/joeseesun/qiaomu-clipper",
 	"version": "1.15.8",
-  "version_name": "1.15.8 · 英语表达定制版 3",
+  "version_name": "1.15.8 · 英语表达定制版 4",
 	"description": "Save web pages to Obsidian and optionally submit their URL, title and content to Qiaomu RSS reader submissions.",
 	"optional_permissions": [
 		"cookies"

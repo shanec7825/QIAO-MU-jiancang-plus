@@ -225,6 +225,14 @@ export function wireTranscript(
 	let lastCurrentTime = -1;
 	let scrubbing = false;
 	let lastScrub = 0;
+	let iframePlaying = false;
+	let selectingText = false;
+	const canFollowPlayback = () => (videoEl ? !videoEl.paused && !videoEl.ended : iframePlaying)
+		&& !selectingText && doc.getSelection()?.isCollapsed !== false;
+	listen(transcript, 'pointerdown', (event: PointerEvent) => { if (event.button === 0) selectingText = true; });
+	listen(window, 'pointerup', () => { selectingText = false; });
+	listen(window, 'pointercancel', () => { selectingText = false; });
+	listen(window, 'blur', () => { selectingText = false; });
 
 	let resumeTimer: ReturnType<typeof setTimeout> | undefined;
 	disposers.push(() => clearTimeout(resumeTimer));
@@ -235,7 +243,7 @@ export function wireTranscript(
 		clearTimeout(resumeTimer);
 		resumeTimer = setTimeout(() => {
 			lastUserScroll = 0;
-			if (!autoScrollEnabled || suppressScroll || search.active() || !activeSegment) return;
+			if (!autoScrollEnabled || !canFollowPlayback() || suppressScroll || search.active() || !activeSegment) return;
 			const rect = activeSegment.getBoundingClientRect();
 			scroll.scrollTo((window.pageYOffset || doc.documentElement.scrollTop) + rect.top - (scroll.getFocusOffset?.() ?? scroll.getStickyOffset() + 20));
 		}, AUTO_SCROLL_COOLDOWN);
@@ -260,7 +268,7 @@ export function wireTranscript(
 			if (newIndex >= 0) {
 				segments[newIndex].classList.add('is-active');
 				// Auto-scroll to keep active segment visible
-				if (autoScrollEnabled && !suppressScroll && !search.active() && Date.now() - lastUserScroll > AUTO_SCROLL_COOLDOWN) {
+				if (autoScrollEnabled && canFollowPlayback() && !suppressScroll && !search.active() && Date.now() - lastUserScroll > AUTO_SCROLL_COOLDOWN) {
 					const rect = segments[newIndex].getBoundingClientRect();
 					const targetY = (window.pageYOffset || doc.documentElement.scrollTop)
 						+ rect.top - (scroll.getFocusOffset?.() ?? scroll.getStickyOffset() + 20);
@@ -387,9 +395,10 @@ export function wireTranscript(
 
 	// Set up time tracking and seeking based on player type
 	let seekTo: (seconds: number) => void;
-	let iframePlaying = false;
 
 	if (videoEl) {
+		listen(videoEl, 'pause', () => clearTimeout(resumeTimer));
+		listen(videoEl, 'ended', () => clearTimeout(resumeTimer));
 		// Native video element: use HTML5 API directly
 		seekTo = (seconds: number) => {
 			videoEl.currentTime = seconds;
@@ -414,7 +423,9 @@ export function wireTranscript(
 			if (e.source !== iframe.contentWindow) return;
 			const data = e.data as { qiaomuPlayer?: string; time?: unknown; paused?: unknown } | null;
 			if (data?.qiaomuPlayer !== 'time' || typeof data.time !== 'number') return;
-			bridged = true; iframePlaying = data.paused === false; updateActiveSegment(data.time);
+			bridged = true; iframePlaying = data.paused === false;
+			if (!iframePlaying) clearTimeout(resumeTimer);
+			updateActiveSegment(data.time);
 		};
 		listen(window, 'message', onBridge);
 		const post = (message: Record<string, unknown>) => iframe.contentWindow?.postMessage({ qiaomuPlayer: message.qiaomuPlayer, ...message }, 'https://player.bilibili.com');
@@ -446,11 +457,12 @@ export function wireTranscript(
 			if (e.source !== iframe.contentWindow) return;
 			try {
 				const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
-				if (data?.info?.currentTime !== undefined) {
-					updateActiveSegment(data.info.currentTime);
-				}
 				if (data?.info?.playerState !== undefined) {
 					iframePlaying = data.info.playerState === 1;
+					if (!iframePlaying) clearTimeout(resumeTimer);
+				}
+				if (data?.info?.currentTime !== undefined) {
+					updateActiveSegment(data.info.currentTime);
 				}
 			} catch {} // Ignore non-YouTube postMessage events
 		};
