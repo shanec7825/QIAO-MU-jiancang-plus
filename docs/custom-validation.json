@@ -3,6 +3,7 @@
   "version": "1.15.8",
   "versionName": "1.15.8 · 英语表达定制版 3",
   "testsPassed": 116,
+  "fullTestsPassed": 918,
   "typecheck": "passed",
   "build": "passed",
   "offlineBrowserTest": "passed",
@@ -26,7 +27,8 @@
     "src/utils/translation-cache.ts",
     "src/utils/translation-cache.test.ts",
     "src/utils/youtube-translation.ts",
-    "src/utils/youtube-translation.test.ts"
+    "src/utils/youtube-translation.test.ts",
+    "src/utils/chat-preferences.test.ts"
   ],
   "zipSha256": "82cf497d2f8d12701d8530511dbe6a2b7df6ddc362b0805185b576248b48415b"
 }

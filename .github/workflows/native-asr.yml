@@ -1,5 +1,6 @@
 name: Native ASR compatibility
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'native/asr*.py'

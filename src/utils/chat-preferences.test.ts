@@ -3,7 +3,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 const state = vi.hoisted(() => ({ saved: undefined as unknown, set: vi.fn(), stream: vi.fn() }));
 vi.mock('./storage-utils', () => ({ generalSettings: {}, getLocalStorage: async (key: string) => key === 'qiaomuChatPreferences' ? state.saved : undefined, setLocalStorage: (...args: unknown[]) => state.set(...args) }));
 vi.mock('./i18n', () => ({ getMessage: (key: string) => key }));
-vi.mock('./browser-polyfill', () => ({ default: { storage: { onChanged: { addListener: vi.fn() } }, runtime: { openOptionsPage: vi.fn() } } }));
+vi.mock('./browser-polyfill', () => ({ default: { storage: { onChanged: { addListener: vi.fn(), removeListener: vi.fn() } }, runtime: { openOptionsPage: vi.fn() } } }));
 vi.mock('./chat-llm', () => ({ enabledChatModels: () => [{ id: 'test', name: 'Test' }], streamChat: (...args: unknown[]) => state.stream(...args) }));
 vi.mock('./chat-history', () => ({ loadConversations: async () => [], saveConversation: vi.fn(), deleteConversation: vi.fn() }));
 vi.mock('./clip-bar', () => ({ showClipStatus: vi.fn() }));

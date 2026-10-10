@@ -38,6 +38,8 @@ npm run build:local
 
 已通过 116 项相关测试、TypeScript 类型检查和 Chrome 本地版构建。隔离浏览器验证了收藏不弹窗、表达与划线互换、日记类型和勾选框、AI 导出，以及整页重载后从本地恢复中文翻译且不再调用 AI。测试使用模拟日记助手和模型。
 
+仓库同步时补齐旧测试的浏览器事件模拟，全量 **918 项测试**已通过。GitHub Actions 使用 Node.js 22 运行全量测试和构建。
+
 ```sh
 npx vitest run src/utils/translation-cache.test.ts src/utils/english-expressions.test.ts src/utils/learning-record.test.ts src/utils/learning-composer.test.ts src/utils/chat-export.test.ts src/utils/local-backup.test.ts src/utils/clip-chat-setup.test.ts src/utils/highlighter.test.ts src/utils/reader-preview-shell.test.ts src/utils/youtube-study.test.ts src/utils/youtube-translation.test.ts src/utils/transcript-export.test.ts
 ```
