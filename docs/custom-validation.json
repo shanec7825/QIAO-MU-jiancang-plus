@@ -1,6 +1,6 @@
 {
   "upstreamVersion": "1.18.8",
-  "customVersion": 5,
+  "customVersion": 6,
   "helperVersion": "1.16.6",
   "frontend": {
     "passed": 1519,
@@ -33,5 +33,14 @@
   "limitations": [
     "Browser fixtures use simulated diary and AI services; live site authentication is not verified.",
     "The full Unix-oriented helper suite and packaging workflow require Linux CI. The local Windows workflow lacks the zip command."
-  ]
+  ],
+  "markerStyle": {
+    "ordinaryHighlight": "yellow marker icon",
+    "expression": "blue marker icon and solid blue underline",
+    "relatedTestsPassed": 21,
+    "typecheck": "passed",
+    "browserRegression": "passed",
+    "lightDarkPreview": "passed",
+    "preservesStorage": true
+  }
 }

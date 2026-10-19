@@ -704,15 +704,17 @@ function mountSelectionPill(onAsk: (text: string) => void, onHighlight?: () => v
 	};
 	let text = '';
 	const hide = () => { pill.hidden = true; };
-	const collect = segment(NotebookPen, '收藏表达');
+	const collect = segment(Highlighter, '收藏表达');
+	collect.classList.add('clip-mark-expression');
 	collect.hidden = true;
 	collect.addEventListener('click', () => { hide(); void expressions?.collect(); });
-	if (expressions) pill.appendChild(collect);
 	if (onHighlight) {
 		const highlight = segment(Highlighter, getMessage('highlightSelection'));
+		highlight.classList.add('clip-mark-highlight');
 		highlight.addEventListener('click', () => { hide(); onHighlight(); });
 		pill.appendChild(highlight);
 	}
+	if (expressions) pill.appendChild(collect);
 	const ask = segment(WandSparkles, getMessage('qiaomuChatAskSelection'));
 	ask.addEventListener('click', () => { hide(); onAsk(text); });
 	pill.appendChild(ask);

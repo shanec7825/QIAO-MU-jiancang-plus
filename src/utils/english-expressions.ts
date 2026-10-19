@@ -1,4 +1,5 @@
 import browser from './browser-polyfill';
+import { createElement, Highlighter } from 'lucide';
 import { clockLabel } from './learning-record';
 import { normalizeUrl } from './url-utils';
 import { videoKey } from './video-source';
@@ -222,7 +223,10 @@ export function mountEnglishExpressions(doc: Document, options: ExpressionOption
     const item = doc.createElement(tag); item.textContent = text; item.className = className; return item;
   };
   const button = (text: string, className = '') => { const item = node('button', text, className); item.type = 'button'; return item; };
-  const entry = button('英语表达', 'english-expression-entry'); entry.hidden = true;
+  const entry = button('', 'english-expression-entry'); entry.hidden = true;
+  const marker = createElement(Highlighter); marker.setAttribute('aria-hidden', 'true'); marker.setAttribute('focusable', 'false');
+  const entryLabel = node('span', '英语表达'); entry.append(marker, entryLabel);
+  entry.title = '英语表达收藏（蓝色标记）'; entry.setAttribute('aria-haspopup', 'dialog');
   const panel = node('section', '', 'english-expression-panel'); panel.hidden = true; panel.setAttribute('aria-label', '英语表达收藏');
   panel.setAttribute('role', 'dialog'); panel.setAttribute('tabindex', '-1');
   const heading = node('header'), title = node('h2', '英语表达收藏'), close = button('关闭');
@@ -262,7 +266,7 @@ export function mountEnglishExpressions(doc: Document, options: ExpressionOption
       row.append(label, node('small', expression.title), context, note, convert, remove); list.append(row);
     }
     updateCount(); paintMarks();
-    const label = `英语表达 (${entries.length})`; if (entry.textContent !== label) entry.textContent = label;
+    const label = `英语表达 (${entries.length})`; if (entryLabel.textContent !== label) entryLabel.textContent = label;
   };
   async function refresh() {
     const current = ++readGeneration, source = options.getSource(), nextKey = scope.value === 'all' ? '*' : expressionSourceKey(source.url);

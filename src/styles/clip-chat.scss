@@ -176,10 +176,17 @@ html.clip-chat-resizing { cursor: col-resize; user-select: none; -webkit-user-se
 	.clip-ask-pill-button { display: inline-flex; align-items: center; gap: 5px; width: auto; height: 26px; padding: 0 10px; border: none; border-radius: 13px; background: transparent; color: inherit; box-shadow: none; font: inherit; cursor: pointer;
 		svg { width: 14px; height: 14px; mix-blend-mode: normal !important; }  // reading mode multiplies svg; keep the icon visible
 		&:hover { background: rgb(128 128 128 / 40%); }
+		&:focus-visible { outline:2px solid currentColor;outline-offset:2px; }
+		&.clip-mark-highlight svg { color:#fde047; }
+		&.clip-mark-expression svg { color:#93c5fd; }
+		&.clip-mark-highlight:hover { background:rgb(250 204 21 / 18%); }
+		&.clip-mark-expression:hover { background:rgb(59 130 246 / 20%); }
 	}
 	.clip-ask-pill-button + .clip-ask-pill-button { margin-inline-start: 2px; position: relative;
 		&::before { content: ''; position: absolute; inset-inline-start: -2px; top: 6px; bottom: 6px; width: 1px; background: currentColor; opacity: .3; } }
 }
+.theme-dark .clip-ask-pill .clip-mark-highlight svg { color:#854d0e; }
+.theme-dark .clip-ask-pill .clip-mark-expression svg { color:#1d4ed8; }
 
 @keyframes clip-chat-picker-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .clip-chat .clip-chat-picker { animation: none; } }

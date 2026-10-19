@@ -1,5 +1,14 @@
-::highlight(qiaomu-english-expression) { background-color: rgb(20 184 166 / 16%); text-decoration: underline dotted #0e928f 2px; text-underline-offset: 4px; }
-.english-expression-entry { display:inline-flex;align-items:center;width:auto!important;min-height:30px;padding:4px 10px!important;border:1px dashed #159793!important;border-radius:8px;background:var(--background-primary,#fff)!important;color:var(--text-normal,#183338)!important;font:13px/1.4 system-ui,sans-serif!important;cursor:pointer; }
+:root { --english-expression-color:#2563eb; --english-expression-tint:rgb(59 130 246 / 16%); }
+.theme-dark { --english-expression-color:#93c5fd; --english-expression-tint:rgb(96 165 250 / 20%); }
+::highlight(qiaomu-english-expression) { background-color:var(--english-expression-tint); text-decoration:underline solid var(--english-expression-color) 1.5px; text-underline-offset:3px; }
+.english-expression-entry {
+  display:inline-flex;align-items:center;gap:6px;width:auto!important;min-height:30px;padding:4px 8px!important;
+  border:1px solid transparent!important;border-radius:6px;background:transparent!important;color:var(--text-muted,#526173)!important;
+  box-shadow:none!important;font:13px/1.4 var(--font-interface,system-ui,sans-serif)!important;white-space:nowrap;cursor:pointer;
+  svg { width:15px;height:15px;flex-shrink:0;color:var(--english-expression-color);mix-blend-mode:normal!important; }
+  &:hover { background:var(--english-expression-tint)!important;color:var(--text-normal,#172e33)!important; }
+  &:focus-visible { outline:2px solid var(--english-expression-color);outline-offset:2px; }
+}
 .english-expression-entry[hidden], .english-expression-panel[hidden] { display:none!important; }
 .english-expression-panel { position:fixed;z-index:950;top:80px;left:20px;width:min(420px,calc(100vw - 40px));max-height:calc(100vh - 100px);overflow:auto;padding:18px;border:1px solid var(--divider-color,#ccdada);border-radius:14px;background:var(--background-primary,#fff);color:var(--text-normal,#172e33);box-shadow:0 12px 40px rgb(0 0 0 / 22%);font:14px/1.6 system-ui,sans-serif;
   * { box-sizing:border-box; }
