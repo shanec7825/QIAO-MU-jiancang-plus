@@ -2,7 +2,6 @@
 	"manifest_version": 3,
 	"name": "乔木剪藏 · Obsidian + RSS",
 	"homepage_url": "https://github.com/joeseesun/qiaomu-clipper",
-	"version": "1.15.8",
 	"description": "Save web pages to Obsidian and optionally submit their URL, title and content to Qiaomu RSS reader submissions.",
 	"permissions": [
 		"activeTab",
@@ -98,6 +97,8 @@
 				"https://*.tiktok.com/*",
 				"https://douyin.com/*",
 				"https://*.douyin.com/*",
+				"https://www.xiaohongshu.com/*",
+				"https://xiaohongshu.com/*",
 				"https://instagram.com/*",
 				"https://*.instagram.com/*",
 				"https://facebook.com/*",
@@ -133,10 +134,21 @@
 				"https://ted.com/*",
 				"https://*.ted.com/*",
 				"https://podcasts.apple.com/*",
-				"https://*.podcasts.apple.com/*"
+				"https://*.podcasts.apple.com/*",
+				"https://channels.weixin.qq.com/finder-preview/pages/feed*"
 			],
 			"js": [
 				"web-panel.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
+			"matches": [
+				"https://weixin.qq.com/sph/*",
+				"https://channels.weixin.qq.com/finder-preview/pages/sph*"
+			],
+			"js": [
+				"channels-share.js"
 			],
 			"run_at": "document_idle"
 		},
@@ -148,6 +160,16 @@
 			"js": [
 				"content-loader.js"
 			]
+		},
+		{
+			"matches": [
+				"https://www.youtube.com/embed/*"
+			],
+			"js": [
+				"youtube-embed.js"
+			],
+			"all_frames": true,
+			"run_at": "document_idle"
 		}
 	],
 	"web_accessible_resources": [

@@ -1,11 +1,13 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 const tabs=vi.hoisted(()=>vi.fn());
 const native=vi.hoisted(()=>vi.fn());
-const asrStore=vi.hoisted(()=>({data:{} as Record<string,unknown>}));
-vi.mock('./browser-polyfill',()=>({default:{tabs:{create:(...args:unknown[])=>tabs(...args)},permissions:{contains:async()=>true},runtime:{id:'test-id',getURL:(path:string)=>`chrome-extension://test-id/${path}`,sendNativeMessage:(...args:unknown[])=>native(...args)},storage:{local:{get:async(key:string)=>({[key]:asrStore.data[key]}),set:async(value:Record<string,unknown>)=>{Object.assign(asrStore.data,value);}}}}}));
+const asrStore=vi.hoisted(()=>({data:{} as Record<string,unknown>,cookiePermission:true}));
+vi.mock('./browser-polyfill',()=>({default:{tabs:{create:(...args:unknown[])=>tabs(...args)},permissions:{contains:async()=>asrStore.cookiePermission},runtime:{id:'test-id',getURL:(path:string)=>`chrome-extension://test-id/${path}`,sendNativeMessage:(...args:unknown[])=>native(...args)},storage:{local:{get:async(key:string)=>({[key]:asrStore.data[key]}),set:async(value:Record<string,unknown>)=>{Object.assign(asrStore.data,value);}}}}}));
 import { handleLearningNativeMessage } from './local-save';
+import browser from './browser-polyfill';
+import { asrStart, registerWebSource } from './asr-client';
 const sender={id:'test-id',url:'chrome-extension://test-id/reader.html'};
-beforeEach(()=>{ native.mockReset(); asrStore.data={}; });
+beforeEach(()=>{ native.mockReset(); asrStore.data={};asrStore.cookiePermission=true; });
 it('rejects other extensions, malformed IDs and unrelated requests without native writes',async()=>{
  expect(await handleLearningNativeMessage({action:'qiaomuLearningDailyTarget'},{id:'other-extension',url:'chrome-extension://other-extension/x.html'})).toMatchObject({status:'failed'});
  expect(await handleLearningNativeMessage({action:'qiaomuLearningSave',payload:{captureId:'../bad'}},sender)).toMatchObject({status:'failed'});
@@ -61,16 +63,23 @@ it('forwards subtitle-generation requests with checked arguments and explains an
  await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'start',videoKey:KEY,language:'zh',force:true}},sender);
  await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'poll',jobId:ID,since:7}},sender);
  await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'cancel',jobId:ID}},sender);
- expect(native.mock.calls.map(([,b])=>b)).toEqual([{action:'asrStatus'},{action:'asrStart',videoKey:KEY,language:'zh',force:true},{action:'asrPoll',jobId:ID,since:7},{action:'asrCancel',jobId:ID}]);
+ expect(native.mock.calls.map(([,b])=>b)).toEqual([{action:'asrStatus'},{action:'asrStart',videoKey:KEY,language:'zh',force:true,cookies:'chrome'},{action:'asrPoll',jobId:ID,since:7},{action:'asrCancel',jobId:ID}]);
  native.mockClear();
  for (const bad of [{mode:'start',videoKey:'https://evil.example/x'},{mode:'start',videoKey:KEY,language:'xx'},{mode:'poll',jobId:'../../x'},{mode:'cancel'},{mode:'rm'},{}]) expect(await handleAsrMessage({action:'qiaomuAsr',payload:bad},sender)).toMatchObject({ok:false,error:'bad-request'});
  expect(native).not.toHaveBeenCalled();
  expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'status'}},{id:'other'})).toMatchObject({ok:false,error:'refused'});
  expect(handleAsrMessage({action:'qiaomuLearningSave'},sender)).toBeUndefined();
  native.mockResolvedValue({ok:false,error:'不支持的本地操作'}); expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'status'}},sender)).toMatchObject({error:'helper-outdated'});
- native.mockResolvedValue(undefined); expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'status'}},sender)).toMatchObject({error:'helper-outdated'});
+ native.mockResolvedValue(undefined); expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'status'}},sender)).toMatchObject({error:'helper-offline'});
  native.mockRejectedValue(new Error('offline')); expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'status'}},sender)).toMatchObject({error:'helper-offline'});
  native.mockResolvedValue({ok:false,error:'missing',missing:['yt-dlp']}); expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'start',videoKey:KEY}},sender)).toMatchObject({error:'missing',missing:['yt-dlp']});
+});
+
+it('does not mistake unsupported input or engine failures for an outdated helper', async () => {
+ for (const error of ['不支持的语言', 'Unsupported audio format', 'This model is unsupported']) {
+  native.mockResolvedValue({ok:false,error});
+  expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'start',videoKey:'youtube:dbqweBCynuI'}},sender)).toMatchObject({ok:false,error});
+ }
 });
 
 it('passes only a known browser name for a borrowed login', async () => {
@@ -135,7 +144,8 @@ it('uses the active one of several saved services, lets a page switch between th
  expect(native.mock.calls[0][1]).toMatchObject({cloudKey:'sk-b',cloud:{label:'智谱'}});native.mockClear();
  const switched=await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'choose',profile:'a'}},sender) as any;
  expect(native.mock.calls[0][1]).toEqual({action:'asrStatus',cloud:true});expect((asrStore.data.qiaomuAsrSettings as any).active).toBe('a');
- expect(switched.choices).toEqual({mode:'cloud',engine:'auto',auto:false,active:'a',profiles:[{id:'a',label:'硅基流动',local:false,configured:true},{id:'b',label:'智谱',local:false,configured:true}]});
+ expect(switched.choices).toEqual({mode:'cloud',engine:'auto',auto:false,active:'a',profiles:[{id:'a',label:'硅基流动',model:'Qwen/Qwen3-ASR-1.7B',local:false,configured:true},{id:'b',label:'智谱',model:'glm-asr-2512',local:false,configured:true}]});
+ expect(switched.cloudModel).toBe('Qwen/Qwen3-ASR-1.7B');
  expect(JSON.stringify(switched)).not.toContain('sk-');
  native.mockClear();expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'choose',profile:'nope'}},sender)).toMatchObject({error:'bad-request'});expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'choose'}},sender)).toMatchObject({error:'bad-request'});expect(native).not.toHaveBeenCalled();
 });
@@ -231,4 +241,101 @@ it('passes the current Douyin media to the helper and refuses foreign CDN URLs',
  expect(native.mock.calls[0][1]).toMatchObject({web:{url,mediaUrl}});native.mockClear();
  for(const bad of ['https://example.com/a','https://douyinvod.com.evil.org/a','http://v11.douyinvod.com/a']) expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'start',videoKey:KEY,web:{url,mediaUrl:bad}}},sender)).toMatchObject({error:'bad-request'});
  expect(native).not.toHaveBeenCalled();
+});
+
+it('preserves an unsupported website probe instead of falsely reporting an outdated helper', async () => {
+ const reply={ok:false,error:'unsupported',message:'No extractor for this page'};
+ native.mockResolvedValue(reply);
+ expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'probe',url:'https://school.xetslk.com/sl/fixture'}},sender)).toEqual(reply);
+ native.mockResolvedValue({ok:false,error:'不支持的本地操作'});
+ expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'probe',url:'https://school.xetslk.com/sl/fixture'}},sender)).toMatchObject({error:'helper-outdated'});
+});
+
+it('accepts verified Channels media only from the extension reader and rejects foreign recipients', async () => {
+ const url='https://weixin.qq.com/sph/Fixture123',mediaUrl='https://finder.video.qq.com/251/20302/stodownload?encfilekey=fixture',KEY='web:'+'a'.repeat(12);
+ native.mockResolvedValue({ok:true});
+ await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'start',videoKey:KEY,web:{url,mediaUrl}}},sender);
+ expect(native.mock.calls[0][1]).toMatchObject({action:'asrStart',web:{url,mediaUrl}});native.mockClear();
+ for(const [source,media] of [[url,'https://evil.org/file'],['https://mp.weixin.qq.com/s/fixture',mediaUrl],[url,'https://finder.video.qq.com.evil.org/251/20302/stodownload']])expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'start',videoKey:KEY,web:{url:source,mediaUrl:media}}},sender)).toMatchObject({error:'bad-request'});
+ expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'start',videoKey:KEY,web:{url,mediaUrl}}},{id:'test-id',url})).toMatchObject({error:'bad-request'});expect(native).not.toHaveBeenCalled();
+});
+
+
+it('never exports Channels login even when automatic browser login is enabled', async () => {
+ asrStore.data.qiaomuAsrSettings={mode:'local',engine:'auto',autoLogin:true,profiles:[],routes:{}};
+ native.mockResolvedValue({ok:true});
+ await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'start',videoKey:'web:'+'a'.repeat(12),cookies:'chrome',web:{url:'https://weixin.qq.com/sph/Fixture123',mediaUrl:'https://finder.video.qq.com/251/20302/stodownload?encfilekey=fixture'}}},sender);
+ const request=native.mock.calls[0][1];expect(request.cookies).toBeUndefined();expect(request.cookiesTxt).toBeUndefined();expect(asrStore.data.qiaomuAsrSettings).toMatchObject({autoLogin:true});
+});
+
+it('passes Xiaoetong replay media without exporting browser login to the helper',async()=>{
+ asrStore.data.qiaomuAsrSettings={mode:'local',engine:'auto',autoLogin:true,profiles:[],routes:{}};native.mockResolvedValue({ok:true});
+ const url='https://appfixture123.h5.xiaoeknow.com/v4/course/alive/l_fixture123456?app_id=appfixture123',mediaUrl='https://video.xet.tech/fixture.m3u8?sign=fixture';
+ await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'start',videoKey:'web:'+'a'.repeat(12),web:{url,mediaUrl}}},sender);
+ expect(native.mock.calls[0][1]).toMatchObject({web:{url,mediaUrl}});expect(native.mock.calls[0][1].cookies).toBeUndefined();expect(native.mock.calls[0][1].cookiesTxt).toBeUndefined();
+});
+
+it('defaults login reuse on only with browser permission, and preserves an explicit opt-out', async () => {
+ native.mockResolvedValue({ok:true});
+ const request={action:'qiaomuAsr',payload:{mode:'start',videoKey:'youtube:dbqweBCynuI'}};
+ await handleAsrMessage(request,sender); expect(native.mock.calls[native.mock.calls.length - 1]?.[1]).toMatchObject({cookies:'chrome'});
+ asrStore.cookiePermission=false;
+ await handleAsrMessage(request,sender); expect(native.mock.calls[native.mock.calls.length - 1]?.[1]).not.toHaveProperty('cookies');
+ asrStore.cookiePermission=true; asrStore.data.qiaomuAsrSettings={autoLogin:false};
+ await handleAsrMessage(request,sender); expect(native.mock.calls[native.mock.calls.length - 1]?.[1]).not.toHaveProperty('cookies');
+});
+
+it.each(['mp4','m4a'])('delivers Xiaohongshu %s from the reader client through the background to native without cookies',async extension=>{
+ const url='https://www.xiaohongshu.com/explore/6abc2b40000000000a023366?xsec_token=fixture',mediaUrl=`https://sns-video-bd.xhscdn.com/stream/fixture.${extension}?sign=fixture`,key='web:123456abcdef';
+ asrStore.data.qiaomuAsrSettings={mode:'local',engine:'mlx-qwen3',autoLogin:true,profiles:[],routes:{}};
+ native.mockResolvedValue({ok:true,id:'a'.repeat(32),state:'queued',segments:[]});
+ const send=vi.fn(request=>handleAsrMessage(request,sender));
+ const original=browser.runtime.sendMessage;
+ browser.runtime.sendMessage=send as typeof browser.runtime.sendMessage;
+ try {
+  registerWebSource(key,url,mediaUrl);
+  expect(await asrStart(key,'auto',false,'chrome')).toMatchObject({ok:true,state:'queued'});
+  expect(native).toHaveBeenCalledTimes(1);
+  expect(native.mock.calls[0][1]).toMatchObject({action:'asrStart',videoKey:key,engine:'mlx-qwen3',web:{url,mediaUrl}});
+  expect(native.mock.calls[0][1].cookies).toBeUndefined();
+  expect(native.mock.calls[0][1].cookiesTxt).toBeUndefined();
+ } finally { browser.runtime.sendMessage=original; }
+});
+
+it('rejects forged Xiaohongshu source/media/sender before contacting native',async()=>{
+ const url='https://www.xiaohongshu.com/explore/6abc2b40000000000a023366',mediaUrl='https://sns-video-bd.xhscdn.com/stream/fixture.mp4';
+ for(const [source,media,from] of [
+  [url,'https://sns-video-bd.xhscdn.com.evil.org/fixture.mp4',sender],
+  [url,mediaUrl.replace('https:','http:'),sender],
+  [url,mediaUrl.replace('.mp4','.html'),sender],
+  ['https://example.com/explore/6abc2b40000000000a023366',mediaUrl,sender],
+  [url,mediaUrl,{...sender,id:'foreign-extension'}],
+  [url,mediaUrl,{id:sender.id,url:'https://www.xiaohongshu.com/explore/aaaaaaaaaaaaaaaaaaaaaaaa'}],
+ ] as const) expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'start',videoKey:'web:123456abcdef',web:{url:source,mediaUrl:media}}},from)).toMatchObject({ok:false});
+ expect(native).not.toHaveBeenCalled();
+});
+
+it('allows model-independent exports only from this extension and rejects YouTube and forged media',async()=>{
+ asrStore.cookiePermission=false;
+ const payload={mode:'downloadStart',url:'https://www.bilibili.com/video/BV1xx411c7mD/',name:'Test',video:true};
+ native.mockResolvedValue({ok:true,id:'a'.repeat(32),state:'queued'});
+ expect(await handleAsrMessage({action:'qiaomuAsr',payload},sender)).toMatchObject({ok:true});
+ expect(native.mock.calls[0][1]).toEqual({action:'mediaDownloadStart',url:payload.url,name:'Test',video:true});native.mockClear();
+ for(const bad of [{...payload,url:'https://youtube.com/watch?v=12345678901'},{...payload,mediaUrl:'https://evil.org/test.mp4'},{...payload,name:'a'.repeat(301)}]) expect(await handleAsrMessage({action:'qiaomuAsr',payload:bad},sender)).toMatchObject({ok:false});
+ expect(await handleAsrMessage({action:'qiaomuAsr',payload},{id:'test-id',url:payload.url})).toMatchObject({ok:false});
+ expect(native).not.toHaveBeenCalled();
+});
+
+it.runIf(__LOCAL_EDITION__)('standalone edition forwards an explicit YouTube watch page and nothing else from YouTube',async()=>{
+ asrStore.cookiePermission=false;native.mockResolvedValue({ok:true,id:'a'.repeat(32),state:'queued'});
+ const page='https://www.youtube.com/watch?v=jNQXAC9IJRw',payload={mode:'downloadStart',url:page,name:'Test',video:true,allowYoutube:true};
+ expect(await handleAsrMessage({action:'qiaomuAsr',payload},sender)).toMatchObject({ok:true});
+ expect(native.mock.calls[0][1]).toMatchObject({action:'mediaDownloadStart',url:page,allowYoutube:true});native.mockClear();
+ for(const bad of [{...payload,allowYoutube:undefined},{...payload,allowYoutube:'true'},{...payload,mediaUrl:'https://r1.googlevideo.com/videoplayback'},{...payload,url:'https://r1.googlevideo.com/videoplayback'},{...payload,url:'https://www.youtube-nocookie.com/embed/x'}])
+  expect(await handleAsrMessage({action:'qiaomuAsr',payload:bad},sender)).toMatchObject({ok:false});
+ expect(await handleAsrMessage({action:'qiaomuAsr',payload},{id:'test-id',url:page})).toMatchObject({ok:false});expect(native).not.toHaveBeenCalled();
+});
+it.runIf(!__LOCAL_EDITION__)('store edition refuses YouTube even when the request asks for it',async()=>{
+ asrStore.cookiePermission=false;native.mockResolvedValue({ok:true});
+ expect(await handleAsrMessage({action:'qiaomuAsr',payload:{mode:'downloadStart',url:'https://www.youtube.com/watch?v=jNQXAC9IJRw',name:'T',video:true,allowYoutube:true}},sender)).toMatchObject({ok:false});expect(native).not.toHaveBeenCalled();
 });

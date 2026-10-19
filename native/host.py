@@ -21,7 +21,16 @@ def atomic_json(path, data):
     fd, name = tempfile.mkstemp(dir=path.parent)
     try:
         with os.fdopen(fd,'w',encoding='utf8') as f: json.dump(data,f,ensure_ascii=False); f.flush(); os.fsync(f.fileno())
-        os.replace(name,path)
+        # Polling readers and antivirus can briefly deny replacement on Windows.
+        # Keep the same staged file; never hide disk errors or a permanent denial.
+        for attempt in range(40):
+            try:
+                os.replace(name, path)
+                break
+            except PermissionError as error:
+                if sys.platform != 'win32' or getattr(error, 'winerror', None) not in (5, 32, 33) or attempt == 39:
+                    raise
+                time.sleep(0.05)
     finally:
         if os.path.exists(name): os.unlink(name)
 def relative_path(value):
@@ -203,7 +212,8 @@ def publish_file(data,final):
     try:
         clone_or_copy(data,temp)
         if temp.stat().st_size!=data.stat().st_size: raise OSError('复制不完整')
-        fd=os.open(temp,os.O_RDONLY)
+        # Windows FlushFileBuffers (os.fsync) requires a writable file handle.
+        fd=os.open(temp,os.O_RDWR)
         try: os.fsync(fd)
         finally: os.close(fd)
         try: os.link(temp,final)
@@ -361,7 +371,7 @@ def handle(message, config, base):
         config.update(updated)
         return {'ok':True,'vault':selected.name,'vaultPath':str(selected)}
     if message.get('action') in {'attachPick','attachLocal','attachBytes','attachDiscard'}: return attach(message,base)
-    if message.get('action') in {'asrStatus','asrStart','asrPoll','asrCancel','asrCloudTest','asrInstall','asrInstallPoll','asrInstallCancel','asrUninstall','asrUploadStart','asrUploadChunk','asrUploadFinish','asrProbe'}:
+    if message.get('action') in {'mediaDownloadStart','mediaDownloadPoll','mediaDownloadCancel','mediaDownloadReveal','asrStatus','asrStart','asrPoll','asrCancel','asrCloudTest','asrInstall','asrInstallPoll','asrInstallCancel','asrUninstall','asrUploadStart','asrUploadChunk','asrUploadFinish','asrProbe'}:
         # Subtitle generation lives in asr.py next to this file; it needs no vault.
         sys.path.insert(0,str(Path(__file__).resolve().parent))
         import asr
@@ -370,7 +380,9 @@ def handle(message, config, base):
         if message.get('action')=='status': return {'ok':True,'vault':None}
         raise ValueError('助手已连接，但还没选 Obsidian 笔记库：请在扩展设置 → 剪藏与保存里选择文件夹')
     root=Path(config['vault']).resolve()
-    if not root.is_dir() or not (root/'.obsidian').is_dir(): raise ValueError('配置的 Obsidian 笔记库不存在')
+    if not root.is_dir() or not (root/'.obsidian').is_dir():
+        if message.get('action')=='status': return {'ok':True,'vault':None,'vaultError':'配置的 Obsidian 笔记库不存在'}
+        raise ValueError('配置的 Obsidian 笔记库不存在')
     if message.get('action')=='status': return {'ok':True,'vault':root.name,'vaultPath':str(root)}
     if message.get('action')=='learningDailyTarget': return {**learning_daily_target(root,message.get('vault') or ''),'helper':HELPER_PROTOCOL}
     if message.get('action')=='saveLearning': return save_learning(message,root,base)

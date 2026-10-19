@@ -1,16 +1,16 @@
 {
 	"name": "qiaomu-clipper",
-	"version": "1.15.8",
+	"version": "1.18.8",
 	"description": "Save web clips to Obsidian and Qiaomu RSS.",
 	"bin": {
-		"obsidian-clipper": "./dist/cli.cjs"
+		"obsidian-clipper": "./build/cli/cli.cjs"
 	},
 	"files": [
-		"dist"
+		"build/cli"
 	],
 	"exports": {
-		".": "./dist/cli.cjs",
-		"./api": "./dist/api.mjs"
+		".": "./build/cli/cli.cjs",
+		"./api": "./build/cli/api.mjs"
 	},
 	"scripts": {
 		"defuddle-dev": "node scripts/set-defuddle-dev.js",
@@ -22,18 +22,25 @@
 		"build:firefox": "webpack --env BROWSER=firefox --mode production",
 		"build:safari": "webpack --env BROWSER=safari --mode production",
 		"build": "npm run build:chrome && npm run build:local && npm run build:firefox && npm run build:safari",
-		"package": "bash scripts/package.sh",
+		"package": "node scripts/package.mjs",
 		"build:cli": "node scripts/build-cli.mjs",
 		"build:api": "node scripts/build-api.mjs",
 		"dev": "npm run dev:chrome",
-		"test": "vitest run",
+		"test": "npm run test:workflow && npm run check:injections && vitest run",
+		"test:store-download": "node scripts/test-store-download.mjs",
 		"test:watch": "vitest",
 		"update-locales": "ts-node --project scripts/tsconfig.json scripts/update-locales.ts",
 		"check-strings": "ts-node --project scripts/tsconfig.json scripts/check-unused-strings.ts",
 		"add-locale": "ts-node --project scripts/tsconfig.json scripts/add-locale.ts",
 		"prepublishOnly": "npm run build:cli && npm run build:api",
 		"dev:local": "webpack --watch --env BROWSER=chrome --env EDITION=local --mode development",
-		"build:local": "webpack --env BROWSER=chrome --env EDITION=local --mode production"
+		"build:local": "webpack --env BROWSER=chrome --env EDITION=local --mode production",
+		"test:prepare": "node scripts/prepare-test.mjs",
+		"test:workflow": "node --test scripts/build-workflow.test.cjs scripts/check-injected-functions.test.cjs",
+		"check:injections": "node scripts/check-injected-functions.cjs",
+		"check:i18n": "node scripts/check-i18n.cjs",
+		"build:store": "webpack --env BROWSER=chrome --mode production",
+		"check:dev-base": "node scripts/check-development-base.cjs"
 	},
 	"devDependencies": {
 		"@types/chrome": "^0.0.270",
@@ -45,6 +52,7 @@
 		"css-loader": "^7.1.2",
 		"dotenv": "^16.4.1",
 		"esbuild": "^0.28.1",
+		"fake-indexeddb": "^6.2.6",
 		"jsdom": "^29.1.1",
 		"mini-css-extract-plugin": "^2.9.1",
 		"sass": "^1.77.8",
@@ -65,16 +73,35 @@
 		"@codemirror/state": "^6.7.4",
 		"@codemirror/view": "^6.43.11",
 		"@lezer/highlight": "^1.2.3",
+		"@tiptap/core": "^3.32.0",
+		"@tiptap/extension-character-count": "^3.32.0",
+		"@tiptap/extension-code-block-lowlight": "^3.32.0",
+		"@tiptap/extension-drag-handle": "^3.32.0",
+		"@tiptap/extension-image": "^3.32.0",
+		"@tiptap/extension-placeholder": "^3.32.0",
+		"@tiptap/extension-table": "^3.32.0",
+		"@tiptap/extension-task-item": "^3.32.0",
+		"@tiptap/extension-task-list": "^3.32.0",
+		"@tiptap/extension-youtube": "^3.32.0",
+		"@tiptap/pm": "^3.32.0",
+		"@tiptap/starter-kit": "^3.32.0",
 		"@types/safari-extension": "^0.0.33",
 		"dayjs": "^1.11.13",
 		"defuddle": "^0.19.2",
 		"dompurify": "^3.4.12",
+		"fflate": "^0.8.3",
 		"highlight.js": "^11.11.1",
+		"jszip": "^3.10.2",
+		"katex": "^0.16.47",
 		"knap": "^0.6.0",
 		"linkedom": "^0.18.0",
+		"lowlight": "^3.3.0",
 		"lucide": "^0.359.0",
 		"lz-string": "^1.5.0",
-		"marked": "^17.0.6"
+		"marked": "^17.0.6",
+		"mathjax-full": "^3.2.1",
+		"mermaid": "^11.17.2",
+		"tiptap-markdown": "^0.9.0"
 	},
 	"private": true,
 	"repository": {

@@ -1,4 +1,4 @@
-import Defuddle from 'defuddle/full';
+import Defuddle from './defuddle';
 import browser from './browser-polyfill';
 import { detectBrowser } from './browser-detection';
 import { flattenShadowDom as flattenShadowDomUtil } from './flatten-shadow-dom';
@@ -27,9 +27,10 @@ function hl(): HighlighterAPI {
 import { copyToClipboard } from './clipboard-utils';
 import { getMessage, initializeI18n } from './i18n';
 import { getFontCss, isFontAvailable, FONT_PRESETS } from './font-utils';
-import { createMarkdownContent } from 'defuddle/full';
+import { createMarkdownContent } from './defuddle';
 import { saveFile } from './file-utils';
 import { parseForClip } from './clip-utils';
+import { extractXhsNote } from './xiaohongshu';
 import { updateSidebarWidth, addResizeHandle, cleanupResizeHandlers } from './iframe-resize';
 import { setElementHTML, setSVGChildren, serializeChildren } from './dom-utils';
 
@@ -914,7 +915,7 @@ export class Reader {
 			if (result.error) throw new Error(result.error);
 			return new Response(result.text, { status: result.status });
 		}) });
-		const defuddled = await defuddle.parseAsync();
+		const defuddled = extractXhsNote(doc) || await defuddle.parseAsync();
 
 		return {
 			content: defuddled.content,

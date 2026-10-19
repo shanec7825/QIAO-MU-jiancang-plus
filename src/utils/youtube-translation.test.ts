@@ -31,6 +31,26 @@ it('reopens a translated video entirely from local storage without a configured 
  expect(reopened.article.textContent).toContain('中文 English source');
  expect(state.stream).not.toHaveBeenCalled();
 });
+it('uses saved custom translations for the upstream translated-clipping flow without a model',async()=>{
+ const url='https://www.youtube.com/watch?v=abcdefghijk';
+ setup(undefined,url).input.click();await complete();
+ const savedKeys=Object.keys(state.data).filter(key=>key.startsWith('qiaomuTranslation1:'));
+ expect(savedKeys).toHaveLength(1);
+ state.stream.mockClear();state.models=[];
+ const reopened=setup(undefined,url);
+ const {ensureTranscriptTranslation}=await import('./youtube-translation');
+ await ensureTranscriptTranslation(reopened.article.querySelector('.transcript')!,new AbortController().signal);
+ expect(reopened.article.querySelectorAll('[data-translation-ready="true"]')).toHaveLength(2);
+ expect(state.stream).not.toHaveBeenCalled();
+});
+it('unregisters the translated-clipping handler when the transcript is replaced',async()=>{
+ const {article}=setup();
+ const transcript=article.querySelector('.transcript')!;
+ article.dispatchEvent(new CustomEvent('qiaomu-transcript-replaced'));
+ const {ensureTranscriptTranslation}=await import('./youtube-translation');
+ await expect(ensureTranscriptTranslation(transcript,new AbortController().signal)).rejects.toThrow('请先打开文稿翻译');
+ expect(state.stream).not.toHaveBeenCalled();
+});
 it('reuses saved parts and requests only missing paragraphs on a new page',async()=>{
  const url='https://www.youtube.com/watch?v=abcdefghijk';
  setup(undefined,url).input.click();await complete();
@@ -189,4 +209,15 @@ it('clears the short completion feedback after three seconds while keeping failu
  await vi.advanceTimersByTimeAsync(200);expect(view.article.querySelector('[role=status]')!.textContent).toBe('');
  state.stream.mockRejectedValue(new Error('Offline'));const failed=setup();failed.input.click();await flush();await vi.advanceTimersByTimeAsync(10000);
  expect(failed.article.querySelector('[role=status]')!.textContent).toContain('qiaomuTranslationError');expect(failed.article.querySelector<HTMLButtonElement>('.youtube-translation-retry')!.hidden).toBe(false);
+});
+it('translates for saving without turning on the manuscript display',async()=>{
+ const {article,input}=setup();const {ensureTranscriptTranslation}=await import('./youtube-translation');await ensureTranscriptTranslation(article.querySelector('.transcript')!,new AbortController().signal);
+ expect(input.checked).toBe(false);expect(article.querySelector('.transcript-translation')).toBeNull();expect(article.querySelector<HTMLElement>('.transcript-segment')?.dataset.translationReady).toBe('true');
+ input.click();await flush();expect(state.stream).toHaveBeenCalledOnce();expect(article.querySelectorAll('.transcript-translation')).toHaveLength(2);
+});
+it('cancels saving immediately even when a provider ignores cancellation',async()=>{
+ state.stream.mockImplementation(()=>new Promise(()=>{}));const {article}=setup();const {ensureTranscriptTranslation}=await import('./youtube-translation');const controller=new AbortController();const waiting=ensureTranscriptTranslation(article.querySelector('.transcript')!,controller.signal);await flush();controller.abort();await expect(waiting).rejects.toThrow('已取消');
+});
+it('does not require a provider to save already Chinese text',async()=>{
+ state.models=[];const {article}=setup(['已经是中文。']);const {ensureTranscriptTranslation}=await import('./youtube-translation');await ensureTranscriptTranslation(article.querySelector('.transcript')!,new AbortController().signal);expect(state.stream).not.toHaveBeenCalled();
 });

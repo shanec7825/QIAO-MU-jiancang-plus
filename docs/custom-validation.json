@@ -1,36 +1,37 @@
 {
-  "extensionId": "jniolfihillilkoajpnonlbkhfkiicoo",
-  "version": "1.15.8",
-  "versionName": "1.15.8 · 英语表达定制版 4",
-  "testsPassed": 122,
-  "fullTestsPassed": 924,
+  "upstreamVersion": "1.18.8",
+  "customVersion": 5,
+  "helperVersion": "1.16.6",
+  "frontend": {
+    "passed": 1519,
+    "skipped": 7,
+    "files": 174
+  },
   "typecheck": "passed",
-  "build": "passed",
-  "offlineBrowserTest": "passed",
-  "changedSourceFiles": [
-    "src/utils/english-expressions.ts",
-    "src/utils/english-expressions.test.ts",
-    "src/utils/chat-export.ts",
-    "src/utils/chat-export.test.ts",
-    "src/styles/english-expressions.scss",
-    "src/utils/clip-chat.ts",
-    "src/styles/clip-chat.scss",
-    "src/utils/local-backup.ts",
-    "src/utils/local-backup.test.ts",
-    "src/manifest.chrome.json",
-    "src/utils/learning-record.ts",
-    "src/utils/learning-record.test.ts",
-    "src/utils/learning-composer.ts",
-    "src/utils/learning-composer.test.ts",
-    "src/utils/reader-preview-shell.ts",
-    "src/utils/youtube-study.ts",
-    "src/utils/translation-cache.ts",
-    "src/utils/translation-cache.test.ts",
-    "src/utils/youtube-translation.ts",
-    "src/utils/youtube-translation.test.ts",
-    "src/utils/chat-preferences.test.ts",
-    "src/utils/reader-transcript.ts",
-    "src/utils/reader-transcript-follow.test.ts"
+  "injectedFunctionsChecked": 17,
+  "windowsHelper": {
+    "passed": 115,
+    "skipped": 2,
+    "reason": "Two upstream cases require Windows symlink privileges; Unix CI keeps them enabled."
+  },
+  "browser": {
+    "expressionCollection": true,
+    "collectionStaysClosed": true,
+    "highlightConversion": true,
+    "diaryFormatting": true,
+    "selectedExpressionsToChat": true,
+    "htmlExport": true,
+    "translationCacheAfterReload": true,
+    "pauseAndSelectionPreventAutoFollow": true
+  },
+  "unchangedStoragePrefixes": [
+    "qiaomuEnglishExpression1:",
+    "qiaomuTranslation1:",
+    "qiaomuLearningDraft:"
   ],
-  "zipSha256": "def11bd65d820d76f4f64e7ca6f664cc9106714c9060ebc7d4210081fa09b23e"
+  "extensionId": "jniolfihillilkoajpnonlbkhfkiicoo",
+  "limitations": [
+    "Browser fixtures use simulated diary and AI services; live site authentication is not verified.",
+    "The full Unix-oriented helper suite and packaging workflow require Linux CI. The local Windows workflow lacks the zip command."
+  ]
 }

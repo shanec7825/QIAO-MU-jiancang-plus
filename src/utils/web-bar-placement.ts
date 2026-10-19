@@ -49,6 +49,16 @@ function topRightLayer(host: HTMLElement, doc: Document): DOMRect | undefined {
 export function placeWebBar(host: HTMLElement, media: WebMedia | undefined, site: string): void {
 	const doc = host.ownerDocument, win = doc.defaultView!;
 	const video = media?.getBoundingClientRect();
+	if (site === 'xiaohongshu') {
+		const scroller = media?.closest('#noteContainer')?.querySelector('.note-scroller');
+		const content = scroller?.querySelector('.note-content');
+		if (scroller) {
+			host.classList.remove('is-floating', 'is-compact'); host.classList.add('is-inline'); host.style.cssText = 'box-sizing:border-box;padding:0 16px 12px;';
+			if (content) { if (content.nextElementSibling !== host) content.after(host); }
+			else if (scroller.firstElementChild !== host) scroller.prepend(host);
+			return;
+		}
+	}
 	if (site === 'ted') {
 		// TED creates its media element after the outer player. Anchor to that box
 		// even while the video is loading; hidden advertising videos are unrelated.
@@ -111,6 +121,12 @@ export function placeWebBar(host: HTMLElement, media: WebMedia | undefined, site
 		host.style.cssText = `right:${right}px;left:auto;top:${top}px;bottom:auto;z-index:2147483000;`;
 		return;
 	}
+	// Channels' playback page is one full-window player: float the strip under the top-right menu, clear of the like/share rail along the bottom right.
+	if (site === 'channels') {
+		host.classList.add('is-floating', 'is-compact', 'is-solid');
+		host.style.cssText = 'right:16px;left:auto;top:88px;bottom:auto;z-index:2147483000;';
+		return;
+	}
 	// TikTok: the same quiet one-line strip as on Douyin, lined up under the site's top-right pill.
 	if (site === 'tiktok') {
 		host.classList.add('is-compact');
@@ -135,6 +151,7 @@ export const WEB_BAR_STYLE = `.qiaomu-web-bar{position:fixed;right:16px;bottom:1
 .qiaomu-web-bar .qiaomu-yt-bar-lines{max-height:min(48vh,calc(100vh - 250px))}
 .qiaomu-web-bar .qiaomu-yt-bar{--qm-frame:1px solid var(--qm-line);--qm-margin:0;--qm-radius:12px}
 .qiaomu-web-bar.is-floating .qiaomu-yt-bar{--qm-card:rgba(34,34,40,.68)!important;--qm-frame:0 none!important;--qm-radius:10px!important;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);max-height:calc(100vh - 150px)}
+.qiaomu-web-bar.is-floating.is-solid .qiaomu-yt-bar{--qm-card:#1f1f23!important;--qm-frame:1px solid #3a3a42!important;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 4px 18px rgba(0,0,0,.28)}
 .qiaomu-web-bar:is(.is-floating,.is-compact){width:max-content;max-width:320px}
 .qiaomu-web-bar:is(.is-floating,.is-compact):has(.qiaomu-yt-bar[data-open=true]){width:320px}
 .qiaomu-web-bar:is(.is-floating,.is-compact) .qiaomu-yt-bar[data-open=false] .qiaomu-yt-bar-head{min-height:34px;padding:0 4px 0 10px;gap:6px}

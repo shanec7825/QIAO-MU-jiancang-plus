@@ -1,3 +1,8 @@
+import { handleChatImageSource } from './utils/chat-image-source';
+import { validChatTurns } from './utils/chat-content';
+import { validChatSession } from './utils/opencode-go';
+import { channelsPlaybackPage, channelsStudyBridge, getChannelsPlaybackMedia, parseChannelsShare, readChannelsPlayback } from './utils/channels-study';
+import { protectedPageBridge, snapshotProtectedPage } from './utils/protected-study';
 import { createContentText } from './utils/content-i18n';
 import { getWebPageMedia, isTikTokMedia, snapshotDouyinPlayer, snapshotTikTokPlayer, tabMayLendTikTokMedia, tiktokVideoPath, validateDouyinTracks } from './utils/web-page-media';
 import { submitQiaomuClip, QiaomuClip } from './utils/qiaomu-rss';
@@ -12,16 +17,26 @@ import { describeHelperFailure } from './utils/native-helper-prompt';
 import { callHelper } from './utils/native-helper-call';
 import { incrementStat, loadSettings } from './utils/storage-utils';
 import { enabledChatModels, streamChat } from './utils/chat-llm';
+import { validEffort } from './utils/chat-thinking';
+import { openStudyWithPlayback } from './utils/study-playback-handoff';
 import { audioStudyPath, videoKey, videoStudyPath } from './utils/video-source';
-import { isSiteOn, loadStudySites, siteOf } from './utils/study-sites';
-import { isMediaItemAddress, webMediaAddress } from './utils/web-media-page';
+import { siteOf } from './utils/study-sites';
+import { webStudyPath } from './utils/web-study-path';
+import { getXhsPageMedia, snapshotXhsPlayer } from './utils/xiaohongshu';
+import { followXiaoeLink, readXiaoeLive, xiaoeParts, fetchXiaoePlaylist } from './utils/xiaoe';
 import { hasStoredHighlights } from './utils/url-utils';
 import { cookiesGranted, handleAsrMessage, handleLearningNativeMessage } from './utils/local-save';
 import { enableYouTubeEmbedRule, disableYouTubeEmbedRule } from './utils/youtube-embed-rules';
 
 import { t } from './utils/ui-text';
+import { registerPublishBridge } from './publish-bridge';
+import { helperInstallUrl } from './utils/helper-install';
+import { pruneHandedFiles } from './utils/file-handoff';
+void pruneHandedFiles();
+registerPublishBridge();
 browser.runtime.onMessage.addListener(handleLearningNativeMessage);
 browser.runtime.onMessage.addListener(handleAsrMessage);
+browser.runtime.onMessage.addListener(handleChatImageSource);
 
 // Accept RSS writes only from our own extension pages, never a website content script.
 const qiaomuInFlight = new Map<string, Promise<unknown>>();
@@ -651,6 +666,22 @@ browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime
 			return true;
 		}
 
+		// A second writer tab for an article that is already open hands over to the first one.
+		if (typedRequest.action === "qiaomuWriteFocus") {
+			const wanted = String((typedRequest as { id?: string }).id || '');
+			void (async () => {
+				const writerPage = browser.runtime.getURL('write.html');
+				const tabs = await browser.tabs.query({ url: `${writerPage}*` });
+				const other = tabs.find(item => item.id !== sender.tab?.id && new URL(item.url || writerPage).searchParams.get('id') === wanted);
+				if (other?.id) {
+					await browser.tabs.update(other.id, { active: true });
+					if (other.windowId) await browser.windows.update(other.windowId, { focused: true });
+					if (sender.tab?.id) await browser.tabs.remove(sender.tab.id);
+				}
+			})().catch(() => {});
+			return undefined;
+		}
+
 		if (typedRequest.action === "qiaomuTripleKey") {
 			const tab = sender.tab;
 			if (tab?.id && tab.url && isValidUrl(tab.url) && !isBlankPage(tab.url)) {
@@ -693,6 +724,9 @@ browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime
 		}
 
 		if (typedRequest.action === "getActiveTab") {
+			// An embedded clipper belongs to its host tab, even when another
+			// browser window is focused while extraction is running.
+			if (sender.tab?.id) { sendResponse({ tabId: sender.tab.id }); return true; }
 			browser.tabs.query({active: true, currentWindow: true}).then(async (tabs) => {
 				let currentTab = tabs[0];
 				// Fallback for when currentWindow has no tabs (e.g., debugging popup in DevTools)
@@ -735,6 +769,12 @@ browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime
 			const query = domain ? `?domain=${encodeURIComponent(domain)}` : '';
 			browser.tabs.create({ url: browser.runtime.getURL(`highlights.html${query}`) });
 			sendResponse({ success: true });
+			return true;
+		}
+
+		if (typedRequest.action === "openHelperInstall") {
+			void browser.runtime.getPlatformInfo().then(platform => browser.tabs.create({ url: helperInstallUrl(platform.os) }))
+				.then(() => sendResponse({ success: true }), error => sendResponse({ success: false, error: String(error) }));
 			return true;
 		}
 
@@ -1242,18 +1282,6 @@ async function openNoteCard(tabId: number, quote?: string): Promise<void> {
 	} catch { /* restricted page */ }
 }
 
-// Supported media detail pages share the native study player. A feed adapter supplies the currently playing item address.
-async function webStudyPath(url: string, tabId: number): Promise<string | null> {
-	const site = siteOf(url); if (!site || site.builtin || !isSiteOn(await loadStudySites(), site.id)) return null;
-	let post = webMediaAddress(url);
-	try { const source = await browser.tabs.sendMessage(tabId, { action: 'qiaomuWebMediaSource' }) as { url?: unknown } | undefined; if (typeof source?.url === 'string' && siteOf(source.url)?.id === site.id) post = webMediaAddress(source.url); } catch { /* adapter not loaded */ }
-	if (!post) return null;
-	try {
-		const [result] = await browser.scripting.executeScript({ target: { tabId }, func: () => Boolean(document.querySelector('video, audio, iframe[src*="player.vimeo.com"], iframe[src*="player.twitch.tv"], iframe[src*="dailymotion.com"], [data-testid="videoPlayer"], meta[property="og:video"], meta[property="og:video:url"], meta[property="og:audio"]')) });
-		return result?.result || isMediaItemAddress(post) ? `reader.html?study=web&url=${encodeURIComponent(post)}&sourceTab=${tabId}` : null;
-	} catch { return null; }
-}
-
 // The triple-press commands open the clipper, which runs read / edit / clip once the clip is ready.
 // A video or audio page reads as its study player (the same for the Read button, the toolbar icon and the triple-press); anything else reads as an article.
 async function openStudyForTab(tabId: number): Promise<boolean> {
@@ -1261,12 +1289,14 @@ async function openStudyForTab(tabId: number): Promise<boolean> {
 	const path = videoStudyPath(tab.url || '', tabId, tab.title || '') || audioStudyPath(tab.url || '', tab.title || '') || await webStudyPath(tab.url || '', tabId);
 	if (!path) return false;
 	// Open the player immediately; subtitle extraction belongs to the reader.
-	await browser.tabs.create({ url: browser.runtime.getURL(path), openerTabId: tabId });
+	await openStudyWithPlayback(tabId, path, tab.url || '');
 	return true;
 }
 
 async function runTripleKeyAction(action: string, tabId: number): Promise<void> {
 	if (action === 'note') { await openNoteCard(tabId); return; }
+	// A new long article opens in its own tab; the writer page reuses an untouched blank article instead of piling up new ones.
+	if (action === 'write') { await browser.tabs.create({ url: browser.runtime.getURL('write.html?new=1'), openerTabId: tabId }); return; }
 	if (action !== 'read' && action !== 'edit' && action !== 'clip') return;
 	if (action === 'read' && await openStudyForTab(tabId)) return;
 	// Reading and editing need no window of their own: an invisible copy of the clipper in the page does the work and opens our page.
@@ -1322,7 +1352,7 @@ browser.runtime.onConnect.addListener(port => {
 	port.onDisconnect.addListener(() => controller.abort());
 	let started = false;
 	port.onMessage.addListener(async raw => {
-		const request = raw as { modelId?: string; system?: string; messages?: any[] };
+		const request = raw as { modelId?: string; system?: string; messages?: any[]; sessionId?: string; reasoningEffort?: string };
 		if (started) return;
 		started = true;
 		const send = (message: unknown) => { if (!controller.signal.aborted) port.postMessage(message); };
@@ -1330,8 +1360,9 @@ browser.runtime.onConnect.addListener(port => {
 			await loadSettings();
 			const model = enabledChatModels().find(item => item.id === request.modelId);
 			if (!model || typeof request.system !== 'string' || !Array.isArray(request.messages)
-				|| request.messages.some((turn: any) => !['user', 'assistant'].includes(turn.role) || typeof turn.content !== 'string')) throw new Error(t('无效的 AI 对话请求'));
-			await streamChat({ model, system: request.system, messages: request.messages, signal: controller.signal, onDelta: delta => send({ delta }) });
+				|| (request.sessionId !== undefined && !validChatSession(request.sessionId))
+				|| !validChatTurns(request.messages)) throw new Error(t('无效的 AI 对话请求'));
+			await streamChat({ model, system: request.system, sessionId: request.sessionId, messages: request.messages, reasoningEffort: validEffort(request.reasoningEffort), signal: controller.signal, onDelta: delta => send({ delta }), onThought: thought => send({ thought }) });
 			send({ done: true });
 		} catch (error) { send({ error: error instanceof Error ? error.message : t('AI 请求失败') }); }
 	});
@@ -1353,10 +1384,8 @@ browser.runtime.onMessage.addListener((raw: unknown, sender) => {
 			if (!tab.url || videoKey(tab.url) !== videoKey(request.sourceUrl!)) return { error: t('原视频页面已切换') };
 			const results = await browser.scripting.executeScript({
 				target: { tabId: request.sourceTabId! },
-				func: async (href: string) => {
-					const response = await fetch(href, { credentials: 'include', headers: { Accept: 'application/json' } });
-					return { ok: response.ok, status: response.status, text: await response.text() };
-				},
+				func: (href: string) => fetch(href, { credentials: 'include', headers: { Accept: 'application/json' } })
+					.then(response => response.text().then(text => ({ ok: response.ok, status: response.status, text }))),
 				args: [target.href],
 			});
 			return results[0]?.result || { error: t('原视频页面没有返回结果') };
@@ -1467,6 +1496,11 @@ browser.runtime.onMessage.addListener((raw: unknown, sender) => {
 	const request = raw as { action?: string; url?: string; sourceTabId?: number };
 	if (request?.action !== 'qiaomuWebStudySource') return;
 	if (sender.id !== browser.runtime.id || !sender.url?.startsWith(browser.runtime.getURL('reader.html')) || typeof request.url !== 'string') return Promise.resolve(null);
+	if (siteOf(request.url)?.id === 'xiaohongshu') return getXhsPageMedia(request.url, request.sourceTabId, browser.tabs, async tabId => {
+		const [result] = await browser.scripting.executeScript({ target: { tabId }, world: 'MAIN', func: snapshotXhsPlayer });
+		return result?.result as ReturnType<typeof snapshotXhsPlayer> | undefined;
+	}).then(info => info || null);
+	if (channelsPlaybackPage(request.url)) return getChannelsPlaybackMedia(request.url, request.sourceTabId, browser.tabs as unknown as Parameters<typeof getChannelsPlaybackMedia>[2]).then(info => info || null);
 	return getWebPageMedia(request.url, request.sourceTabId, browser.tabs, async tabId => {
 		const [result] = await browser.scripting.executeScript({ target: { tabId }, func: snapshotDouyinPlayer });
 		const snapshot = result?.result as ReturnType<typeof snapshotDouyinPlayer> | undefined;
@@ -1485,4 +1519,68 @@ browser.runtime.onMessage.addListener((raw: unknown, sender) => {
 		}
 		return snapshot;
 	}).then(info => info || null);
+});
+
+// Inspect a password/login gate only in an original tab explicitly opened by this study reader.
+const protectedStudyPage = protectedPageBridge({
+ create: options => browser.tabs.create(options),
+ get: id => browser.tabs.get(id),
+ update: (id, options) => browser.tabs.update(id, options),
+ inspect: async tabId => {
+  const [result] = await browser.scripting.executeScript({ target: { tabId }, func: snapshotProtectedPage });
+  return result?.result as ReturnType<typeof snapshotProtectedPage> || { state: 'unavailable' };
+ },
+});
+browser.runtime.onMessage.addListener((raw: unknown, sender) => {
+ const request = raw as { action?: string; mode?: string; url?: string; tabId?: number };
+ if (request?.action !== 'qiaomuProtectedStudyPage') return;
+ if (sender.id !== browser.runtime.id || !sender.url?.startsWith(browser.runtime.getURL('reader.html?')) || sender.tab?.id === undefined) return Promise.resolve({ state: 'unavailable' });
+ return protectedStudyPage(sender.tab.id, request).catch(() => ({ state: 'unavailable' }));
+});
+
+// User-selected third-party resolver; each reader owns only its own two tabs.
+const channelsStudy = channelsStudyBridge({
+ create: options => browser.tabs.create(options), get: id => browser.tabs.get(id), remove: id => browser.tabs.remove(id), update: (id, properties) => browser.tabs.update(id, properties),
+ parse: (tabId, share) => browser.scripting.executeScript({ target: { tabId }, world: 'MAIN', func: parseChannelsShare, args: [share] }).then(results => results[0]?.result as Awaited<ReturnType<typeof parseChannelsShare>> || { state: 'unavailable' }),
+ inspect: tabId => browser.scripting.executeScript({ target: { tabId }, world: 'MAIN', func: readChannelsPlayback }).then(results => results[0]?.result as Awaited<ReturnType<typeof readChannelsPlayback>> || { state: 'unavailable' }),
+});
+browser.runtime.onMessage.addListener((raw: unknown, sender) => {
+ const request = raw as { action?: string; mode?: string; url?: string };
+ if (request?.action !== 'qiaomuChannelsStudy') return;
+ if (sender.id !== browser.runtime.id || !sender.url?.startsWith(browser.runtime.getURL('reader.html?')) || sender.tab?.id === undefined) return Promise.resolve({ state: 'unavailable' });
+ return channelsStudy(sender.tab.id, request).catch(() => ({ state: 'unavailable' }));
+});
+
+// 小鹅通: the study reader asks for a live replay. The shop's API answers only a signed-in viewer, so it is asked as that viewer:
+// first from here (the extension may send the shop's cookies), then from an open tab of the shop (where the viewer signed in).
+// Serialized by scripting.executeScript: self-contained, no async/await.
+function fetchShopJson(path: string, origin: string): Promise<unknown> {
+ if (location.origin !== origin || !/^\/_alive\/v3\/(?:get_lookback_list|base_info)\?/.test(path)) return Promise.resolve(null);
+ const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 20000);
+ return fetch(path, { credentials: 'include', redirect: 'error', signal: controller.signal }).then(response => location.origin === origin && response.ok ? response.json() : null).catch(() => null).finally(() => clearTimeout(timer));
+}
+browser.runtime.onMessage.addListener((raw: unknown, sender) => {
+	const request = raw as { action?: string; url?: string };
+	if (request?.action !== 'qiaomuXiaoeLive') return;
+	if (sender.id !== browser.runtime.id || !sender.url?.startsWith(browser.runtime.getURL('reader.html')) || typeof request.url !== 'string' || request.url.length > 12000 || !/^https:\/\//.test(request.url)) return Promise.resolve(null);
+	return (async () => {
+		const address = await followXiaoeLink(request.url!);
+		if (!address) return { ok: false, error: 'not-live' };
+		const origin = xiaoeParts(address)!.origin;
+		type Reply = { code?: number; msg?: string; data?: unknown } | null;
+		const fromHere = async (path: string): Promise<Reply> => { const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 20000); try { const response = await fetch(origin + path, { credentials: 'include', redirect: 'error', signal: controller.signal }); return response.ok ? await response.json() : null; } catch { return null; } finally { clearTimeout(timer); } };
+		const fromTab = async (path: string): Promise<Reply> => {
+			for (const tab of (await browser.tabs.query({ url: origin + '/*' })) || []) {
+				if (tab.id === undefined) continue;
+				try {
+					const [result] = await browser.scripting.executeScript({ target: { tabId: tab.id }, func: fetchShopJson, args: [path, origin] });
+					const reply = result?.result as Reply; if (reply && typeof reply === 'object') return reply;
+				} catch { /* tab not ready or not the shop any more */ }
+			}
+			return null;
+		};
+		const api = async (path: string): Promise<Reply> => { const here = await fromHere(path); if (here && here.code !== 11302) return here; return (await fromTab(path)) || here; };
+		const playlist = (url: string) => fetchXiaoePlaylist(url);
+		return readXiaoeLive(address, api, playlist);
+	})().catch(() => ({ ok: false, error: 'failed' }));
 });

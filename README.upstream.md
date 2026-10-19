@@ -18,10 +18,10 @@ Read, watch, listen, and turn what you learn into Obsidian notes.
 
 </div>
 
-> **安装建议（2026-10-08）：等新版商店上架后安装。** [Chrome 应用商店](https://chromewebstore.google.com/detail/jniolfihillilkoajpnonlbkhfkiicoo)当前公开版本仍为 **1.7.1**；**1.15.6 已提交审核，通过后自动发布**。本页介绍 GitHub 版 1.15.8 的功能；多语言版将在 1.15.6 审核通过后再提交商店，旧商店版不包含全部功能。想现在体验，将下面这段安装 prompt 复制给 Codex、Claude Code 等有本机终端权限的 Agent，插件和 helper 一起安装。
+> 本页介绍 GitHub 版 **1.18.7**。GitHub 与 [Chrome 应用商店](https://chromewebstore.google.com/detail/jniolfihillilkoajpnonlbkhfkiicoo)分别更新，请以各渠道页面显示的版本为准。希望立即使用本页功能，可安装下面的 GitHub 独立版；已有商店版无需为了日常使用同时安装两份。
 
 ```text
-请帮我安装或升级乔木剪藏：https://github.com/joeseesun/qiaomu-clipper 。先读 README.md 和 native/README.md，按我的系统与浏览器操作。
+请帮我安装或升级乔木剪藏：https://github.com/joeseesun/qiaomu-clipper 。先读 README.md、docs/INSTALL-FOR-AGENTS.md 和 native/README.md，先告诉我该装商店版还是独立版、区别是什么，再按我的系统与浏览器操作。
 下载最新正式 release 的 -chrome-local.zip，解压并指导我加载扩展；同时安装对应版本的 helper：macOS 下载 qiaomu-clipper-helper.pkg 并指导我双击安装，其他系统按仓库文档安装。已有旧版先备份并保留数据，最后检查扩展与助手连接，指导我选择 Obsidian 笔记库。
 ```
 
@@ -40,9 +40,9 @@ Read, watch, listen, and turn what you learn into Obsidian notes.
 
 ## 快速开始
 
-### 推荐：等 1.15.6 上架后，从商店安装
+### 推荐：等 1.15.8 上架后，从商店安装
 
-在[商店页面](https://chromewebstore.google.com/detail/jniolfihillilkoajpnonlbkhfkiicoo)确认版本已更新到 **1.15.6 或更高**，再安装。需要保存笔记时，请先安装 Obsidian 并创建或打开一个笔记库。
+在[商店页面](https://chromewebstore.google.com/detail/jniolfihillilkoajpnonlbkhfkiicoo)确认版本已更新到 **1.15.8 或更高**，再安装。需要保存笔记时，请先安装 Obsidian 并创建或打开一个笔记库。
 
 安装扩展后，打开文章或支持的视频、音频页面，在非输入框内连按三次 `A`。也可以点页面字幕栏的学习入口，或扩展弹窗里的「阅读」：文章进入阅读页，支持的媒体页面进入学习播放器。
 
@@ -64,7 +64,7 @@ npm ci
 npm run build:local
 ```
 
-加载 `dist_local`，更新源码并重新构建后，在扩展管理页重新加载。`npm run build:chrome` 生成的是供商店提交使用的 `dist`，不含本地版音视频下载功能。
+日常测试默认使用商店版：`npm run build:store && npm run test:prepare`。固定加载 `~/Documents/乔木剪藏测试/extension`，以后只重新加载这个目录。测试独立版专属功能时运行 `npm run build:local && npm run test:prepare -- --edition local`，路径不变。请使用专用测试浏览器资料，详见 [开发与测试流程](docs/BUILD-TESTING.md)。
 
 </details>
 
@@ -72,7 +72,7 @@ npm run build:local
 
 **helper 是可选的本地助手。** 不装助手也能阅读、编辑、复制或下载 Markdown；保存到 Obsidian 可使用 URI 方式。静默写入笔记库、追加学习日记和生成字幕需要助手。
 
-macOS 用户下载 [1.15.8 的 `qiaomu-clipper-helper.pkg`](https://github.com/joeseesun/qiaomu-clipper/releases/download/1.15.8/qiaomu-clipper-helper.pkg)，双击安装。安装包**自带 Python，已签名并通过 Apple 公证**，不需要先安装 Python、Git 或 Node.js。扩展设置页也提供「下载安装包」入口。安装后重新加载扩展，并在 **设置 → 剪藏与保存** 的「笔记保存到」下拉列表里选择 Obsidian 库；列表读取 Obsidian 已记录的库，也可选择其他文件夹。
+macOS 用户下载 [最新发布的 `qiaomu-clipper-helper.pkg`](https://github.com/joeseesun/qiaomu-clipper/releases/latest/download/qiaomu-clipper-helper.pkg)，双击安装。安装包**自带 Python，已签名并通过 Apple 公证**，不需要先安装 Python、Git 或 Node.js。扩展设置页也提供「下载安装包」入口。安装后重新加载扩展，并在 **设置 → 剪藏与保存** 的「笔记保存到」下拉列表里选择 Obsidian 库；列表读取 Obsidian 已记录的库，也可选择其他文件夹。
 
 Linux / Windows 或需要源码安装的用户，按[助手文档](native/README.md)操作。Windows 助手已有实现和自动测试，尚待真机验证。
 
@@ -161,11 +161,17 @@ AI 面板支持围绕全文或选中段落提问，流式显示回答，按文�
 
 勾选「分享到乔木 RSS」后，链接、标题、剪藏正文和封面会进入[公开读者提交源](https://rss.qiaomu.ai/feeds/user-submitted.xml)。**默认关闭**，可在设置中调整；本地保存和公开投稿分别显示结果。阅读、编辑和学习日记保存不会触发投稿。
 
-### 本地版独有：保存正在学习的音视频
+### 保存正在学习的音视频
 
-GitHub 的 **`-chrome-local.zip`** 包在支持的学习页提供音视频下载，调用 helper 保存原媒体，显示进度，可取消，完成后可显示文件所在位置。目标目录为「下载」中的「乔木剪藏」。**商店版不包含此功能**；两版都支持 Markdown 和字幕文本导出。
+Chrome 商店版与 GitHub 独立版都可在支持的学习页下载完整音视频文件，显示进度、支持取消，并在浏览器确认保存完成后显示文件位置。首次点击时，商店版会申请可选的下载权限。浏览器下载文件保存在「下载/乔木剪藏」，助手下载文件保存在「下载/Qiaomu Clipper」，只保存你有权下载的内容。
 
-抖音、小宇宙、播客的媒体下载，以及普通 Chrome 中的实际目录与文件名，尚未逐项完成真实页面验收。需要这项功能的用户可用本地版，并反馈具体来源与错误。
+**YouTube 视频和音频的文件下载只有独立版提供**：需要已安装本地助手，在 YouTube 学习页点「下载视频／下载音频」，文件保存到「下载/Qiaomu Clipper」；直播和 DRM 视频不支持。商店版不提供，也会拦截来自 YouTube 媒体域名的文件，并拒绝下载重定向。完整文件下载可通过本地助手合并原站提供的分段或分轨媒体，不提供 DRM 解密。部分站点读取媒体地址需要助手；已有直接媒体地址由浏览器保存，不经过我们的服务器。两版都保留 Markdown 和字幕文本导出。
+
+## 常见问题
+
+**该装商店版还是独立版？** 没有特殊需求装商店版：自动更新，权限用到时才请求。想比商店更早用到新版本，或想下载 YouTube 视频/音频文件，装 GitHub release 里的 `-chrome-local.zip`（手动更新，YouTube 下载还需要本地助手）。两个版本扩展 ID 相同。详见 [给 AI agent 的版本选择指南](docs/INSTALL-FOR-AGENTS.md)。
+
+**为什么我装了没有 YouTube 下载？** 商店版不提供 YouTube 文件下载；字幕、文字稿（复制或导出 TXT）和沉浸学习都可以用。要下载文件，请改装独立版并安装本地助手。
 
 ## 三连击快捷键
 
@@ -196,8 +202,8 @@ GitHub 的 **`-chrome-local.zip`** 包在支持的学习页提供音视频下载
 npm test
 npx tsc --noEmit
 python3 -m unittest discover -s native -p 'test_*.py'
-npm run build:chrome          # 商店版：dist/
-npm run build:local           # 本地版：dist_local/
+npm run build:chrome          # 商店版：build/production/chrome-store/
+npm run build:local           # 独立版：build/production/chrome-local/
 node scripts/check-editions.mjs
 ```
 
@@ -223,7 +229,7 @@ node scripts/check-editions.mjs
 
 Qiaomu Clipper brings a clean reader, Markdown editor, media player, timed transcripts and contextual AI chat into one workflow. Study a passage, ask a question, and save your own understanding with its source.
 
-> **Installation recommendation, October 8, 2026:** wait for **1.15.6 or later** to appear on the [Chrome Web Store](https://chromewebstore.google.com/detail/jniolfihillilkoajpnonlbkhfkiicoo). The current published version is **1.7.1**; **1.15.6 is submitted for review and set to publish automatically after approval**. This README describes GitHub version 1.15.8. Its multilingual store update will be submitted after 1.15.6 passes review. For early access, ask an agent with local terminal access to read the repository and install the [GitHub release](https://github.com/joeseesun/qiaomu-clipper/releases/tag/1.15.8).
+> This README describes GitHub **1.18.7**. GitHub and the [Chrome Web Store](https://chromewebstore.google.com/detail/jniolfihillilkoajpnonlbkhfkiicoo) update independently; check each channel for its available version. Install the GitHub standalone edition below for these features.
 
 ### Quick start
 
@@ -232,13 +238,13 @@ Once the store version is updated, install it, open an article or supported medi
 For early access, copy this prompt into Codex, Claude Code or another agent with local terminal access:
 
 ```text
-Install or upgrade Qiaomu Clipper: https://github.com/joeseesun/qiaomu-clipper . Read README.md and native/README.md first, then follow the instructions for my OS and browser.
+Install or upgrade Qiaomu Clipper: https://github.com/joeseesun/qiaomu-clipper . Read README.md, docs/INSTALL-FOR-AGENTS.md and native/README.md first, tell me whether the store edition or the standalone edition fits me and what differs, then follow the instructions for my OS and browser.
 Download the latest stable release's -chrome-local.zip, extract it and guide me to load the extension. Install the matching helper too: on macOS download qiaomu-clipper-helper.pkg and guide me through installation; on other systems follow the repository docs. Back up and preserve existing data before upgrading. Verify the extension/helper connection and help me select my Obsidian vault.
 ```
 
 ### Optional helper
 
-The macOS [1.15.8 helper installer](https://github.com/joeseesun/qiaomu-clipper/releases/download/1.15.8/qiaomu-clipper-helper.pkg) is signed, notarized and includes Python. Double-click to install, reload the extension, then select an Obsidian vault under Clipping and saving. No Python, Git or Node.js setup is required for this installer.
+The macOS [latest helper installer](https://github.com/joeseesun/qiaomu-clipper/releases/latest/download/qiaomu-clipper-helper.pkg) is signed, notarized and includes Python. Double-click to install, reload the extension, then select an Obsidian vault under Clipping and saving. No Python, Git or Node.js setup is required for this installer.
 
 The helper enables silent vault writes, appending learning notes to today's daily note, and subtitle generation. Reading, editing, copying and Markdown export work without it; Obsidian URI saving is also available. Update the helper when upgrading the extension. Local recognition engines and models are downloaded separately on demand. Linux/Windows and source installation instructions are in [native/README.md](native/README.md); Windows device validation is pending.
 
@@ -251,9 +257,15 @@ The helper enables silent vault writes, appending learning notes to today's dail
 - **Articles and AI:** clean typography, highlights, full-page Markdown/property editing, streaming article or selection chat, saved conversations, custom instructions and quick prompts. Bring your own provider and credentials.
 - **Clipping and sharing:** templates, vault/folder selection and optional public RSS submissions. **RSS sharing is off by default.** Reading, editing and daily-note saving never submit to RSS.
 - **Interface languages:** Complete interface coverage in Simplified Chinese, Traditional Chinese, English, Japanese, Korean, Spanish, French, German and Brazilian Portuguese, including settings, reading, media study and local-helper messages. Other languages retain partial translations and use English for missing strings. Refresh open media pages after changing the interface language; original-language caption selection stays independent.
-- **Local edition only:** the GitHub `-chrome-local.zip` offers media-file saving through the helper on supported study pages. The store edition excludes this feature. Markdown and transcript text export are available in both editions. Real-page download checks for Douyin, Xiaoyuzhou and podcasts, including folder/file naming in regular Chrome, remain incomplete.
+- **Saving media files:** both editions can save complete audio/video files from supported study pages (the store edition asks for the optional downloads permission on the first click). **Downloading YouTube video or audio files is available only in the standalone edition** and needs the local helper; it is not offered in the store edition. Markdown and transcript text export are available in both editions. Real-page download checks for Douyin, Xiaoyuzhou and podcasts, including folder/file naming in regular Chrome, remain incomplete.
 
 Shortcuts: `aaa` read/study, `eee` edit, `qqq` clip and `iii` open a learning-note card. Triple-press keys can be changed, disabled or excluded per site; typing in editable fields does not trigger them.
+
+### FAQ
+
+**Store or standalone edition?** Install the Chrome Web Store edition unless you want a build newer than the store has, or want to download YouTube video/audio files; then use the GitHub `-chrome-local.zip` (manual updates; YouTube downloads also need the local helper). The extension ID is the same. AI agents: read [docs/INSTALL-FOR-AGENTS.md](docs/INSTALL-FOR-AGENTS.md).
+
+**Why is there no YouTube download?** The store edition does not download YouTube files; transcripts (copy or TXT export) and study mode work. To download files, install the standalone edition and the local helper.
 
 ### Privacy and limits
 
@@ -265,6 +277,6 @@ Chat, drafts and recognition caches are stored locally; some settings, templates
 
 ### Development and license
 
-Source builds need Node.js 22+ and npm. Run `npm ci`, then `npm run build:local` and load `dist_local` for the local edition; `npm run build:chrome` produces the store edition in `dist`. Check with `npm test`, `npx tsc --noEmit`, the native Python tests and `node scripts/check-editions.mjs` after building both editions. Translations live in `src/i18n/`; tests check English and Traditional Chinese coverage.
+Source builds need Node.js 22+ and npm. Run `npm ci`, then `npm run build:store && npm run test:prepare`. Load the fixed `~/Documents/乔木剪藏测试/extension` folder in a dedicated test profile. To switch to the standalone edition, run `npm run build:local && npm run test:prepare -- --edition local`; the installation path stays the same. See [build and testing](docs/BUILD-TESTING.md). Check with `npm test`, `npx tsc --noEmit`, the native Python tests and `node scripts/check-editions.mjs` after building both editions. Translations live in `src/i18n/`; tests check English and Traditional Chinese coverage.
 
 Independent [MIT](LICENSE) project based on [Obsidian Web Clipper](https://github.com/obsidianmd/obsidian-clipper), preserving upstream history. Built with [Defuddle](https://github.com/kepano/defuddle) and Lucide; Zhuque Fangsong uses the SIL Open Font License. Maintained by [joeseesun](https://github.com/joeseesun).

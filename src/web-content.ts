@@ -1,5 +1,6 @@
 import { createContentText } from './utils/content-i18n';
 import { readPageMedia } from './utils/web-page-media';
+import { xhsVideo } from './utils/xiaohongshu';
 import { readTedMedia } from './utils/ted-media';
 import { placeWebBar, WEB_BAR_STYLE } from './utils/web-bar-placement';
 import type { PanelSegment } from './utils/youtube-panel-actions';
@@ -9,7 +10,9 @@ import { createBarGeneration } from './utils/bar-generation';
 import { generationStrings } from './utils/subtitle-generation-strings';
 import { registerWebSource } from './utils/asr-client';
 import { webKey } from './utils/podcast-feed';
-import { siteOf } from './utils/study-sites';
+import { siteOf, xStatus } from './utils/study-sites';
+import { isChannelsMedia, readChannelsPlayback } from './utils/channels-study';
+import type { WebInfo } from './utils/asr-client';
 import { activeWebMedia, currentWebMediaAddress, declaredWebMediaAddress } from './utils/web-media-page';
 
 // Shared transcript bar for supported media detail pages. On X, on the page of a post that holds a video or audio, the transcript bar sits right under the media, in the post's own
@@ -46,16 +49,36 @@ try {
 		// The post this page is about, and its first video or audio.
 		const isX = siteOf(location.href)?.id === 'x';
 		const post = () => { const player = media(); return player ? currentWebMediaAddress(document, player, location.href) : declaredWebMediaAddress(document, location.href); };
-		const mainTweet = () => isX ? document.querySelector<HTMLElement>('main article[data-testid="tweet"]') ?? document.querySelector<HTMLElement>('article') : document.body;
-		const pageMedia = (url: string) => readPageMedia(document, url, media());
-		const media = () => isX ? mainTweet()?.querySelector<HTMLMediaElement>('video, audio') ?? undefined : activeWebMedia(document);
+		const mainTweet = () => {
+			if (!isX) return document.body;
+			const detail = xStatus(location.href); if (!detail) return undefined;
+			const id = detail.split('/').pop();
+			// Conversation parents and recommendations can precede the current post. Match its own timestamp link.
+			return Array.from(document.querySelectorAll<HTMLElement>('article[data-testid="tweet"]')).find(tweet =>
+				Array.from(tweet.querySelectorAll<HTMLAnchorElement>('a[href]')).some(link => link.querySelector('time') && link.closest('article') === tweet && xStatus(link.href)?.split('/').pop() === id));
+		};
+		// Channels' official playback page: the media address comes from the page's own feed request (the same one its player makes), read once per video.
+		const isChannels = siteOf(location.href)?.id === 'channels';
+		let channelsInfo: WebInfo | undefined, channelsFor = '', channelsTried = 0;
+		const readChannels = async (url: string) => {
+			if (!isChannels || channelsFor === url || Date.now() - channelsTried < 10000) return;
+			channelsTried = Date.now();
+			const result = await readChannelsPlayback();
+			if (post() !== url) return;
+			if (result.state === 'ready' && isChannelsMedia(url, result.info.mediaUrl)) { channelsInfo = result.info; channelsFor = url; }
+		};
+		const pageMedia = (url: string) => isChannels ? (channelsFor === url ? channelsInfo : undefined) : readPageMedia(document, url, media());
+		// Explicit study requests can still read the visible player on a feed; only automatic mounting requires a detail route.
+		const media = () => siteOf(location.href)?.id === 'xiaohongshu' ? xhsVideo(document, location.href) : isX && xStatus(location.href) ? mainTweet()?.querySelector<HTMLMediaElement>('video, audio') ?? undefined : activeWebMedia(document);
 		api.runtime.onMessage.addListener((message, _sender, reply) => { if (message.action === 'qiaomuWebMediaSource') reply({ url: post(), info: pageMedia(post() || '') }); });
-		const tweetText = () => (mainTweet()?.querySelector('[data-testid="tweetText"]')?.textContent || document.title).replace(/\s+/g, ' ').trim().slice(0, 120);
+		const tweetText = () => (isChannels && channelsInfo?.title || mainTweet()?.querySelector('[data-testid="tweetText"]')?.textContent || document.title).replace(/\s+/g, ' ').trim().slice(0, 120);
 
 		// The colours of the page it sits in: X has a light, a dim and a dark theme, and none of them is ours to choose.
 		const paint = (element: HTMLElement, where: 'side' | 'media') => {
 			const parts = getComputedStyle(document.body).backgroundColor.match(/\d+(\.\d+)?/g)?.map(Number) ?? [255, 255, 255], dark = (parts[0] * 299 + parts[1] * 587 + parts[2] * 114) / 1000 < 140;
 			const set = (name: string, value: string) => element.style.setProperty(name, value);
+			// Channels' playback page runs over any video, white or black: a solid dark card with light type reads on both.
+			if (isChannels) { set('--qm-bg', '#1f1f23'); set('--qm-card', '#1f1f23'); set('--qm-fg', '#f2f2f2'); set('--qm-fg2', '#b4b4bb'); set('--qm-line', '#3a3a42'); set('--qm-hover', 'rgba(255,255,255,.12)'); set('--qm-field', 'rgba(255,255,255,.1)'); set('--qm-margin', '0'); return; }
 			set('--qm-bg', dark ? '#16181c' : '#fff');
 			if (!isX) { set('--qm-card', dark ? '#16181c' : '#fff'); set('--qm-margin', '0'); }
 			if (dark) { set('--qm-fg', '#e7e9ea'); set('--qm-fg2', '#71767b'); set('--qm-line', '#2f3336'); set('--qm-hover', 'rgba(231,233,234,.1)'); set('--qm-field', 'rgba(231,233,234,.08)'); }
@@ -86,7 +109,7 @@ try {
 				updateBar();
 			})();
 		};
-		const remove = () => { host?.remove(); host = undefined; bar = undefined; generation.reset(); postUrl = ''; key = ''; };
+		const remove = () => { bar?.setGeneration(null); host?.remove(); host = undefined; bar = undefined; generation.reset(); postUrl = ''; key = ''; };
 		// Under the media, above the row of reply / repost / like when it can be found, else at the end of the post.
 		// Where in the right column it can go: just above X's own modules (related users, what's happening), which are `aside` blocks listed one
 		// after another. Not next to the search box: that is fixed to the top of the column and covers whatever is inserted beside it.
@@ -108,14 +131,15 @@ try {
 		let mounting = false;
 		const mount = async () => {
 			if (!(panelOn && siteOn)) { if (host) remove(); return; }
-			const url = post(), tweet = mainTweet();
-			if (!url || !tweet) { if (host) remove(); return; }
+			const url = isX && !xStatus(location.href) ? null : post(), tweet = mainTweet();
+			if (!url || !tweet || (isX && !media())) { if (host) remove(); return; }
 			// The right column can appear or go away as the window is resized: the bar follows it.
 			if (host?.isConnected && postUrl === url && (where === 'side') === Boolean(sideSpot())) { if (!isX) { registerWebSource(key, url, pageMedia(url)?.audioUrl || pageMedia(url)?.mediaUrl || undefined); placeWebBar(host, media(), siteOf(location.href)?.id || ''); } return; }
 			if (mounting) return; mounting = true;
 			try {
 				if (host) remove();
-				const nextKey = await webKey(url); if (post() !== url) return;
+				await readChannels(url); if (post() !== url) return;
+				const nextKey = await webKey(url); if (post() !== url || !(panelOn && siteOn) || (isX && !xStatus(location.href))) return;
 				postUrl = url; key = nextKey; registerWebSource(key, url, pageMedia(url)?.audioUrl || pageMedia(url)?.mediaUrl || undefined);
 				const style = document.createElement('style'); style.textContent = BAR_STYLE + '.qiaomu-x{display:block;width:100%}' + WEB_BAR_STYLE;
 				host = document.createElement('div'); host.className = isX ? 'qiaomu-x' : 'qiaomu-web-bar'; host.append(style);
@@ -125,7 +149,7 @@ try {
 					onLanguage: language => { const mine = key; void readOfficial(language).then(official => { if (key !== mine || !official?.segments.length) return; officialReady = true; lines = official.segments; bar?.setLanguages(official.languages, official.language); updateBar(); }); },
 					retry: load, seek: seconds => { const player = media(); if (player && 'currentTime' in player) { player.currentTime = seconds; void player.play().catch(() => {}); } },
 					getTime: () => { const player = media(); return player && 'currentTime' in player ? player.currentTime : undefined; }, initialOpen: false, theme: 'x',
-					generation: { strings: generationStrings(text), actions: { ...generation.actions, request: () => { const player = media(); if (siteOf(location.href)?.id === 'douyin' && player && 'currentSrc' in player && player.currentSrc.startsWith('blob:')) { void api.runtime.sendMessage({ action: 'qiaomuTripleKey', command: 'read' }); return; } generation.actions.request(); } } }, getSegments: async () => lines,
+					generation: { strings: generationStrings(text), actions: { ...generation.actions, request: () => { const player = media(); if (siteOf(location.href)?.id === 'xiaohongshu' || (siteOf(location.href)?.id === 'douyin' && player && 'currentSrc' in player && player.currentSrc.startsWith('blob:'))) { void api.runtime.sendMessage({ action: 'qiaomuTripleKey', command: 'read' }); return; } generation.actions.request(); } } }, getSegments: async () => lines,
 				} as Parameters<typeof buildTranscriptBar>[1]);
 				host.append(bar.element); where = place(host, tweet); paint(bar.element, where); load();
 			} finally { mounting = false; }

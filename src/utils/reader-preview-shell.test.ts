@@ -2,11 +2,11 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 const state=vi.hoisted(()=>({chat:vi.fn((_options: any)=>({toggle:vi.fn(()=>true)})),update:vi.fn(),copy:vi.fn().mockResolvedValue(true)}));
 vi.mock('./clip-chat',()=>({mountClipChat:state.chat}));
-vi.mock('./clip-preview',()=>({updateClipPreview:state.update,saveClipPreview:vi.fn().mockResolvedValue(['saved'])}));
+vi.mock('./clip-preview',()=>({updateClipPreview:state.update,patchClipPreview:state.update,saveClipPreview:vi.fn().mockResolvedValue(['saved'])}));
 vi.mock('./obsidian-note-creator',()=>({generateFrontmatter:async()=>''}));
 vi.mock('./reader',()=>({Reader:{onEdit:null,highlightSelection:vi.fn()}}));
 vi.mock('./highlighter',()=>({getHighlights:()=>[]}));
-vi.mock('./storage-utils',()=>({generalSettings:{tripleKeys:{},tripleKeyShortcuts:true}}));
+vi.mock('./storage-utils',()=>({generalSettings:{tripleKeys:{},tripleKeyShortcuts:true},getLocalStorage:async()=>undefined,setLocalStorage:async()=>{}}));
 vi.mock('./triple-key',()=>({listenTripleKey:vi.fn(),normalizeTripleKeys:()=>({edit:'e'})}));
 vi.mock('./youtube-study',()=>({transcriptText:()=> '[0:12] Source transcript'}));
 vi.mock('./clipboard-utils',()=>({copyToClipboard:state.copy}));

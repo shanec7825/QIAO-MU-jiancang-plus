@@ -3,10 +3,12 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('./clip-chat', () => ({ mountClipChat: vi.fn(() => ({ toggle: vi.fn() })) }));
 vi.mock('./clipboard-utils', () => ({ copyToClipboard: vi.fn().mockResolvedValue(true) }));
 vi.mock('./file-utils', () => ({ saveFile: vi.fn() }));
+vi.mock('./study-download', () => ({ mountStudyDownload: vi.fn() }));
 vi.mock('./storage-utils', () => ({ loadSettings: vi.fn(), getLocalStorage: vi.fn().mockResolvedValue(undefined), setLocalStorage: vi.fn().mockResolvedValue(undefined) }));
 import { mountYouTubeStudy, transcriptText } from './youtube-study';
 import { mountClipChat } from './clip-chat';
 import { copyToClipboard } from './clipboard-utils';
+import { mountStudyDownload } from './study-download';
 import { saveFile } from './file-utils';
 
 function article(html: string): HTMLElement {
@@ -41,12 +43,13 @@ describe('YouTube study transcript', () => {
 		expect(node.querySelector('[aria-label="基于视频文稿提问"]')).toBeNull();
 		expect(vi.mocked(mountClipChat).mock.calls).toHaveLength(count);
 	});
-	it('omits duplicate size/transcript action rows and places translation beside sentence highlighting', async () => {
+	it('omits duplicate size/transcript action rows and places manuscript translation beside Transcript', async () => {
 		const node = article('<div class="player-toggle-group"><label>标出当前句子</label></div>'+subtitles);
 		await mountYouTubeStudy(document, node, 'Video', 'https://www.youtube.com/watch?v=dbqweBCynuI', {toggle: () => true});
 		expect(node.querySelector('.youtube-study-toolbar, .youtube-size-control')).toBeNull();
 		expect(node.querySelector('[aria-label="复制字幕"], [aria-label="下载字幕（TXT）"]')).toBeNull();
-		expect(node.querySelector('.player-toggle-group')!.lastElementChild?.classList.contains('youtube-translate-toggle')).toBe(true);
+		expect(node.querySelector('.transcript-heading-tools .youtube-translate-toggle')).not.toBeNull();
+		expect(node.querySelector('.player-toggle-group .youtube-translate-toggle')).toBeNull();
 		await mountYouTubeStudy(document,node,'Video','https://www.youtube.com/watch?v=dbqweBCynuI');
 		expect(node.querySelectorAll('.youtube-translate-toggle')).toHaveLength(1);
 	});
@@ -72,4 +75,14 @@ it('does not embed lookalike hosts or malformed video IDs', async () => {
 	expect(restoreYouTubePlayer(node, 'https://youtube.com.evil.test/watch?v=dbqweBCynuI')).toBe(false);
 	expect(restoreYouTubePlayer(node, 'https://www.youtube.com/watch?v=invalid')).toBe(false);
 	expect(node.querySelector('iframe')).toBeNull();
+});
+
+describe('YouTube study download entry', () => {
+	it('mounts the helper-backed download for a YouTube watch page only in the standalone edition', async () => {
+		vi.mocked(mountStudyDownload).mockClear();
+		const node = article('<iframe src="https://www.youtube.com/embed/dbqweBCynuI"></iframe>');
+		await mountYouTubeStudy(document, node, 'Video', 'https://www.youtube.com/watch?v=dbqweBCynuI');
+		if (__LOCAL_EDITION__) expect(mountStudyDownload).toHaveBeenCalledWith(node, undefined, { title: 'Video', sourceUrl: 'https://www.youtube.com/watch?v=dbqweBCynuI', mediaUrl: '', video: true });
+		else expect(mountStudyDownload).not.toHaveBeenCalled();
+	});
 });

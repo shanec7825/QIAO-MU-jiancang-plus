@@ -5,6 +5,7 @@ vi.mock('./i18n',()=>({getMessage:(key:string)=>key}));
 vi.mock('./clip-chat',()=>({mountClipChat:()=>({toggle:()=>true})}));
 import {mountPlayerSize} from './youtube-player-size';
 import {wireTranscript} from './reader-transcript';
+vi.mock('./study-download',()=>({mountStudyDownload:vi.fn()}));
 import {mountYouTubeStudy} from './youtube-study';
 it('connects late subtitles to the original handle and iframe without nesting containers or rewriting its URL',async()=>{
  vi.stubGlobal('CSS',{});
@@ -18,7 +19,8 @@ it('connects late subtitles to the original handle and iframe without nesting co
  expect(article.querySelectorAll('.player-container')).toHaveLength(1); expect(article.querySelectorAll('.player-toggle-group')).toHaveLength(1);
  expect(article.querySelector('.youtube-player-resize')).toBe(handle);expect(handle?.previousElementSibling).toBe(frame);
  expect(article.querySelector('iframe')).toBe(frame);expect(frame.src).toBe(src);
- expect(article.querySelector('.player-toggle-group')!.lastElementChild?.className).toContain('youtube-translate-toggle');
+ expect(article.querySelector('.player-toggle-group .youtube-translate-toggle')).toBeNull();
+ expect(article.querySelector('.transcript-heading-tools .youtube-translate-toggle')).not.toBeNull();
  expect(Array.from(article.querySelectorAll('.player-toggle')).map(toggle => (toggle as HTMLElement).dataset.toggle || 'translate')).toEqual(['pin', 'follow', 'translate']); // translation stays last, pin and follow sit to its left
  expect(article.querySelector('.youtube-size-control,.youtube-study-toolbar')).toBeNull();
  const post=vi.spyOn(frame.contentWindow!,'postMessage'); const grip=handle as HTMLElement;

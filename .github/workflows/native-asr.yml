@@ -1,19 +1,40 @@
 name: Native ASR compatibility
 on:
-  workflow_dispatch:
   push:
     paths:
+      - 'native/host.py'
+      - 'native/test_atomic_json.py'
       - 'native/asr*.py'
       - 'native/test_asr*.py'
+      - 'native/install.py'
+      - 'native/test_install_check.py'
       - '.github/workflows/native-asr.yml'
       - 'src/utils/bar-generation.test.ts'
+      - 'src/utils/channels-study*.ts'
+      - 'src/utils/protected-study*.ts'
+      - 'src/utils/xiaoe*.ts'
+      - 'src/utils/remote-preview-media*.ts'
+      - 'src/utils/web-study-probe.ts'
+      - 'src/utils/audio-study.ts'
+      - 'src/background.ts'
       - 'package*.json'
   pull_request:
     paths:
+      - 'native/host.py'
+      - 'native/test_atomic_json.py'
       - 'native/asr*.py'
       - 'native/test_asr*.py'
+      - 'native/install.py'
+      - 'native/test_install_check.py'
       - '.github/workflows/native-asr.yml'
       - 'src/utils/bar-generation.test.ts'
+      - 'src/utils/channels-study*.ts'
+      - 'src/utils/protected-study*.ts'
+      - 'src/utils/xiaoe*.ts'
+      - 'src/utils/remote-preview-media*.ts'
+      - 'src/utils/web-study-probe.ts'
+      - 'src/utils/audio-study.ts'
+      - 'src/background.ts'
       - 'package*.json'
 permissions:
   contents: read
@@ -29,8 +50,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - run: python -m unittest discover -s native -p 'test_atomic_json.py'
       - run: python -m unittest discover -s native -p 'test_asr_install.py'
       - run: python -m unittest discover -s native -p 'test_asr_recovery.py'
+      - run: python -m unittest discover -s native -p 'test_asr_page_media.py'
+      - run: python -m unittest discover -s native -p 'test_asr_xiaoe.py'
+      - run: python -m unittest discover -s native -p 'test_asr_xhs.py'
+      - run: python -m unittest discover -s native -p 'test_install_check.py'
       - if: runner.os == 'Linux'
         run: python -m unittest discover -s native -p 'test_*.py'
   extension:
@@ -49,7 +75,10 @@ jobs:
       - run: npm run build:chrome
       - run: npm run build:local
       - run: node scripts/check-editions.mjs
+      - run: npm run package -- --targets chrome-store,chrome-local
       - uses: actions/upload-artifact@v4
         with:
           name: windows-asr-chrome-local
-          path: builds/*chrome-local.zip
+          path: releases/**
+          if-no-files-found: error
+          retention-days: 14

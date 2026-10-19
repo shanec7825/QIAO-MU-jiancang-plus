@@ -22,11 +22,15 @@ export interface BarGenerationOptions {
 	// Where "add a cloud service" leads (the settings page); a page that cannot open it leaves this out.
 	openSettings?: () => void;
 	intervalMs?: number;
+	// File uploads always show the shared confirmation, even when another page enabled automatic starts.
+	alwaysConfirm?: boolean;
+	// Track the actual helper task; undefined means a new request has not been acknowledged yet.
+	onJob?: (videoKey: string, jobId?: string) => void;
 }
 const sizeText = (mb: number) => mb >= 1000 ? (mb / 1000).toFixed(1) + ' GB' : mb + ' MB';
 // Which engine or service is doing the work, in words for the progress line and the note on the result.
 export function viaOf(status: AsrStatus): string {
-	if (status.mode === 'cloud') return status.cloudLocal ? status.cloudLabel || t('本机服务') : t('{0} · 云端', [status.cloudLabel || t('云端服务')]);
+	if (status.mode === 'cloud') { const label = [status.cloudLabel || t('云端服务'), status.cloudModel].filter(Boolean).join(' · '); return status.cloudLocal ? label : t('{0} · 云端', [label]); }
 	const engine = (status.local ?? []).find(item => item.id === status.engine) ?? (status.local ?? []).find(item => item.id === status.choices?.engine);
 	return engine ? t('{0} · 本机', [engine.name]) : t('本机识别');
 }
@@ -37,7 +41,7 @@ export function confirmFor(status: AsrStatus): Extract<GenUi, { kind: 'confirm' 
 	const chosenLocal = status.choices && status.choices.engine !== 'auto' ? status.choices.engine : (status.engine && status.engine !== 'cloud' ? status.engine : recommended);
 	const choices: GenChoice[] = [
 		...locals.map(item => ({ value: 'local:' + item.id, kind: 'local' as const, label: item.name, note: item.installed ? t('本机 · 音频不上传 · 免费') : t('本机 · 音频不上传 · 需先下载 {0}', [sizeText(item.sizeMb)]) })),
-		...(status.choices?.profiles ?? []).filter(item => item.configured).map(item => ({ value: 'cloud:' + item.id, kind: 'cloud' as const, label: item.label + (item.local ? t('（本机服务）') : ''), note: item.local ? t('本机服务 · 音频不离开这台电脑') : t('云端 · 音频会上传到该服务并按其规则计费') })),
+		...(status.choices?.profiles ?? []).filter(item => item.configured).map(item => ({ value: 'cloud:' + item.id, kind: 'cloud' as const, label: [item.label, item.model].filter(Boolean).join(' · ') + (item.local ? t('（本机服务）') : ''), note: item.local ? t('本机服务 · 音频不离开这台电脑') : t('云端 · 音频会上传到该服务并按其规则计费') })),
 	];
 	const picked = cloud ? 'cloud:' + status.choices?.active : 'local:' + chosenLocal;
 	// What is missing: the engine the viewer picked (a cloud service needs none), or just the download and audio tools.
@@ -51,17 +55,19 @@ const choiceOf = (value: string): { engine: string } | { profile: string } | und
 const LANGUAGE_KEY = 'qiaomuAsrLanguage';
 const savedLanguage = (): string => { try { const value = localStorage.getItem(LANGUAGE_KEY); return value && /^[a-z]{2,4}$/.test(value) ? value : 'auto'; } catch { return 'auto'; } };
 const rememberLanguage = (value: string) => { try { localStorage.setItem(LANGUAGE_KEY, value); } catch { /* storage unavailable */ } };
-export interface BarGeneration { actions: GenerationActions; sync: () => void; markGenerated: (videoKey: string) => void; reset: () => void; readonly active: boolean }
+export interface BarGeneration { actions: GenerationActions; sync: () => void; markGenerated: (videoKey: string) => void; resume: (jobId?: string) => void; reset: () => void; readonly active: boolean }
 
 // Pressing "generate subtitles" asks only what is still undecided. Once the viewer has chosen an engine or service and agreed to
 // start straight away (the "remember" box, or the setting), the press starts the job at once; the confirm step comes back only when
 // something has to be installed first, or when the viewer asks to do it another way.
 export function createBarGeneration(options: BarGenerationOptions): BarGeneration {
-	const uiByKey = new Map<string, GenUi>(); let jobKey = '', lastLanguage = savedLanguage(), pendingTarget: InstallTarget | undefined, selected = '', via = '', force = false, generation: Generation;
+	const uiByKey = new Map<string, GenUi>();
+ // A cancellation is a request to reconsider this video's model, not a change to global defaults.
+ const cancelledKeys = new Set<string>(); let revision = 0; let jobKey = '', lastLanguage = savedLanguage(), pendingTarget: InstallTarget | undefined, selected = '', via = '', force = false, generation: Generation;
 	const sync = () => { const key = options.videoKey(); options.bar()?.setGeneration((key && uiByKey.get(key)) || null); };
 	const set = (key: string, ui: GenUi | null) => { if (ui) uiByKey.set(key, ui); else uiByKey.delete(key); sync(); };
 	const language = () => lastLanguage === 'auto' ? {} : { language: lastLanguage };
-	const run = (key: string) => { set(key, { kind: 'running', stage: '', progress: 0, modelDownload: false, via }); generation.run(key, { ...language(), ...(force ? { force: true } : {}) }); };
+	const run = (key: string) => { cancelledKeys.delete(key); options.onJob?.(key); set(key, { kind: 'running', stage: '', progress: 0, modelDownload: false, via }); generation.run(key, { ...language(), ...(force ? { force: true } : {}) }); };
 	const onEvent = (event: GenerationEvent) => {
 		const key = jobKey; if (!key) return;
 		switch (event.phase) {
@@ -70,21 +76,21 @@ export function createBarGeneration(options: BarGenerationOptions): BarGeneratio
 				 set(key, { kind: 'running', stage: event.stage, progress: event.progress, processedSec: event.processedSec, totalSec: event.totalSec, modelDownload: event.modelDownload, via }); break;
 			case 'done': options.apply(key, event.segments, true); options.save(key, event.segments); set(key, { kind: 'generated', ...(via ? { via } : {}) }); break;
 			case 'failed': if (!force) options.revert(key); set(key, { kind: 'failed', error: event.error, code: event.code }); break;
-			case 'cancelled': if (force) set(key, { kind: 'generated' }); else { options.revert(key); set(key, null); } break;
+			case 'cancelled': cancelledKeys.add(key); if (force) set(key, { kind: 'generated' }); else { options.revert(key); set(key, null); } break;
 			case 'installing': set(key, { kind: 'installing', stage: event.stage, progress: event.progress }); break;
 			// The install was the only thing standing in the way: carry on and make the subtitles.
 			case 'installed': pendingTarget = undefined; run(key); break;
 			case 'install-failed': set(key, { kind: 'failed', error: event.error, code: 'install' }); break;
-			case 'install-cancelled': set(key, null); break;
+			case 'install-cancelled': cancelledKeys.add(key); set(key, null); break;
 		}
 	};
-	generation = createGeneration(onEvent, options.deps, options.intervalMs);
+	generation = createGeneration(onEvent, options.deps, options.intervalMs, options.onJob);
 	const request = (ask = false) => {
-		const key = options.videoKey(); if (!key) return; jobKey = key; set(key, { kind: 'checking' });
+		const key = options.videoKey(); if (!key) return; const mine = ++revision; jobKey = key; set(key, { kind: 'checking' });
 		void generation.prepare(key).then(status => {
-			if (jobKey !== key || !status) return;
+			if (mine !== revision || jobKey !== key || !status) return;
 			const { target, ...ui } = confirmFor(status); pendingTarget = target; selected = ui.selected ?? ''; via = viaOf(status);
-			if (!ask && status.choices?.auto && status.ready && !target) { run(key); return; }
+			if (status.ready && !target && !ask && !cancelledKeys.has(key) && !options.alwaysConfirm && status.choices?.auto) { run(key); return; }
 			set(key, ui);
 		});
 	};
@@ -93,31 +99,48 @@ export function createBarGeneration(options: BarGenerationOptions): BarGeneratio
 		get active() { return generation.active; },
 		sync,
 		markGenerated: key => set(key, { kind: 'generated' }),
-		reset() { generation.dispose(); jobKey = ''; },
+		// Poll the original task even if current model settings changed. Never create a task during recovery.
+		resume(jobId) {
+			force = false; via = '';
+			if (!jobId || !/^[0-9a-f]{32}$/.test(jobId)) { request(true); return; }
+			const key = options.videoKey(); if (!key) return; jobKey = key;
+			set(key, { kind: 'running', stage: '', progress: 0, modelDownload: false });
+			generation.run(key, { jobId });
+		},
+		reset() { ++revision; generation.dispose(); jobKey = ''; uiByKey.clear(); },
 		actions: {
-			request: () => { force = false; request(); },
+			request: () => {
+				const key = options.videoKey(), failed = Boolean(key && uiByKey.get(key)?.kind === 'failed');
+				if (!failed) force = false;
+				request(failed);
+			},
 			confirm(chosenLanguage, remembered) {
-				const key = options.videoKey(); if (!key) return; jobKey = key; lastLanguage = chosenLanguage || 'auto'; rememberLanguage(lastLanguage);
+				const key = options.videoKey(); if (!key || uiByKey.get(key)?.kind === 'checking') return; jobKey = key; lastLanguage = chosenLanguage || 'auto'; rememberLanguage(lastLanguage);
 				if (remembered !== undefined) remember(remembered);
 				if (pendingTarget) { set(key, { kind: 'installing', stage: '', progress: 0 }); generation.install(pendingTarget); return; }
 				run(key);
 			},
-			// A different engine or service: save it as the default and show the confirm step again for it.
+			// Save the selected model, then refresh costs and installation needs in the existing dialog.
 			choose(value) {
-				const choice = choiceOf(value); const key = options.videoKey(); if (!key || !choice) return;
-				void (options.choose ?? asrChoose)({ ...choice, videoKey: key }).then(() => { if (jobKey === key) request(true); });
+				const choice = choiceOf(value); const key = options.videoKey(); if (!key || !choice) return; const mine = ++revision;
+				set(key, { kind: 'checking' });
+				void (options.choose ?? asrChoose)({ ...choice, videoKey: key }).then(reply => { if (mine !== revision || jobKey !== key) return; if (!reply.ok) { set(key, { kind: 'failed', error: reply.error }); return; } request(true); }).catch(() => { if (mine === revision && jobKey === key) set(key, { kind: 'failed', error: t('与本地助手的连接中断，任务可能仍在后台进行，稍后重新点击即可继续查看') }); });
 			},
 			// Make them again another way (different engine or service); the new result replaces the old one.
 			regenerate() { force = true; request(true); },
-			setup(reason) { if (reason !== 'busy') void browser.runtime.sendMessage({ action: 'openSettings', section: reason === 'helper-offline' || reason === 'helper-outdated' ? 'clip' : 'asr-models' }); },
+			setup(reason) { if (reason !== 'busy') void browser.runtime.sendMessage(reason === 'helper-offline' || reason === 'helper-outdated' ? { action: 'openHelperInstall' } : { action: 'openSettings', section: 'asr-models' }); },
 			addService() { options.openSettings?.(); },
 			// The viewer closed the dialog without choosing: back to the plain offer.
-			dismiss() { const key = options.videoKey(); if (key) set(key, null); },
-			cancel() { generation.cancel(); },
+			dismiss() { const key = options.videoKey(); ++revision; jobKey = ''; if (key) set(key, null); },
+			cancel() { ++revision; generation.cancel(); },
 			// The viewer agreed to lend this browser's login for this one download.
 			async confirmWithLogin() { const key = options.videoKey(); if (!key) return;
 				// Lending the browser's login needs a permission the viewer gives once, in the settings (the local edition already has it).
-				const ready = await Promise.resolve(browser.runtime.sendMessage({ action: 'qiaomuCookiesReady' })).then(answer => (answer as { ready?: boolean } | undefined)?.ready === true, () => false);
+				// Extension pages can request optional access directly in this click gesture.
+				// A content script has no permissions API and uses the settings handoff.
+				const ready = browser.permissions?.request
+					? await browser.permissions.request({ permissions: ['cookies'] }).catch(() => false)
+					: await Promise.resolve(browser.runtime.sendMessage({ action: 'qiaomuCookiesReady' })).then(answer => (answer as { ready?: boolean } | undefined)?.ready === true, () => false);
 				if (!ready) { set(key, { kind: 'failed', error: t('要先在设置里允许使用浏览器的登录状态：ASR 语音识别页，打开「下载要验证身份时…」。'), code: 'cookies-permission' }); options.openSettings?.(); return; }
 				jobKey = key; set(key, { kind: 'running', stage: '', progress: 0, modelDownload: false, via }); generation.run(key, { cookies: thisBrowser(), ...language() }); },
 		},

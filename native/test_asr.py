@@ -42,6 +42,22 @@ class AsrTests(unittest.TestCase):
  def work(self,job_id):
   asr.run_worker(str(asr.job_dir(self.base,job_id)))
   return asr.handle({'action':'asrPoll','jobId':job_id},self.base)
+ def test_restore_poll_reads_terminal_job_without_spawning_a_new_worker(self):
+  started=self.run_job();directory=asr.job_dir(self.base,started['id'])
+  for state in ('failed','cancelled','completed'):
+   asr.write_state(directory,state=state,error='fixture timeout' if state=='failed' else None)
+   with patch.object(asr,'spawn_worker') as spawn:
+    reply=asr.handle({'action':'asrPoll','jobId':started['id'],'since':0},self.base)
+   self.assertTrue(reply['ok'],reply);self.assertEqual(reply['id'],started['id']);self.assertEqual(reply['state'],state);spawn.assert_not_called()
+ def test_restore_poll_pages_through_a_completed_long_transcript(self):
+  started=self.run_job();directory=asr.job_dir(self.base,started['id']);count=asr.MAX_POLL_SEGMENTS+1
+  (directory/'segments.jsonl').write_text(''.join(json.dumps({'start':i,'end':i+1,'text':str(i)})+'\n' for i in range(count)),encoding='utf8')
+  asr.write_state(directory,state='completed',segmentCount=count)
+  with patch.object(asr,'spawn_worker') as spawn:
+   first=asr.handle({'action':'asrPoll','jobId':started['id'],'since':0},self.base)
+   second=asr.handle({'action':'asrPoll','jobId':started['id'],'since':first['next']},self.base)
+  self.assertEqual(first['state'],'completed');self.assertEqual(len(first['segments']),asr.MAX_POLL_SEGMENTS)
+  self.assertEqual(first['segmentCount'],count);self.assertEqual(second['next'],count);self.assertEqual(len(second['segments']),1);spawn.assert_not_called()
  def test_status_reports_tools_engine_and_install_hints(self):
   s=asr.handle({'action':'asrStatus'},self.base);self.assertTrue(s['ready']);self.assertEqual(s['engine'],'mlx');self.assertFalse(s['modelDownloadNeeded'])
   with patch.dict(os.environ,{'QIAOMU_TOOL_DIRS':''}),patch.object(asr,'TOOL_DIRS',[]),patch.dict(os.environ,{'PATH':'/nonexistent'}):
@@ -166,4 +182,34 @@ class AsrTests(unittest.TestCase):
   self.assertEqual(asr.video_url('xiaoyuzhou:'+'a'*24),'https://www.xiaoyuzhoufm.com/episode/'+'a'*24)
   for bad in ('xiaoyuzhou:abc','xiaoyuzhou:'+'g'*24,'file:xyz'):
    with self.assertRaises(ValueError):asr.video_url(bad)
+
+class SilenceRecognitionTests(unittest.TestCase):
+ def test_silent_pcm_never_reaches_whisper(self):
+  import wave
+  with tempfile.TemporaryDirectory() as tmp:
+   directory=Path(tmp);wav=directory/'audio.wav'
+   with wave.open(str(wav),'wb') as audio:
+    audio.setnchannels(1);audio.setsampwidth(2);audio.setframerate(16000);audio.writeframes(bytes(16000*2*2))
+   found={'id':'mlx','path':'mlx_whisper','model':'test','modelReady':True}
+   with patch.object(asr,'stream',return_value=(0,[])) as run:
+    with self.assertRaises(asr.Failed):asr.recognise(directory,{},wav,2,{},found,{})
+    run.assert_not_called()
+ def test_mlx_enables_upstream_silence_hallucination_guard(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   directory=Path(tmp);found={'id':'mlx','path':'mlx_whisper','model':'test','modelReady':True}
+   with patch.object(asr,'stream',return_value=(0,[])) as run:
+    with self.assertRaises(asr.Failed):asr.recognise(directory,{},directory/'audio.wav',2,{},found,{})
+    command=run.call_args.args[0]
+    self.assertIn('--word-timestamps',command);self.assertIn('--hallucination-silence-threshold',command)
+
+ def test_pcm_gate_preserves_quiet_audio_and_does_not_guess_for_invalid_files(self):
+  import wave, struct
+  with tempfile.TemporaryDirectory() as tmp:
+   wav=Path(tmp)/'quiet.wav'
+   with wave.open(str(wav),'wb') as audio:
+    audio.setnchannels(1);audio.setsampwidth(2);audio.setframerate(16000)
+    audio.writeframes(struct.pack('<h',100)*16000)
+   self.assertFalse(asr.silent_pcm(wav))
+   wav.write_bytes(b'not a wav');self.assertFalse(asr.silent_pcm(wav))
+
 if __name__=='__main__':unittest.main()
