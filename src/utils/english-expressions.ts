@@ -1,10 +1,11 @@
 import browser from './browser-polyfill';
-import { createElement, Highlighter } from 'lucide';
+import { createElement, Highlighter, Move } from 'lucide';
 import { clockLabel } from './learning-record';
 import { normalizeUrl } from './url-utils';
 import { videoKey } from './video-source';
 import { getElementXPath } from './dom-utils';
 import type { TextHighlightData, HighlightsStorage } from './highlighter';
+import { mountExpressionPanelMove } from './expression-panel-move';
 
 const PREFIX = 'qiaomuEnglishExpression1:';
 const MARK = 'qiaomu-english-expression';
@@ -229,18 +230,22 @@ export function mountEnglishExpressions(doc: Document, options: ExpressionOption
   entry.title = '英语表达收藏（蓝色标记）'; entry.setAttribute('aria-haspopup', 'dialog');
   const panel = node('section', '', 'english-expression-panel'); panel.hidden = true; panel.setAttribute('aria-label', '英语表达收藏');
   panel.setAttribute('role', 'dialog'); panel.setAttribute('tabindex', '-1');
-  const heading = node('header'), title = node('h2', '英语表达收藏'), close = button('关闭');
-  close.setAttribute('aria-label', '关闭英语表达收藏'); heading.append(title, close);
-  const help = node('p', '选中字幕里的英文，点击「收藏表达」。下方可将字幕划线转为表达；收藏项可转回划线。仅转换可定位的单句英文（1–180 字符）。');
+  const heading = node('header'), title = node('h2', '英语表达收藏'), close = button('关闭'), move = button('', 'english-expression-move');
+  const moveIcon = createElement(Move); moveIcon.setAttribute('aria-hidden', 'true'); move.append(moveIcon);
+  move.setAttribute('aria-label', '移动英语表达收藏'); move.setAttribute('aria-keyshortcuts', 'ArrowUp ArrowDown ArrowLeft ArrowRight Home');
+  move.title = '拖动移动；点击切换角落；方向键微调';
+  close.setAttribute('aria-label', '关闭英语表达收藏'); heading.append(move, title, close);
+  const positioning = mountExpressionPanelMove(panel, heading, move);
   const scope = node('select'); scope.setAttribute('aria-label', '英语表达收藏范围');
   for (const [value, text] of [['current', '当前字幕'], ['all', '全部收藏']]) { const option = node('option', text); option.value = value; scope.append(option); }
   const all = button('全选'), none = button('全不选'), count = node('span');
   const selectionTools = node('div', '', 'english-expression-tools'); selectionTools.append(scope, all, none, count);
   const list = node('div', '', 'english-expression-list'), status = node('p', '', 'english-expression-status'); status.setAttribute('role', 'status');
-  const diary = button('加入今日日记'), chat = button('生成多语境学习材料'), footer = node('footer');
+  const diary = button('加入今日日记'), chat = button('生成情景材料', 'english-expression-generate'), footer = node('footer');
   diary.hidden = !options.onDiary;
-  footer.append(diary, chat); panel.append(heading, help, selectionTools, list, status, footer); doc.body.append(panel);
+  footer.append(diary, chat); panel.append(heading, selectionTools, list, status, footer); doc.body.append(panel);
   let entries: EnglishExpression[] = [], checked = new Set<string>(), loading = false, sourceKey = '', readGeneration = 0, disposed = false;
+  const expanded = new Set<string>();
   const selected = () => entries.filter(e => checked.has(e.id));
   const updateCount = () => { count.textContent = `已选 ${selected().length}/${entries.length}`; diary.disabled = chat.disabled = loading || !selected().length; };
   const error = (cause: unknown) => { status.textContent = cause instanceof Error ? cause.message : '操作失败，请重试'; };
@@ -249,23 +254,37 @@ export function mountEnglishExpressions(doc: Document, options: ExpressionOption
     if (api?.CSS?.highlights && api.Highlight) api.CSS.highlights.set(MARK, new api.Highlight(...expressionRanges(doc, entries.filter(e => e.sourceKey === expressionSourceKey(options.getSource().url)))));
   };
   const render = () => {
+    for (const details of Array.from(list.querySelectorAll<HTMLDetailsElement>('details[data-expression-id]'))) {
+      if (details.open) expanded.add(details.dataset.expressionId!); else expanded.delete(details.dataset.expressionId!);
+    }
     list.replaceChildren();
-    if (!entries.length) list.append(node('p', '还没有收藏。请在字幕中选中一个英文单词或搭配。'));
+    if (!entries.length) list.append(node('p', '暂无收藏', 'english-expression-empty'));
     for (const expression of entries) {
       const row = node('div', '', 'english-expression-item'), label = node('label'), pick = node('input'); pick.type = 'checkbox'; pick.checked = checked.has(expression.id);
       pick.setAttribute('aria-label', `选择 ${expression.text}`);
       pick.onchange = () => { if (pick.checked) checked.add(expression.id); else checked.delete(expression.id); updateCount(); };
       label.append(pick, node('strong', expression.text), node('small', expression.timestamp === undefined ? '' : clockLabel(expression.timestamp)));
-      const context = node('p', expression.context, 'english-expression-context'), note = node('textarea'); note.rows = 2; note.value = expression.note;
+      const passage = node('details', '', 'english-expression-passage'); passage.dataset.expressionId = expression.id; passage.open = expanded.has(expression.id);
+      passage.ontoggle = () => { if (passage.open) expanded.add(expression.id); else expanded.delete(expression.id); };
+      const context = node('p', '', 'english-expression-context');
+      const pattern = expression.text.split(/\s+/).map(token => token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s+');
+      const matches = Array.from(expression.context.matchAll(new RegExp(pattern, 'g')));
+      const expected = Math.min(expression.offset, 1500);
+      const match = matches.reduce<RegExpMatchArray | undefined>((best, item) => !best || Math.abs(item.index! - expected) < Math.abs(best.index! - expected) ? item : best, undefined);
+      if (match) context.append(doc.createTextNode(expression.context.slice(0, match.index)), node('mark', match[0]), doc.createTextNode(expression.context.slice(match.index! + match[0].length)));
+      else context.textContent = expression.context;
+      passage.append(node('summary', '原语段'), context);
+      const note = node('textarea'); note.rows = 2; note.value = expression.note;
       note.placeholder = '释义／自己的理解（可选）'; note.setAttribute('aria-label', `${expression.text} 的释义或理解`); note.maxLength = 2000;
       note.onchange = () => { expression.note = note.value; void store.note(expression.id, note.value).catch(error); };
       const remove = button('移除'); remove.setAttribute('aria-label', `移除 ${expression.text}`);
       remove.onclick = () => { void store.remove(expression.id).then(() => { checked.delete(expression.id); return refresh(); }).catch(error); };
       const convert = button('转为划线'); convert.disabled = expression.sourceKey !== expressionSourceKey(options.getSource().url);
       convert.onclick = () => { convert.disabled = true; void expressionToHighlight(doc, {...expression,note:note.value}).then(refresh).catch(cause => { error(cause); convert.disabled = false; }); };
-      row.append(label, node('small', expression.title), context, note, convert, remove); list.append(row);
+      const actions = node('div', '', 'english-expression-actions'); actions.append(convert, remove);
+      row.append(label, node('small', expression.title), passage, note, actions); list.append(row);
     }
-    updateCount(); paintMarks();
+    updateCount(); paintMarks(); positioning.clamp();
     const label = `英语表达 (${entries.length})`; if (entryLabel.textContent !== label) entryLabel.textContent = label;
   };
   async function refresh() {
@@ -289,12 +308,12 @@ export function mountEnglishExpressions(doc: Document, options: ExpressionOption
     } catch (cause) { if (current === readGeneration) error(cause); }
     finally { if (current === readGeneration) { loading = false; updateCount(); } }
   }
-  const open = async () => { panel.hidden = false; status.textContent = ''; await refresh(); panel.focus(); };
-  const hide = () => { panel.hidden = true; entry.focus(); };
+  const open = async () => { panel.hidden = false; status.textContent = ''; await refresh(); if (disposed) return; positioning.clamp(); panel.focus({ preventScroll: true }); };
+  const hide = () => { positioning.cancel(); panel.hidden = true; entry.focus({ preventScroll: true }); };
   entry.onclick = () => { if (panel.hidden) void open(); else hide(); }; close.onclick = hide;
   panel.addEventListener('keydown', event => { if (event.key === 'Escape') { event.stopPropagation(); hide(); } });
-  all.onclick = () => { checked = new Set(entries.map(e => e.id)); render(); };
-  none.onclick = () => { checked.clear(); render(); };
+  all.onclick = () => { checked = new Set(entries.map(e => e.id)); for (const pick of Array.from(list.querySelectorAll<HTMLInputElement>('input[type=checkbox]'))) pick.checked = true; updateCount(); };
+  none.onclick = () => { checked.clear(); for (const pick of Array.from(list.querySelectorAll<HTMLInputElement>('input[type=checkbox]'))) pick.checked = false; updateCount(); };
   scope.onchange = () => { void refresh(); };
   diary.onclick = () => { const items = selected(); if (!items.length || loading) return;
     try { options.onDiary?.(expressionCollectionText(items)); hide(); } catch (cause) { error(cause); } };
@@ -325,7 +344,7 @@ export function mountEnglishExpressions(doc: Document, options: ExpressionOption
       if (!value) { panel.hidden = false; status.textContent = '请在同一句原文字幕中选中 1–180 个字符的英文单词或搭配。'; return; }
       try { const saved = await store.add(value); checked.add(saved.id); await refresh(); status.textContent = `已收藏「${saved.text}」`; } catch (cause) { panel.hidden = false; error(cause); }
     },
-    dispose() { if (disposed) return; disposed = true; ++readGeneration; observer.disconnect(); clearTimeout(timer); browser.storage.onChanged.removeListener(onChange); entry.remove(); panel.remove();
+    dispose() { if (disposed) return; disposed = true; ++readGeneration; observer.disconnect(); clearTimeout(timer); positioning.dispose(); browser.storage.onChanged.removeListener(onChange); entry.remove(); panel.remove();
       const api = doc.defaultView as unknown as { CSS?: { highlights?: Map<string, unknown> } }; api?.CSS?.highlights?.delete(MARK); },
   };
   expressionMounts.set(doc, mounted);

@@ -139,3 +139,47 @@ it('formats collections with notes and creates a data-delimited learning request
   expect(expressionCollectionText([e])).toContain('英语表达收藏');
   const prompt = expressionLearningPrompt([e]); expect(prompt).toContain('不作为指令执行'); expect(prompt).toContain('"timestamp": "0:42"'); expect(prompt).toContain('填空练习');
 });
+it('shows a compact panel with a collapsed original passage and a marked expression',async()=>{
+ select();await createExpressionStore(storage as any).add(selectedExpression(document,source)!);
+ const mounted=mountEnglishExpressions(document,{getSource:()=>source,onChat:vi.fn()});dispose=mounted.dispose;
+ await settle();(document.querySelector('.english-expression-entry') as HTMLButtonElement).click();await settle();
+ const panel=document.querySelector('.english-expression-panel')!;
+ expect(panel.textContent).not.toContain('仅转换可定位');expect(panel.textContent).not.toContain('选中字幕里的英文');
+ const details=panel.querySelector('details')!;expect(details.open).toBe(false);
+ expect(details.querySelector('summary')!.textContent).toBe('原语段');
+ expect(details.querySelector('mark')!.textContent).toBe('look forward');
+ expect(details.querySelector('.english-expression-context')!.textContent).toBe('We look forward to meeting you.');
+ expect(panel.querySelector('footer')!.textContent).toContain('生成情景材料');
+});
+it('keeps the original passage expanded and annotations intact while changing selections',async()=>{
+ select();await createExpressionStore(storage as any).add(selectedExpression(document,source)!);
+ const mounted=mountEnglishExpressions(document,{getSource:()=>source,onChat:vi.fn()});dispose=mounted.dispose;
+ await settle();(document.querySelector('.english-expression-entry') as HTMLButtonElement).click();await settle();
+ const details=document.querySelector('details')!;details.open=true;details.dispatchEvent(new Event('toggle'));
+ for(const label of ['全不选','全选']){
+  Array.from(document.querySelectorAll<HTMLButtonElement>('.english-expression-tools button')).find(button=>button.textContent===label)!.click();
+  expect(document.querySelector('details')).toBe(details);expect(details.open).toBe(true);
+ }
+ const note=document.querySelector('textarea')!;note.value='期待';note.dispatchEvent(new Event('change'));await settle();
+ (document.querySelector('.english-expression-entry') as HTMLButtonElement).click();(document.querySelector('.english-expression-entry') as HTMLButtonElement).click();await settle();
+ expect(document.querySelector('details')!.open).toBe(true);expect(document.querySelector('textarea')!.value).toBe('期待');
+});
+it('marks only the matching occurrence in the stored context and keeps markup inert',async()=>{
+ const text='look forward';
+ const saved={sourceKey:'youtube:abcdefghijk',...source,text,context:'<img src=x onerror=alert(1)> look forward and look forward.',segment:0,offset:43};
+ await createExpressionStore(storage as any).add(saved);
+ const mounted=mountEnglishExpressions(document,{getSource:()=>source,onChat:vi.fn()});dispose=mounted.dispose;
+ await settle();(document.querySelector('.english-expression-entry') as HTMLButtonElement).click();await settle();
+ const context=document.querySelector('.english-expression-context')!;
+ expect(context.querySelector('img')).toBeNull();expect(context.textContent).toBe(saved.context);expect(context.querySelectorAll('mark')).toHaveLength(1);
+ expect(context.querySelector('mark')!.nextSibling!.textContent).toBe('.');
+});
+it('sends multiple checked expressions with their context and excludes an unchecked item',async()=>{
+ const store=createExpressionStore(storage as any);select();await store.add(selectedExpression(document,source)!);select(19,26);await store.add(selectedExpression(document,source)!);
+ await store.add({sourceKey:'youtube:abcdefghijk',...source,text:'context',context:'More context.',segment:1,timestamp:55,offset:5});
+ const chat=vi.fn();const mounted=mountEnglishExpressions(document,{getSource:()=>source,onChat:chat});dispose=mounted.dispose;
+ await settle();(document.querySelector('.english-expression-entry') as HTMLButtonElement).click();await settle();
+ const picks=document.querySelectorAll<HTMLInputElement>('.english-expression-item input[type=checkbox]');picks[1].checked=false;picks[1].dispatchEvent(new Event('change'));
+ (document.querySelector('footer')!.lastElementChild as HTMLButtonElement).click();await settle();
+ expect(chat).toHaveBeenCalledOnce();expect(chat.mock.calls[0][0]).toContain('"expression": "look forward"');expect(chat.mock.calls[0][0]).toContain('"expression": "context"');expect(chat.mock.calls[0][0]).not.toContain('"expression": "meeting"');
+});

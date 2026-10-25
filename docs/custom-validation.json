@@ -1,11 +1,11 @@
 {
   "upstreamVersion": "1.19.0",
-  "customVersion": 8,
+  "customVersion": 9,
   "helperVersion": "1.16.9",
   "frontend": {
-    "passed": 1668,
+    "passed": 1682,
     "skipped": 7,
-    "files": 197
+    "files": 198
   },
   "typecheck": "passed",
   "injectedFunctionsChecked": 18,
@@ -42,6 +42,18 @@
     "browserRegression": "passed",
     "lightDarkPreview": "passed",
     "preservesStorage": true
+  },
+  "expressionPanel": {
+    "addedTestsPassed": 14,
+    "freeDragAndReleasePosition": "passed",
+    "keyboardAndClickAlternatives": "passed",
+    "viewportBounds": "passed",
+    "contextCollapsedAndMarked": "passed",
+    "multiSelectToChat": "passed",
+    "instructionsRemoved": true,
+    "lightDarkAndNarrowPreview": "passed",
+    "isolatedBrowser": "passed",
+    "simulatedDiaryAndModel": true
   },
   "translationRecovery": {
     "addedTestsPassed": 16,
