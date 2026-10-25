@@ -86,7 +86,7 @@ export function salvageTranslation(answer: string, batch: TranslationPart[]): Ma
 function singleTranslation(answer: string): string | undefined {
  const cleaned = answer.trim().replace(/^```(?:text|markdown|json)?[ \t]*\r?\n/i, '').replace(/\s*```$/, '')
   .replace(/^(?:中文(?:译文|翻译)?|译文|翻译|Translation)\s*[:：]\s*/i, '');
- if (/^[\[{"`]|^(?:id|text|translations)\s*:|<<<(?:END_)?TRANSLATION\b|<\/?think\b/i.test(cleaned)) return;
+ if (/^\{|^\[(?=\s*(?:[\[{"\d-]|\]))|^`|^["']?(?:id|text|translations)["']?\s*:|<<<(?:END_)?TRANSLATION\b|<\/?think\b/i.test(cleaned)) return;
  const translated = translationParagraphs(cleaned).join('\n\n');
  if (/[\u3400-\u9fff]/.test(translated)) return translated;
 }

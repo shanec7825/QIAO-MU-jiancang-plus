@@ -3,7 +3,7 @@
   "customVersion": 8,
   "helperVersion": "1.16.9",
   "frontend": {
-    "passed": 1666,
+    "passed": 1668,
     "skipped": 7,
     "files": 197
   },
@@ -44,7 +44,7 @@
     "preservesStorage": true
   },
   "translationRecovery": {
-    "addedTestsPassed": 14,
+    "addedTestsPassed": 16,
     "singlePassagePlainTextFallback": "passed",
     "wrongIdsAndInvalidOutputRejected": "passed",
     "onlyMissingParagraphRequested": "passed",

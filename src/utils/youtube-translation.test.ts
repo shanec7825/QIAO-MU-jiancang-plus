@@ -198,18 +198,18 @@ it('accepts valid JSON on the recovery request even when a model ignores the blo
 });
 it('finishes a last cached paragraph with plain Chinese when both numbered formats keep failing',async()=>{
  const texts=Array.from({length:13},(_,i)=>`Source ${i}`),url='https://www.youtube.com/watch?v=abcdefghijk';
- setup(texts,url).input.click();await complete();
+ const first=setup(texts,url);first.input.click();await vi.waitFor(()=>expect(first.article.querySelectorAll('.transcript-translation')).toHaveLength(13));
  const saved=Object.values(state.data)[0];saved.entries=saved.entries.filter(([id]:[number,string])=>id!==12);
  state.stream.mockReset();state.stream.mockResolvedValueOnce('[{"id":0,"text":"最后一句。"}]')
   .mockResolvedValueOnce('<<<TRANSLATION:0>>>\n最后一句。\n<<<END_TRANSLATION>>>')
   .mockResolvedValueOnce('最后一句。');
- const {article,input}=setup(texts,url);input.click();await complete();
+ const {article,input}=setup(texts,url);input.click();await vi.waitFor(()=>expect(article.querySelectorAll('.transcript-translation')).toHaveLength(13));
  expect(state.stream).toHaveBeenCalledTimes(3);
  for(const [options] of state.stream.mock.calls)expect(JSON.parse(options.messages[0].content).map((part:{id:number})=>part.id)).toEqual([12]);
  expect(article.querySelectorAll('.transcript-translation')).toHaveLength(13);
  expect(article.querySelectorAll('.transcript-translation')[12].textContent).toBe('最后一句。');
  expect(article.querySelector('[role=status]')!.textContent).toBe('qiaomuTranslationDone');
- state.stream.mockClear();state.models=[];const reopened=setup(texts,url);reopened.input.click();await complete();
+ state.stream.mockClear();state.models=[];const reopened=setup(texts,url);reopened.input.click();await vi.waitFor(()=>expect(reopened.article.querySelectorAll('.transcript-translation')).toHaveLength(13));
  expect(reopened.article.querySelectorAll('.transcript-translation')).toHaveLength(13);expect(state.stream).not.toHaveBeenCalled();
 });
 it('uses unnumbered recovery only for the missing paragraph and renders its markup as text',async()=>{
@@ -221,12 +221,17 @@ it('uses unnumbered recovery only for the missing paragraph and renders its mark
  expect(article.querySelectorAll('.transcript-translation')).toHaveLength(2);expect(article.querySelector('img')).toBeNull();
  expect(article.querySelectorAll('.transcript-translation')[1].textContent).toContain('<img');
 });
-it.each(['', 'garbage', '[{"id":999,"text":"错误编号"}]', '```json\n[{"id":999,"text":"错误编号"}]\n```', '```unknown\n错误编号\n```', '"错误编号"', 'id:999,text:错误编号', '<<<TRANSLATION:999>>>\n没有结束标记', '<think>我需要先分析这句话。</think>最后一句。', '翻译：'])('does not mark a broken single-paragraph recovery complete: %s',async answer=>{
+it.each(['', 'garbage', '[{"id":999,"text":"错误编号"}]', '```json\n[{"id":999,"text":"错误编号"}]\n```', '```unknown\n错误编号\n```', '"id":999,"text":"错误编号"', 'id:999,text:错误编号', '<<<TRANSLATION:999>>>\n没有结束标记', '<think>我需要先分析这句话。</think>最后一句。', '翻译：'])('does not mark a broken single-paragraph recovery complete: %s',async answer=>{
  state.stream.mockResolvedValueOnce('broken JSON').mockResolvedValueOnce('broken blocks').mockResolvedValueOnce(answer);
  const {article,input}=setup(['Final source']);input.click();await flush();
  expect(state.stream).toHaveBeenCalledTimes(3);expect(article.querySelector('.transcript-translation')).toBeNull();
  expect(article.querySelector('[role=status]')!.textContent).toContain('qiaomuTranslationInvalid');
  expect(article.querySelector<HTMLButtonElement>('.youtube-translation-retry')!.hidden).toBe(false);
+});
+it.each(['"谢谢收看。"','[掌声]'])('preserves quoted dialogue or meaningful stage directions in single-passage recovery: %s',async answer=>{
+ state.stream.mockResolvedValueOnce('broken JSON').mockResolvedValueOnce('broken blocks').mockResolvedValueOnce(answer);
+ const {article,input}=setup(['Final source']);input.click();await flush();
+ expect(article.querySelector('.transcript-translation')!.textContent).toBe(answer);
 });
 it('ignores a late plain-text recovery after subtitle language changes',async()=>{
  let resolve!:(text:string)=>void;let signal!:AbortSignal;
