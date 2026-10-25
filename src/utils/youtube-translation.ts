@@ -15,6 +15,7 @@ Use natural Chinese word order and punctuation, not a literal word-for-word tran
 `;
 export const TRANSLATION_SYSTEM = TRANSLATION_RULES + `Return ONLY a valid JSON array of {"id": number, "text": string}; retain every id exactly once. Escape double quotes and newline characters inside JSON strings. A music-only input may have empty text. No Markdown fences, headings or commentary.`;
 const BLOCK_SYSTEM = TRANSLATION_RULES + `Return plain text blocks, never JSON. For each supplied id write exactly:\n<<<TRANSLATION:id>>>\nChinese translation (ordinary quotes and newlines are allowed)\n<<<END_TRANSLATION>>>\nReplace id with its supplied number. Retain every id exactly once. No text outside the blocks.`;
+const SINGLE_SYSTEM = TRANSLATION_RULES + `The input contains exactly ONE passage. Return ONLY its Chinese translation as ordinary text. Do not return JSON, ids, numbered blocks, delimiters, headings or explanations. Use contextBefore/contextAfter only to understand the passage, never translate them. Never leave the answer empty: translate even a short closing fragment or filler briefly and faithfully.`;
 class TranslationFormatError extends Error { constructor() { super(getMessage('qiaomuTranslationInvalid')); } }
 
 export interface TranslationPart { id: number; segment: number; text: string }
@@ -78,6 +79,16 @@ export function salvageTranslation(answer: string, batch: TranslationPart[]): Ma
   if (translated || !withoutMusicCues(part.text)) output.set(part.id, translated);
  }
  return output;
+}
+
+// Only a dedicated single-passage request has an unambiguous destination without
+// an id. Never use this to guess the alignment of a multi-passage response.
+function singleTranslation(answer: string): string | undefined {
+ const cleaned = answer.trim().replace(/^```(?:text|markdown|json)?[ \t]*\r?\n/i, '').replace(/\s*```$/, '')
+  .replace(/^(?:中文(?:译文|翻译)?|译文|翻译|Translation)\s*[:：]\s*/i, '');
+ if (/^[\[{"`]|^(?:id|text|translations)\s*:|<<<(?:END_)?TRANSLATION\b|<\/?think\b/i.test(cleaned)) return;
+ const translated = translationParagraphs(cleaned).join('\n\n');
+ if (/[\u3400-\u9fff]/.test(translated)) return translated;
 }
 
 class TranslationTimeoutError extends Error { constructor() { super(getMessage('qiaomuTranslationTimeout')); } }
@@ -246,6 +257,7 @@ export function mountTranslation(article: HTMLElement, toolbar: HTMLElement, sta
 						const answer = await callWithRetry(system, remaining); if (cancelled()) return;
 						for (const [id, text] of salvageTranslation(answer, remaining)) cache.set(id, text);
 						await persistCache();
+						if (cancelled()) return;
 					} catch (error) { if (error instanceof TranslationTimeoutError && remaining.length > 1) break; throw error; }
 					remaining = remaining.filter(part => !cache.has(part.id));
 					render(); progress();
@@ -254,7 +266,15 @@ export function mountTranslation(article: HTMLElement, toolbar: HTMLElement, sta
 				}
 				if (cancelled()) return;
 				if (remaining.length > 1) { const middle = Math.ceil(remaining.length / 2); await solve(remaining.slice(0, middle)); await solve(remaining.slice(middle)); }
-				else failed.add(remaining[0].id);
+				else {
+					const part = remaining[0];
+					const answer = await callWithRetry(SINGLE_SYSTEM, remaining); if (cancelled()) return;
+					// Some models still return the numbered format. Its id must remain valid.
+					const translated = salvageTranslation(answer, remaining).get(part.id) ?? singleTranslation(answer);
+					if (translated === undefined) { failed.add(part.id); return; }
+					cache.set(part.id, translated); await persistCache(); if (cancelled()) return;
+					render(); progress();
+				}
 			};
 			const queue = batches.filter(batch => batch.some(part => !cache.has(part.id)));
 			const worker = async () => {

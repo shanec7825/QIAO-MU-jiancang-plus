@@ -1,9 +1,9 @@
 {
   "upstreamVersion": "1.19.0",
-  "customVersion": 7,
+  "customVersion": 8,
   "helperVersion": "1.16.9",
   "frontend": {
-    "passed": 1652,
+    "passed": 1666,
     "skipped": 7,
     "files": 197
   },
@@ -42,6 +42,17 @@
     "browserRegression": "passed",
     "lightDarkPreview": "passed",
     "preservesStorage": true
+  },
+  "translationRecovery": {
+    "addedTestsPassed": 14,
+    "singlePassagePlainTextFallback": "passed",
+    "wrongIdsAndInvalidOutputRejected": "passed",
+    "onlyMissingParagraphRequested": "passed",
+    "lateResponsesIgnored": "passed",
+    "cacheRestoredWithoutModel": "passed",
+    "isolatedBrowser": "passed",
+    "simulatedModel": true,
+    "liveUserVideoTested": false
   },
   "subtitleRecovery": {
     "unavailableSignedInFormatFallback": "passed",
