@@ -240,7 +240,7 @@ export function mountEnglishExpressions(doc: Document, options: ExpressionOption
   const diary = button('加入今日日记'), chat = button('生成多语境学习材料'), footer = node('footer');
   diary.hidden = !options.onDiary;
   footer.append(diary, chat); panel.append(heading, help, selectionTools, list, status, footer); doc.body.append(panel);
-  let entries: EnglishExpression[] = [], checked = new Set<string>(), loading = false, sourceKey = '', readGeneration = 0;
+  let entries: EnglishExpression[] = [], checked = new Set<string>(), loading = false, sourceKey = '', readGeneration = 0, disposed = false;
   const selected = () => entries.filter(e => checked.has(e.id));
   const updateCount = () => { count.textContent = `已选 ${selected().length}/${entries.length}`; diary.disabled = chat.disabled = loading || !selected().length; };
   const error = (cause: unknown) => { status.textContent = cause instanceof Error ? cause.message : '操作失败，请重试'; };
@@ -325,7 +325,7 @@ export function mountEnglishExpressions(doc: Document, options: ExpressionOption
       if (!value) { panel.hidden = false; status.textContent = '请在同一句原文字幕中选中 1–180 个字符的英文单词或搭配。'; return; }
       try { const saved = await store.add(value); checked.add(saved.id); await refresh(); status.textContent = `已收藏「${saved.text}」`; } catch (cause) { panel.hidden = false; error(cause); }
     },
-    dispose() { observer.disconnect(); clearTimeout(timer); browser.storage.onChanged.removeListener(onChange); entry.remove(); panel.remove();
+    dispose() { if (disposed) return; disposed = true; ++readGeneration; observer.disconnect(); clearTimeout(timer); browser.storage.onChanged.removeListener(onChange); entry.remove(); panel.remove();
       const api = doc.defaultView as unknown as { CSS?: { highlights?: Map<string, unknown> } }; api?.CSS?.highlights?.delete(MARK); },
   };
   expressionMounts.set(doc, mounted);

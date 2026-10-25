@@ -17,7 +17,7 @@ def apple_silicon(): return sys.platform == 'darwin' and platform.machine() == '
 def windows(): return sys.platform == 'win32'
 
 # Fetching the video and cutting the audio. imageio-ffmpeg ships a static ffmpeg, so ffmpeg needs no system install.
-BASE = {'id': 'base', 'name': '下载与音频工具（yt-dlp、ffmpeg）', 'packages': ['yt-dlp', 'imageio-ffmpeg'], 'sizeMb': 60}
+BASE = {'id': 'base', 'name': '下载与音频工具（yt-dlp、ffmpeg）', 'packages': ['yt-dlp[default]', 'imageio-ffmpeg'], 'sizeMb': 60}
 # yt-dlp stopped supporting Python 3.9: on it, pip quietly installs a year-old yt-dlp that YouTube no longer accepts.
 MIN_YTDLP_PYTHON = (3, 10)
 ENGINES = {
@@ -50,6 +50,9 @@ def model_ready(model):
     return snapshots.is_dir() and any(snapshots.iterdir())
 def model_bytes(model):
     folder = hf_home() / 'hub' / ('models--' + model.replace('/', '--'))
+    return folder_bytes(folder)
+def folder_bytes(folder):
+    if folder.is_symlink(): return 0
     total = 0
     for path in folder.rglob('*') if folder.is_dir() else []:
         try:
@@ -117,7 +120,7 @@ def plan(engine_id, python=None):
     # The base tools need a Python that today's yt-dlp supports; if there is none, yt-dlp comes as its own standalone program.
     python = python or (modern_python() if engine_id == 'base' else None) or sys.executable
     standalone = engine_id == 'base' and not (python_version(python) or (0, 0)) >= MIN_YTDLP_PYTHON
-    packages = [x for x in spec['packages'] if not (standalone and x == 'yt-dlp')]
+    packages = [x for x in spec['packages'] if not (standalone and x.split('[', 1)[0] == 'yt-dlp')]
     steps = []
     if not venv_python(spec['id'] if engine_id == 'base' else engine_id).exists(): steps.append(('正在创建独立的 Python 环境', 5, [python, '-m', 'venv', str(venv_dir(engine_id))]))
     steps.append(('正在安装 ' + ', '.join(packages), 55 if engine_id != 'base' else (60 if standalone else 90), [str(venv_python(engine_id)), '-m', 'pip', 'install', '--progress-bar', 'off', '--disable-pip-version-check', '-U', *packages]))

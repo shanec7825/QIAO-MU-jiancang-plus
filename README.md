@@ -1,6 +1,6 @@
 # 乔木剪藏 · 英语学习定制版
 
-基于 [joeseesun/qiaomu-clipper](https://github.com/joeseesun/qiaomu-clipper) 最新正式版 **1.18.8**，兼容原 1.15.8 英语学习定制功能，保留 MIT 许可证。
+基于 [joeseesun/qiaomu-clipper](https://github.com/joeseesun/qiaomu-clipper) 最新正式版 **1.19.0**，兼容原 1.15.8 英语学习定制功能，保留 MIT 许可证。
 
 ## 保留的个人功能
 
@@ -15,9 +15,9 @@
 
 ## 本次兼容
 
-合入上游 1.18.8 的代码块、缩进、ASCII 图和字幕空格保留等修复。将新版「剪藏时确保文稿翻译完成」流程与原本地翻译缓存衔接，缓存完整时无需配置模型或重复翻译。上游的构建版本号、来源标识、独立版权限和文件下载能力保留。
+合入上游 1.19.0 的代码块、缩进、ASCII 图和字幕空格保留等修复。将新版「剪藏时确保文稿翻译完成」流程与原本地翻译缓存衔接，缓存完整时无需配置模型或重复翻译。上游的构建版本号、来源标识、独立版权限和文件下载能力保留。
 
-修复 Windows 注入检查脚本的路径分隔符判断，以及 helper 复制日记附件时对只读句柄调用 fsync 导致的错误。helper 基于上游 1.16.6。
+修复 Windows 注入检查脚本的路径分隔符判断，以及 helper 复制日记附件时对只读句柄调用 fsync 导致的错误。helper 基于上游 1.16.9。
 
 ## 升级
 
@@ -32,3 +32,11 @@ Windows / Linux 的助手升级命令为 `python native/install.py`，安装器�
 Node.js 22+：`npm ci`，`npx tsc --noEmit`，`npm run build:local`。新版构建目录为 `build/production/chrome-local/`；以 scripts/build-layout.cjs 为准。上游完整说明见 [README.upstream.md](README.upstream.md) 和 [native/README.md](native/README.md)。
 
 定制变更记录见 [CHANGELOG.custom.md](CHANGELOG.custom.md)。本机验证记录位于 `docs/custom-validation.json`；GitHub Actions 继续运行上游的前端测试、助手测试与各浏览器构建。
+
+## 2026-10-25 字幕生成修复
+
+修复无字幕 YouTube 视频在下载音频时「Requested format is not available」直接失败的问题。登录模式找不到格式时有限次数回退，不删除登录状态；显式启用本机 Deno 2.3+ / Node.js 22+；私有下载工具使用 yt-dlp[default]，补齐 EJS 解析脚本。
+
+已有识别引擎、模型、原扩展 ID、英语表达收藏、翻译缓存和笔记库配置保留。新版 AI 面板的销毁流程同时清理表达界面，避免重开时重复按钮或旧面板影响新标记。
+
+对近期失败视频的前 20 秒已实际验证下载、转换和本地 Whisper 识别。完整视频、实际中文翻译服务不在此项实测范围内。

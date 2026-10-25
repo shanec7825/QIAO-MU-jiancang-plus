@@ -49,7 +49,7 @@ agent 注意：不要猜扩展 ID（商店版与本地加载版不同，猜错�
 
 日记使用电脑真实日期和该库 `.obsidian/daily-notes.json` 的目录配置；支持常见数字日期格式。复杂日期格式或已配置日记模板时明确报错，可通过更多菜单“添加到 Obsidian”保留原始行为。
 
-助手安装文件位于 `~/.local/share/qiaomu-clipper/`，Chrome 注册文件位于用户级 `NativeMessagingHosts/ai.qiaomu.clipper.json`。助手不常驻（只有「生成字幕」任务运行期间，会有一个后台识别进程，结束即退出）。卸载时移除注册文件即可停用连接；如需恢复 URI 保存，可清除扩展本地存储的 `qiaomuNativeConfigured` 标记。不要清除全部扩展存储，以免丢失模板和待提交内容。
+助手安装文件位于 `~/.local/share/qiaomu-clipper/`，Chrome 注册文件位于用户级 `NativeMessagingHosts/ai.qiaomu.clipper.json`。助手不常驻（只有「生成字幕」任务运行期间，会有一个后台识别进程，结束即退出）。卸载：扩展设置 →「本地助手」→「卸载助手」，确认后输入 Mac 密码，会一并删除安装包文件、各浏览器的注册文件、助手目录和独立运行环境；保留笔记和共享模型缓存；助手连不上时，在终端运行 `/Library/QiaomuClipper/bin/qiaomu-helper --uninstall`。如只想停用连接，移除注册文件即可；如需恢复 URI 保存，可清除扩展本地存储的 `qiaomuNativeConfigured` 标记。不要清除全部扩展存储，以免丢失模板和待提交内容。
 
 测试：`python3 -m unittest discover -s native -p 'test_*.py'`。
 
@@ -90,6 +90,11 @@ agent 注意：不要猜扩展 ID（商店版与本地加载版不同，猜错�
 - `QIAOMU_TOOLS_HOME` 可改工具目录；已经用 Homebrew / `uv tool` 装好的 `yt-dlp`、`ffmpeg`、`mlx_whisper` 仍然会被直接使用，不会重复安装。
 
 ### 手动安装（可选）
+
+本定制版的 YouTube 音频下载会复用已有 Deno 2.3+ 或 Node.js 22+，并显式启用运行时。
+私有下载环境安装、更新使用 `yt-dlp[default]`，包含匹配的 EJS 解析脚本；不会从网页下载可执行脚本。
+若登录下载报「Requested format is not available」，只对 YouTube 有限次数地尝试其他客户端及匿名下载，保留原登录选择。
+需要登录才能访问的内容仍按原验证流程处理。配置依据见 [yt-dlp EJS 官方说明](https://github.com/yt-dlp/yt-dlp/wiki/EJS)。
 
 ```sh
 brew install yt-dlp ffmpeg
@@ -160,3 +165,10 @@ APP_SIGN_ID="Developer ID Application: …" INSTALLER_SIGN_ID="Developer ID Inst
 播放器有可信词级数据时自动高亮原文，暂停和倍速跟随媒体时间，回退重新计算；中文原文无需翻译模型。译文没有词级对齐，仍按整句显示。缺失、异常或与正文不匹配的时间数据回退普通字幕，不按字数伪造时间。
 
 需同时更新扩展和助手。旧文字稿继续可用，不会自动再次上传；要获得词级数据需用户主动选择豆包重新生成。Qwen 当前安装的只是识别模型，本地精确对齐需另接 Qwen3-ForcedAligner，尚未纳入本次改动。
+
+
+## Codex 内置生图
+
+图片模型中选择「Codex」后，本地助手会调用本机已登录的 Codex。需要安装 Codex CLI 并在其中登录 ChatGPT；网页扩展里的 OAuth 登录不会替代本机登录。不读取或导出 Codex 登录凭据。
+
+`codexImageStatus` 只检查账号状态和模型；`codexImageStart` 使用固定任务 ID 启动后台任务，`codexImagePoll` / `codexImageRead` 查询原任务和分块结果，`codexImageCancel` 发送取消标记。恢复不会自动重新生成。此能力需要助手 1.16.8；重装时保留笔记库、缓存和模型。

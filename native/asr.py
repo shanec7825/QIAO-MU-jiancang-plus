@@ -29,7 +29,7 @@ COOKIES_UNREADABLE = re.compile(r'cookies? database|could not (find|decrypt).{0,
 NEEDS_LOGIN = re.compile(r'sign in to confirm|not a bot|use --cookies|fresh cookies|login required|412|ip address is blocked|blocked from accessing', re.I)  # TikTok answers an anonymous download with "IP address is blocked"; a signed-in browser is let through
 # What a downloader that has fallen behind the site looks like (YouTube changes its player every few weeks). Worth one update and one retry.
 STALE_TOOL = re.compile(r'needs to be reloaded|unable to extract|nsig|signature|player response|precondition check failed|requested format is not available|http error 403|sabr|po token|js runtime|challenge', re.I)
-YOUTUBE_CLIENT_ERROR = re.compile(r'needs to be reloaded|player response|precondition check failed|unable to extract.{0,40}(?:player|initial)', re.I)
+YOUTUBE_CLIENT_ERROR = re.compile(r'needs to be reloaded|player response|precondition check failed|unable to extract.{0,40}(?:player|initial)|requested format is not available', re.I)
 UPDATE_EVERY = 12 * 3600
 # Lines Whisper tends to invent over silence or music. Only dropped when they stand alone in a short segment.
 HALLUCINATIONS = ('谢谢观看', '感谢观看', '请不吝点赞', '字幕由', '字幕 by', '字幕by', '订阅', 'thanks for watching', 'thank you for watching', 'subtitles by', 'amara.org')
@@ -87,6 +87,10 @@ def write_private(path, text):
     with os.fdopen(descriptor, 'w', encoding='utf8') as handle: handle.write(text)
 def find_tool(name):
     found = shutil.which(name, path=os.pathsep.join(tool_dirs() + [os.environ.get('PATH', '')]))
+    if not found and name == 'node' and sys.platform == 'win32':
+        program_files = os.environ.get('ProgramW6432') or os.environ.get('ProgramFiles') or 'C:/Program Files'
+        candidate = Path(program_files) / 'nodejs/node.exe'
+        if candidate.is_file(): found = str(candidate)
     return found or (eng.private_ffmpeg() if name == 'ffmpeg' else None)
 def tool_env():
     env = dict(os.environ); env['PATH'] = os.pathsep.join(tool_dirs() + [env.get('PATH', '')]); env['PYTHONUNBUFFERED'] = '1'; env['PYTHONIOENCODING'] = 'utf-8'
@@ -99,6 +103,17 @@ def tool_env():
 def tool_version(path, flag='--version'):
     try: return subprocess.run([path, flag], capture_output=True, text=True, timeout=10).stdout.strip().splitlines()[0][:60]
     except Exception: return ''
+
+def youtube_runtime_args():
+    # yt-dlp enables only Deno by default. Use an existing supported runtime;
+    # never fetch executable JavaScript from a page or weaken its permissions.
+    for name, minimum in (('deno', (2, 3)), ('node', (22, 0))):
+        path = find_tool(name)
+        if not path: continue
+        version = re.match(r'^(?:v|deno\s+)?(\d+)\.(\d+)', tool_version(path))
+        if version and tuple(map(int, version.groups())) >= minimum:
+            return ['--js-runtimes', name + ':' + path]
+    return []
 apple_silicon = eng.apple_silicon
 def mlx_model_ready():
     hub = Path(os.environ.get('HF_HOME') or Path.home() / '.cache/huggingface') / 'hub' / MLX_MODEL_DIR / 'snapshots'
@@ -209,7 +224,7 @@ def update_ytdlp(env, force=False, on_stage=None):
             if eng.modern_python(): rebuild_base(env)
             else: run_steps([step for step in eng.plan('base')[0] if step[0] == '正在下载 yt-dlp'], env)
         elif eng.has_module('base', 'yt_dlp'):
-            run_steps([('', 0, [str(eng.venv_python('base')), '-m', 'pip', 'install', '--progress-bar', 'off', '--disable-pip-version-check', '--quiet', '-U', 'yt-dlp'])], env)
+            run_steps([('', 0, [str(eng.venv_python('base')), '-m', 'pip', 'install', '--progress-bar', 'off', '--disable-pip-version-check', '--quiet', '-U', 'yt-dlp[default]'])], env)
         else: run_steps([('', 0, [path, '-U'])], env)
     except Exception: pass
     try: atomic_json(update_stamp(), {'checkedAt': time.time(), 'before': before}, durable=False)
@@ -773,6 +788,7 @@ def probe(message):
     ytdlp = find_tool('yt-dlp')
     if not ytdlp: return {'ok': False, 'error': 'missing', 'missing': ['yt-dlp']}
     command = [ytdlp, '--dump-single-json', '--no-playlist', '--skip-download', '--no-warnings', '--socket-timeout', '20', '-f', 'bestaudio/best']
+    if re.match(r'^https://(?:[\w-]+\.)?(?:youtube\.com|youtu\.be)/', url): command += youtube_runtime_args()
     cookie_path = None
     if cookie_text:
         import tempfile
@@ -886,11 +902,12 @@ def uninstall(base, message):
     engine = message.get('engine')
     if engine not in eng.ENGINES: raise ValueError('只能卸载由插件安装的识别引擎')
     if active_job(base)[0] or active_install(base)[0]: return {'ok': False, 'error': 'busy'}
-    shutil.rmtree(eng.venv_dir(engine), ignore_errors=True)
-    freed = 0
-    if message.get('model'):
-        folder = eng.hf_home() / 'hub' / ('models--' + eng.ENGINES[engine]['model'].replace('/', '--')); freed = eng.model_bytes(eng.ENGINES[engine]['model'])
-        shutil.rmtree(folder, ignore_errors=True)
+    folder = eng.venv_dir(engine)
+    freed = eng.folder_bytes(folder)
+    if folder.is_symlink(): folder.unlink()
+    else: shutil.rmtree(folder, ignore_errors=True)
+    # Older clients send model=True. Never remove the shared HF cache: other
+    # applications can use the same weights, regardless of who downloaded first.
     return {'ok': True, 'freedMb': round(freed / 1048576)}
 
 def run_install(base_dir):
@@ -974,6 +991,7 @@ def download(directory, spec, env, tools):
     if spec['videoKey'].startswith('web:') and spec.get('mediaUrl') and xiaoe_media(spec['url'], spec['mediaUrl']): return download_hls(directory, spec, env, tools)
     if spec['videoKey'].startswith('web:') and spec.get('mediaUrl'): return download_page_media(directory, spec)
     command = [tools['yt-dlp'], '--no-playlist', '--no-warnings', '--newline', '--no-continue', '--retries', '4', '--fragment-retries', '4', '-f', 'bestaudio/best', '--write-info-json', '-o', str(directory / 'audio.%(ext)s')]
+    if spec['videoKey'].startswith('youtube:'): command += youtube_runtime_args()
     cookie_args = []
     if spec.get('cookiesFile') and (directory / 'cookies.txt').is_file(): cookie_args = ['--cookies', str(directory / 'cookies.txt')]
     elif spec.get('cookies') in COOKIE_BROWSERS: cookie_args = ['--cookies-from-browser', spec['cookies']]

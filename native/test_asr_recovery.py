@@ -131,6 +131,23 @@ class DownloadTests(unittest.TestCase):
         self.assertEqual(cookie.read_text(), secret); self.assertEqual(self.spec['cookies'], 'edge')
         self.assertIn('login=False', log.getvalue()); self.assertNotIn(secret, log.getvalue())
 
+    def test_unavailable_authenticated_format_can_recover_anonymously(self):
+        self.spec.update(cookies='chrome', cookiesFile=True)
+        cookie = self.directory / 'cookies.txt'; cookie.write_text('KEEP-PRIVATE-COOKIE')
+        message = 'ERROR: [youtube] Requested format is not available. Use --list-formats'
+        with self.attempt([message, message, None]), patch.object(asr, 'update_ytdlp', return_value=False):
+            self.assertEqual(asr.download(self.directory, self.spec, {}, self.tools).read_bytes(), b'whole')
+        self.assertEqual(len(self.commands), 3)
+        self.assertIn('--cookies', self.commands[0]); self.assertIn('--cookies', self.commands[1])
+        self.assertIn('--no-cookies', self.commands[-1]); self.assertNotIn('--cookies', self.commands[-1])
+        self.assertNotIn('--extractor-args', self.commands[-1])
+        self.assertEqual(cookie.read_text(), 'KEEP-PRIVATE-COOKIE')
+
+    def test_youtube_download_passes_the_supported_runtime(self):
+        with self.attempt([None]), patch.object(asr, 'youtube_runtime_args', return_value=['--js-runtimes', 'node:/node with spaces']):
+            asr.download(self.directory, self.spec, {}, self.tools)
+        self.assertEqual(self.commands[0][self.commands[0].index('--js-runtimes') + 1], 'node:/node with spaces')
+
     def test_localized_windows_connection_reset_has_bounded_transport_retries(self):
         self.spec.update(cookies='edge')
         errors = ['[WinError 10054] 远程主机强迫关闭了一个现有的连接。'] * 2 + ['The page needs to be reloaded.'] * 2 + [None]

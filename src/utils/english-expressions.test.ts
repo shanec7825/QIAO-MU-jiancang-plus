@@ -25,6 +25,14 @@ it('collects without opening the expression panel and updates the entry count',a
  expect(document.querySelector('.english-expression-entry')!.textContent).toBe('英语表达 (1)');
  expect((await createExpressionStore(storage as any).list()).length).toBe(1);
 });
+it('keeps the current markers when an older chat instance is destroyed twice',async()=>{
+ const old=mountEnglishExpressions(document,{getSource:()=>source,onChat:vi.fn()});
+ const current=mountEnglishExpressions(document,{getSource:()=>source,onChat:vi.fn()});dispose=current.dispose;
+ await settle();old.dispose();
+ expect(document.querySelectorAll('.english-expression-entry')).toHaveLength(1);
+ select();await current.collect();
+ expect(document.querySelector('.english-expression-entry')!.textContent).toBe('英语表达 (1)');
+});
 beforeEach(() => {
   vi.stubGlobal('crypto', webcrypto); data = {}; dispose = undefined;
   document.body.innerHTML = '<article><div class="player-toggle-group"></div><div class="transcript"><p class="transcript-segment"><strong><span class="timestamp" data-timestamp="42">0:42</span></strong><span id="original">We look forward to meeting you.</span><span class="transcript-translation">我们期待与你见面。</span></p><p class="transcript-segment"><strong><span class="timestamp" data-timestamp="55">0:55</span></strong><span>More context.</span></p></div></article>';

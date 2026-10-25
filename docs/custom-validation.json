@@ -1,18 +1,18 @@
 {
-  "upstreamVersion": "1.18.8",
-  "customVersion": 6,
-  "helperVersion": "1.16.6",
+  "upstreamVersion": "1.19.0",
+  "customVersion": 7,
+  "helperVersion": "1.16.9",
   "frontend": {
-    "passed": 1519,
+    "passed": 1652,
     "skipped": 7,
-    "files": 174
+    "files": 197
   },
   "typecheck": "passed",
-  "injectedFunctionsChecked": 17,
+  "injectedFunctionsChecked": 18,
   "windowsHelper": {
-    "passed": 115,
-    "skipped": 2,
-    "reason": "Two upstream cases require Windows symlink privileges; Unix CI keeps them enabled."
+    "passed": 130,
+    "skipped": 3,
+    "reason": "Windows symlink privilege unavailable; Unix CI keeps these assertions enabled."
   },
   "browser": {
     "expressionCollection": true,
@@ -42,5 +42,16 @@
     "browserRegression": "passed",
     "lightDarkPreview": "passed",
     "preservesStorage": true
+  },
+  "subtitleRecovery": {
+    "unavailableSignedInFormatFallback": "passed",
+    "supportedRuntimeDetection": "passed",
+    "matchingEjsDependencies": "installed",
+    "liveSampleSeconds": 20,
+    "liveSampleTimedSegments": 2,
+    "localWhisper": "passed",
+    "audioUploaded": false,
+    "fullVideoTested": false,
+    "liveChineseModelTested": false
   }
 }

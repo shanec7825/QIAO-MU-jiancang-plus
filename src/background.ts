@@ -1,3 +1,6 @@
+import { handleImageJobs } from './utils/image-job-background';
+import { handleChatToolPort } from './utils/chat-tools-background';
+import { openAiSidebar } from './utils/ai-sidebar';
 import { handleChatImageSource } from './utils/chat-image-source';
 import { validChatTurns } from './utils/chat-content';
 import { validChatSession } from './utils/opencode-go';
@@ -37,6 +40,8 @@ registerPublishBridge();
 browser.runtime.onMessage.addListener(handleLearningNativeMessage);
 browser.runtime.onMessage.addListener(handleAsrMessage);
 browser.runtime.onMessage.addListener(handleChatImageSource);
+browser.runtime.onMessage.addListener(handleImageJobs);
+browser.runtime.onConnect.addListener(handleChatToolPort);
 
 // Accept RSS writes only from our own extension pages, never a website content script.
 const qiaomuInFlight = new Map<string, Promise<unknown>>();
@@ -46,11 +51,14 @@ const helperDown = (error: unknown) => { const reason = error instanceof Error ?
 
 browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime.MessageSender) => {
 	const message = request as { action?: string; payload?: { requestId?: string; vaultPath?: string; vault?: string; folder?: string } };
-	if (!['qiaomuLocalStatus', 'qiaomuLocalSave', 'qiaomuLocalConfigure', 'qiaomuLocalChooseVault', 'qiaomuLocalChooseFolder', 'qiaomuLocalListVaults'].includes(message?.action || '')) return;
+	if (!['qiaomuLocalStatus', 'qiaomuLocalSave', 'qiaomuLocalConfigure', 'qiaomuLocalChooseVault', 'qiaomuLocalChooseFolder', 'qiaomuLocalListVaults', 'qiaomuLocalUninstallPlan', 'qiaomuLocalUninstall'].includes(message?.action || '')) return;
 	if (sender.id !== browser.runtime.id || !sender.url?.startsWith(browser.runtime.getURL(''))) return Promise.resolve({ ok: false, error: t('无效的本地保存请求') });
 	if (message.action === 'qiaomuLocalStatus') return callHelper({ action: 'status' }).catch((error: unknown) => ({ ok: false, reason: error instanceof Error ? error.message : String(error) }));
 	if (message.action === 'qiaomuLocalChooseFolder') return callHelper({ action: 'chooseNoteFolder', vault: message.payload?.vault, folder: message.payload?.folder })
 		.catch(error => ({ ...helperDown(error), error: t('{0}也可以手动填写相对路径。', [describeHelperFailure(error instanceof Error ? error.message : String(error))]) }));
+	// Taking the helper away is a settings-page action; the helper refuses while a subtitle job is running.
+	if (message.action === 'qiaomuLocalUninstallPlan') return callHelper({ action: 'helperUninstallPlan' }).catch(helperDown);
+	if (message.action === 'qiaomuLocalUninstall') return callHelper({ action: 'helperUninstall' }).catch(helperDown);
 	if (message.action === 'qiaomuLocalListVaults') return callHelper({ action: 'listVaults' }).catch(helperDown);
 	if (message.action === 'qiaomuLocalChooseVault') return callHelper({ action: 'chooseVault' })
 		.catch(helperDown);
@@ -932,6 +940,10 @@ browser.commands.onCommand.addListener(async (command, tab) => {
 		tab = tabs[0];
 	}
 
+	if (command === 'open_ai_sidebar' && tab?.windowId !== undefined) {
+		await openAiSidebar(tab.windowId);
+		return;
+	}
 	if (command === 'quick_clip') {
 		if (tab?.id) {
 			openPopup();
@@ -1026,6 +1038,10 @@ const debouncedUpdateContextMenu = debounce(async (tabId: number) => {
 			];
 
 		const browserType = await detectBrowser();
+		// Feature detection works even when the polyfill exposes `browser` in a Chrome worker.
+		if (typeof chrome !== 'undefined' && chrome.sidePanel) {
+			menuItems.push({ id: 'open-ai-sidebar', title: t('AI 对话'), contexts: ['page', 'selection', 'action'] });
+		}
 		if (browserType === 'chrome') {
 			menuItems.push({
 				id: 'open-side-panel',
@@ -1045,7 +1061,9 @@ const debouncedUpdateContextMenu = debounce(async (tabId: number) => {
 }, 100); // 100ms debounce time
 
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
-	if (info.menuItemId === "open-obsidian-clipper") {
+	if (info.menuItemId === 'open-ai-sidebar' && tab?.windowId !== undefined) {
+		await openAiSidebar(tab.windowId);
+	} else if (info.menuItemId === "open-obsidian-clipper") {
 		openPopup();
 	} else if (info.menuItemId === "enter-highlighter" && tab && tab.id) {
 		await setHighlighterMode(tab.id, true);
@@ -1062,7 +1080,7 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
 	} else if (info.menuItemId === 'open-embedded' && tab && tab.id) {
 		await sendMessageToContentScript(tab.id, { action: "toggle-iframe" });
 	} else if (info.menuItemId === 'open-side-panel' && tab && tab.id && tab.windowId) {
-		chrome.sidePanel.open({ tabId: tab.id });
+		await Promise.all([chrome.sidePanel.setOptions({ path: 'side-panel.html', enabled: true }), chrome.sidePanel.open({ tabId: tab.id })]);
 		sidePanelOpenWindows.add(tab.windowId);
 		await ensureContentScriptLoadedInBackground(tab.id);
 	} else if (info.menuItemId === 'copy-markdown-to-clipboard' && tab && tab.id) {

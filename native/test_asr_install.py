@@ -121,7 +121,7 @@ class InstallTests(unittest.TestCase):
             asr.run_install(str(directory))
         commands = [call.args[0] for call in stream.call_args_list]
         pip = next(command for command in commands if 'pip' in command)
-        self.assertIn('yt-dlp', pip); self.assertIn('imageio-ffmpeg', pip)
+        self.assertIn('yt-dlp[default]', pip); self.assertIn('imageio-ffmpeg', pip)
         self.assertFalse(any('faster-whisper' in command for command in commands))
         model.assert_not_called(); link.assert_called_once()
         self.assertEqual(asr.read_state(directory)['state'], 'completed')
@@ -206,11 +206,13 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(state['state'], 'failed'); self.assertEqual(state['errorCode'], 'install-failed'); self.assertIn('no network', state['error'])
         self.assertFalse(eng.venv_dir('faster-whisper').exists())
 
-    def test_uninstall_removes_the_environment_and_optionally_the_model(self):
+    def test_uninstall_preserves_shared_model_even_for_older_delete_requests(self):
         eng.venv_dir('mlx-qwen3').mkdir(parents=True)
         snap = eng.hf_home() / 'hub' / 'models--Qwen--Qwen3-ASR-0.6B' / 'snapshots' / 'x'; snap.mkdir(parents=True); (snap / 'w.bin').write_bytes(b'0' * 2048)
         reply = asr.handle({'action': 'asrUninstall', 'engine': 'mlx-qwen3', 'model': True}, self.base)
-        self.assertTrue(reply['ok']); self.assertFalse(eng.venv_dir('mlx-qwen3').exists()); self.assertFalse(snap.exists())
+        self.assertTrue(reply['ok']); self.assertFalse(eng.venv_dir('mlx-qwen3').exists())
+        self.assertEqual((snap / 'w.bin').read_bytes(), b'0' * 2048)
+        self.assertEqual(reply['freedMb'], 0)
 
     def test_runner_engine_command_uses_the_runner_script(self):
         captured = {}
@@ -240,13 +242,13 @@ class KeepYtdlpCurrentTests(unittest.TestCase):
         with patch.object(eng, 'python_version', lambda path: (3, 9)), patch.object(eng, 'modern_python', lambda: None):
             steps, _ = eng.plan('base')
         pip = next(command for _, _, command in steps if 'pip' in command)
-        self.assertNotIn('yt-dlp', pip); self.assertIn('imageio-ffmpeg', pip)
+        self.assertNotIn('yt-dlp', pip); self.assertNotIn('yt-dlp[default]', pip); self.assertIn('imageio-ffmpeg', pip)
         self.assertTrue(any(label == '正在下载 yt-dlp' for label, _, _ in steps))
 
     def test_modern_python_installs_ytdlp_with_pip(self):
         with patch.object(eng, 'python_version', lambda path: (3, 12)), patch.object(eng, 'modern_python', lambda: '/x/python3.12'):
             steps, _ = eng.plan('base')
-        self.assertEqual(steps[0][2][0], '/x/python3.12'); self.assertIn('yt-dlp', next(c for _, _, c in steps if 'pip' in c))
+        self.assertEqual(steps[0][2][0], '/x/python3.12'); self.assertIn('yt-dlp[default]', next(c for _, _, c in steps if 'pip' in c))
         self.assertFalse(any('curl' in ' '.join(c) for _, _, c in steps))
 
     def test_age_is_read_from_the_version(self):
