@@ -2,7 +2,7 @@
 export function mountExpressionPanelMove(panel: HTMLElement, heading: HTMLElement, handle: HTMLButtonElement) {
   const doc = panel.ownerDocument, win = doc.defaultView!;
   const margin = 12;
-  let drag: { id: number; x: number; y: number; left: number; top: number; moved: boolean } | undefined;
+  let drag: { id: number; x: number; y: number; left: number; top: number; moved: boolean; capture: HTMLElement } | undefined;
   let suppressClick = false, clickTimer: ReturnType<typeof setTimeout> | undefined;
   const place = (left: number, top: number) => {
     const rect = panel.getBoundingClientRect();
@@ -11,7 +11,7 @@ export function mountExpressionPanelMove(panel: HTMLElement, heading: HTMLElemen
   };
   const clamp = () => { if (!panel.hidden) { const rect = panel.getBoundingClientRect(); place(rect.left, rect.top); } };
   const cancel = () => {
-    if (drag) { try { if (handle.hasPointerCapture?.(drag.id)) handle.releasePointerCapture(drag.id); } catch { /* capture already ended */ } }
+    if (drag) { try { if (drag.capture.hasPointerCapture?.(drag.id)) drag.capture.releasePointerCapture(drag.id); } catch { /* capture already ended */ } }
     drag = undefined; heading.classList.remove('is-dragging'); suppressClick = false; clearTimeout(clickTimer);
   };
   const start = (event: PointerEvent) => {
@@ -19,8 +19,8 @@ export function mountExpressionPanelMove(panel: HTMLElement, heading: HTMLElemen
     if (event.button !== 0 || (control && control !== handle)) return;
     const rect = panel.getBoundingClientRect();
     event.preventDefault(); event.stopPropagation(); cancel(); handle.focus({ preventScroll: true });
-    drag = { id: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, moved: false };
-    try { handle.setPointerCapture(event.pointerId); } catch { /* document listeners also cover missing capture support */ }
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, moved: false, capture: control === handle ? handle : heading };
+    try { drag.capture.setPointerCapture(event.pointerId); } catch { /* document listeners also cover missing capture support */ }
   };
   const move = (event: PointerEvent) => {
     if (!drag || event.pointerId !== drag.id) return;
@@ -31,8 +31,7 @@ export function mountExpressionPanelMove(panel: HTMLElement, heading: HTMLElemen
   };
   const end = (event: PointerEvent) => {
     if (!drag || event.pointerId !== drag.id) return;
-    // Pointer capture can retarget the release click to the move button even
-    // when the drag began on the title. Suppress that click for either origin.
+    // A drag must not also activate the click alternative on release.
     const moved = drag.moved && event.type === 'pointerup'; cancel();
     if (moved) { suppressClick = true; clickTimer = setTimeout(() => { suppressClick = false; }, 0); }
   };

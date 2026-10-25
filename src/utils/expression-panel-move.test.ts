@@ -22,9 +22,11 @@ beforeEach(() => {
 });
 afterEach(() => { controls.dispose(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
-it('drags the title bar, even without pointer capture, and keeps the full panel in the viewport', () => {
+it('captures the title drag on the heading and keeps the full panel in the viewport', () => {
+  heading.setPointerCapture = vi.fn(); heading.hasPointerCapture = vi.fn(() => true); heading.releasePointerCapture = vi.fn();
   pointer(heading.querySelector('h2')!, 'pointerdown', 100, 100);
   pointer(document, 'pointermove', 350, 240); pointer(document, 'pointerup', 350, 240);
+  expect(heading.setPointerCapture).toHaveBeenCalledWith(1); expect(heading.releasePointerCapture).toHaveBeenCalledWith(1);
   expect(panel.style.left).toBe('270px'); expect(panel.style.top).toBe('220px');
   pointer(heading, 'pointerdown', 300, 240); pointer(document, 'pointermove', 2000, 2000);
   expect(panel.style.left).toBe('588px'); expect(panel.style.top).toBe('528px');
