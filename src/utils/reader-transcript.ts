@@ -464,6 +464,9 @@ export function wireTranscript(
 		};
 	} else if (iframe) {
 		// Iframe embed: use postMessage API
+		let lastBridgeAt = 0;
+		const listenToPlayer = () => iframe.contentWindow?.postMessage(JSON.stringify({ event: 'listening' }), new URL(iframe.src).origin);
+		listenToPlayer();
 		seekTo = (seconds: number) => {
 			if (!iframe.contentWindow) return;
 			iframe.contentWindow.postMessage(JSON.stringify({
@@ -477,6 +480,14 @@ export function wireTranscript(
 			if (e.source !== iframe.contentWindow) return;
 			try {
 				const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+				if (data?.qiaomuPlayer === 'time' && e.origin === new URL(iframe.src).origin && typeof data.time === 'number' && Number.isFinite(data.time)) {
+					lastBridgeAt = Date.now();
+					if (typeof data.paused === 'boolean') iframePlaying = !data.paused && !data.buffering;
+					if (!iframePlaying) clearTimeout(resumeTimer);
+					updateActiveSegment(data.time);
+					return;
+				}
+				if (Date.now() - lastBridgeAt < 1500) return;
 				if (data?.info?.playerState !== undefined) {
 					iframePlaying = data.info.playerState === 1;
 					if (!iframePlaying) clearTimeout(resumeTimer);
@@ -494,6 +505,7 @@ export function wireTranscript(
 				window.removeEventListener('message', onMessage);
 				return;
 			}
+			if (Date.now() - lastBridgeAt >= 1500) listenToPlayer();
 			iframe.contentWindow.postMessage(JSON.stringify({
 				event: 'command',
 				func: 'getCurrentTime',

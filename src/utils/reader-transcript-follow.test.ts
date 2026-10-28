@@ -25,6 +25,12 @@ it('processes a pause before a new timestamp in the same YouTube message',()=>{
  const {scroll,report}=setup();report(1,true);scroll.mockClear();report(31,false);
  expect(article.querySelector('.is-active')?.textContent).toContain('Second passage');expect(scroll).not.toHaveBeenCalled();
 });
+it('follows trusted embedded playback even without the YouTube API and holds position on pause',()=>{
+ const {scroll}=setup();const frame=article.querySelector('iframe')!;
+ const report=(time:number,paused:boolean,origin='https://www.youtube.com')=>window.dispatchEvent(new MessageEvent('message',{source:frame.contentWindow,origin,data:{qiaomuPlayer:'time',time,paused}}));
+ report(1,false,'https://evil.example');expect(scroll).not.toHaveBeenCalled();report(1,false);expect(scroll).toHaveBeenCalledOnce();scroll.mockClear();report(31,true);
+ expect(article.querySelector('.is-active')?.textContent).toContain('Second passage');expect(scroll).not.toHaveBeenCalled();
+});
 it.each(['native','bilibili'] as const)('does not follow paused %s playback after manual scrolling or seeking',kind=>{
  const {scroll,report}=setup(kind);report(1,true);scroll.mockClear();window.dispatchEvent(new Event('scroll'));report(1,false);
  vi.advanceTimersByTime(11000);report(31,false);expect(scroll).not.toHaveBeenCalled();

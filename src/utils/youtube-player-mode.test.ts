@@ -23,16 +23,16 @@ it('picks layouts with hysteresis so a new scrollbar cannot flip them back and f
 });
 
 it('leaves room for the transcript beside the video and for the text under it', () => {
-	expect(maxPlayerWidth('side', 1196, 900, 56)).toBe(656); expect(maxPlayerWidth('side', 1000, 900, 56)).toBe(460);
-	expect(maxPlayerWidth('stack', 800, 900, 56)).toBeCloseTo(736, 0); expect(maxPlayerWidth('theater', 2000, 900, 56)).toBeCloseTo(1280, 0);
+	expect(maxPlayerWidth('side', 1196, 900, 56)).toBeCloseTo(837, 0); expect(maxPlayerWidth('side', 1000, 900, 56)).toBe(680);
+	expect(maxPlayerWidth('stack', 800, 900, 56)).toBe(800); expect(maxPlayerWidth('theater', 2000, 900, 56)).toBeCloseTo(1280, 0);
 	expect(maxPlayerWidth('theater', 300, 900, 56)).toBe(300);
-	expect(maxPlayerWidth('theater', 2000, 900, 56, true)).toBeCloseTo(880, 0); // pinned in theater: 55% of the height, so the text keeps room
+	expect(maxPlayerWidth('theater', 2000, 900, 56, true)).toBeCloseTo(1120, 0);
 	expect(maxPlayerWidth('theater', 2000, 900, 56, false)).toBeCloseTo(1280, 0);
 });
 
 it('validates stored preferences and keeps a wide-screen width when the window is narrow', () => {
-	expect(normalizeMode('float')).toBe('float'); expect(normalizeMode('x')).toBe('dock'); expect(clampFloatWidth(9999)).toBe(640); expect(clampFloatWidth('a')).toBe(360);
-	expect(visibleFloatWidth(500, 600)).toBe(360); expect(visibleFloatWidth(500, 2000)).toBe(500);
+	expect(normalizeMode('float')).toBe('float'); expect(normalizeMode('x')).toBe('dock'); expect(clampFloatWidth(9999)).toBe(1000); expect(clampFloatWidth('a')).toBe(360);
+	expect(visibleFloatWidth(500, 600)).toBe(480); expect(visibleFloatWidth(500, 2000)).toBe(500);
 	expect(nearestCorner(100, 100, 1000, 800)).toBe('tl'); expect(nearestCorner(900, 700, 1000, 800)).toBe('br'); expect(nearestCorner(100, 700, 1000, 800)).toBe('bl'); expect(nearestCorner(900, 100, 1000, 800)).toBe('tr');
 });
 
@@ -57,8 +57,8 @@ it('restores the saved mode, but never over a click made before storage answered
 
 it('falls back to stacked layout on narrow pages and tells the size module the max video width', async () => {
 	const { article } = setup(800); await flush();
-	expect(article.dataset.ytLayout).toBe('stack'); expect(article.style.getPropertyValue('--youtube-player-max')).toBe('736px');
-	document.body.innerHTML = html; expect(setup(1500).article.style.getPropertyValue('--youtube-player-max')).toBe('825px');
+	expect(article.dataset.ytLayout).toBe('stack'); expect(article.style.getPropertyValue('--youtube-player-max')).toBe('800px');
+	document.body.innerHTML = html; expect(setup(1500).article.style.getPropertyValue('--youtube-player-max')).toBe('1050px');
 });
 
 it('adopts the controls when the player container appears after subtitles load', async () => {
@@ -88,7 +88,7 @@ it('drags the floating window and snaps to the nearest corner, resizes it and cl
 	const grip = article.querySelector<HTMLElement>('.youtube-float-resize')!; grip.setPointerCapture = vi.fn();
 	pointer(grip, 'pointerdown', 400); pointer(document, 'pointermove', 460); pointer(document, 'pointercancel', 460);
 	expect(article.style.getPropertyValue('--yt-float-width')).toBe('420px');
-	grip.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true })); expect(grip.getAttribute('aria-valuenow')).toBe('640');
+	grip.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true })); expect(grip.getAttribute('aria-valuenow')).toBe('960');
 	const dragStrip = article.querySelector<HTMLElement>('.youtube-float-drag')!; dragStrip.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); expect(article.dataset.ytCorner).toBe('tr'); // tl -> next corner
 });
 

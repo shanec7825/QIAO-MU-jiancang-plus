@@ -26,6 +26,10 @@ it('rejects duplicate or foreign translated IDs and renders no model HTML',()=>{
  expect(()=>parseCaptionTranslations('[{"id":99,"text":"a"}]',[0])).toThrow();
  expect(parseCaptionTranslations('[{"id":0,"text":"<img onerror=x>"}]',[0]).get(0)).toBe('<img onerror=x>');
 });
+it('recovers missing subtitle translations individually without guessing batch alignment',async()=>{
+ const {clock,toggle,line}=setup('native');state.stream.mockImplementation(async({messages}:any)=>{const data=JSON.parse(messages[0].content);return Array.isArray(data)?'[{"id":1,"text":"再见"}]':'你好';});
+ clock(1);toggle.click();await flush();expect(line.textContent).toBe('你好');expect(state.stream).toHaveBeenCalledTimes(2);
+});
 it('seeks immediately, aborts stale work, and expires subtitles in gaps',async()=>{
  const pending:Array<{ids:number[],signal:AbortSignal,resolve:(x:Map<number,string>)=>void}>=[];
  const q=new CaptionQueue(cues,(ids,signal)=>new Promise(resolve=>pending.push({ids,signal,resolve})),()=>{});

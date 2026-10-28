@@ -84,7 +84,7 @@ export function salvageTranslation(answer: string, batch: TranslationPart[]): Ma
 
 // Only a dedicated single-passage request has an unambiguous destination without
 // an id. Never use this to guess the alignment of a multi-passage response.
-function singleTranslation(answer: string): string | undefined {
+export function singleTranslation(answer: string): string | undefined {
  const cleaned = answer.trim().replace(/^```(?:text|markdown|json)?[ \t]*\r?\n/i, '').replace(/\s*```$/, '')
   .replace(/^(?:中文(?:译文|翻译)?|译文|翻译|Translation)\s*[:：]\s*/i, '');
  if (/^\{|^\[(?=\s*(?:[\[{"\d-]|\]))|^`|^["']?(?:id|text|translations)["']?\s*:|<<<(?:END_)?TRANSLATION\b|<\/?think\b/i.test(cleaned)) return;

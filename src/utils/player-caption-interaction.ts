@@ -12,7 +12,7 @@ const STYLE=`
 html .q-caption-overlay{position:fixed;z-index:705;pointer-events:none;box-sizing:border-box;overflow:hidden;color:#fff;padding:0!important}
 html .q-caption-overlay[hidden]{display:none!important}
 html .q-caption-overlay[data-suppressed=true] .q-caption-stack{visibility:hidden}
-html .q-caption-overlay .q-caption-stack{pointer-events:auto}html .q-caption-stack[data-editing=true]{cursor:grab;touch-action:none;pointer-events:auto;outline:1px dashed #fffc;outline-offset:5px;min-width:130px;min-height:34px}
+html .q-caption-overlay .q-caption-stack{pointer-events:none}html .q-caption-overlay .q-caption-stack[data-editing=true]{cursor:grab;touch-action:none;pointer-events:auto;outline:1px dashed #fffc;outline-offset:5px;min-width:130px;min-height:34px}
 html .q-caption-stack .q-caption-drag{display:none;position:absolute;left:50%;bottom:100%;transform:translateX(-50%);pointer-events:auto;touch-action:none;cursor:grab;appearance:none!important;width:auto!important;min-width:0!important;min-height:26px;margin:0!important;padding:4px 7px!important;border:0!important;border-radius:5px;box-shadow:none!important;font:500 12px/1.4 system-ui,sans-serif;align-items:center;gap:5px;background:#242424!important;color:#fff!important;z-index:1}
 html .q-caption-stack:is(:hover,:focus-within) .q-caption-drag{display:inline-flex}
 html .q-caption-stack[data-editing=true] .q-caption-drag{display:none}
@@ -63,6 +63,7 @@ export function mountCaptionInteraction(container:HTMLElement,player:HTMLVideoEl
  const editor=captionStyleEditor(doc,appearance,next=>{revision++;appearance=next;layout(lastRect);void saveCaptionAppearance(next).catch(()=>status.textContent=t('字幕样式保存失败'));});panel.append(editor.element);
  container.append(panel);
  const drag=button(t('拖动字幕位置'),Move);drag.className='q-caption-drag';drag.append(doc.createTextNode(t('拖动字幕位置')));stack.append(drag);
+ const moveButton=button(t('调整字幕位置'),Move);row.append(moveButton);
  const finish=button(t('完成'),Check),cancel=button(t('取消'),X),editActions=node('div','q-caption-edit-actions');
  finish.append(doc.createTextNode(t('完成')));cancel.append(doc.createTextNode(t('取消')));editActions.append(finish,cancel);stack.append(editActions);
  stack.tabIndex=0;stack.setAttribute('aria-label',t('调整字幕位置'));stack.setAttribute('aria-keyshortcuts','Enter');
@@ -73,6 +74,7 @@ export function mountCaptionInteraction(container:HTMLElement,player:HTMLVideoEl
  const placePanel=()=>{const r=styleButton.getBoundingClientRect();panel.style.left=`${Math.max(12,Math.min(win.innerWidth-panel.offsetWidth-12,r.right-panel.offsetWidth))}px`;panel.style.top=`${Math.max(12,Math.min(win.innerHeight-panel.offsetHeight-12,r.bottom+8))}px`;};
  styleButton.onclick=()=>{if(!panel.hidden){closePanel();return;}panel.hidden=false;styleButton.setAttribute('aria-expanded','true');editor.set(appearance);placePanel();close.focus();showHud();};close.onclick=()=>closePanel();
  const beginEdit=()=>{enable();const current={x:parseFloat(stack.style.left)/lastRect.width,y:parseFloat(stack.style.top)/lastRect.height};setEditing(true);if(Number.isFinite(current.x)&&Number.isFinite(current.y)){positions={...positions,[context()]:normalizeCaptionPosition(current)};layout(lastRect);}closePanel(false);stack.focus();};
+ moveButton.onclick=beginEdit;
  drag.onclick=()=>{if(!editing)beginEdit();};
  finish.onclick=()=>{const next=position();editSnapshot=undefined;persistPosition(next);setEditing(false);stack.focus();};
  cancel.onclick=()=>{endDrag();setEditing(false);stack.focus();};
