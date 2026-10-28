@@ -9,6 +9,7 @@ export const LOCAL_BACKUP_KEY = '__qiaomuLocalData';
 const EXACT = new Set([
 	'highlights', 'history', 'domains',
 	'qiaomuChatIndex', 'qiaomuChatPreferences', 'qiaomuChatModel', 'qiaomuChatWidth',
+	'qiaomuChatHistory1',
 	'qiaomuAsrSettings', 'qiaomuAsrLanguage', 'qiaomuStudySites', 'qiaomuStudyRecent', 'qiaomuAudioRate',
 	'qiaomuYouTubePlayerMode', 'qiaomuYouTubeFloat', 'qiaomuYouTubePlayerSize',
 	'qiaomuTranscriptBarOpen', 'qiaomuTranscriptBarFollow', 'qiaomuRssEnabled', 'lastSelectedVault'

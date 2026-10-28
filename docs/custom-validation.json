@@ -1,11 +1,11 @@
 {
   "upstreamVersion": "1.19.0",
-  "customVersion": 9,
+  "customVersion": 10,
   "helperVersion": "1.16.9",
   "frontend": {
-    "passed": 1682,
+    "passed": 1780,
     "skipped": 7,
-    "files": 198
+    "files": 213
   },
   "typecheck": "passed",
   "injectedFunctionsChecked": 18,
@@ -76,5 +76,34 @@
     "audioUploaded": false,
     "fullVideoTested": false,
     "liveChineseModelTested": false
+  },
+  "upstreamCommit": "cfd5abee81ac0b8ef0477180698fd9230805f4db",
+  "upstreamRef": "main",
+  "upstreamChangesReleased": false,
+  "syncDate": "2026-10-28",
+  "upstreamCompatibility": {
+    "legacyHistoryMigration": "passed",
+    "bookmarksAndThoughtPreserved": "passed",
+    "historySettingsBackupAndLegacyRestore": "passed",
+    "expressionLearningAfterReadOnlyHistory": "passed",
+    "oldConversationNotModified": "passed",
+    "simulatedDiaryAndModel": true,
+    "realBrowserIndexedDB": true
+  },
+  "additionalStorageKeys": [
+    "qiaomuChatHistory1"
+  ],
+  "helperConnection": {
+    "version": "1.16.9",
+    "ok": true,
+    "reinstalled": false,
+    "upstreamNativeChanged": false,
+    "vaultPreserved": true
+  },
+  "upgradeDataBackup": {
+    "files": 21,
+    "bytes": 13855148,
+    "stableSnapshot": true,
+    "uploaded": false
   }
 }

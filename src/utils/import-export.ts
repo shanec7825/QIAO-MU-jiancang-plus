@@ -10,7 +10,8 @@ import browser from '../utils/browser-polyfill';
 import { saveFile } from './file-utils';
 import { copyToClipboard } from './clipboard-utils';
 import { compressToUTF16, decompressFromUTF16 } from 'lz-string';
-import { LOCAL_BACKUP_KEY, pickLocalBackup, restoreLocalBackup, splitImport } from './local-backup';
+import { LOCAL_BACKUP_KEY, splitImport } from './local-backup';
+import { exportLocalData, restoreLocalData } from './local-backup-history';
 import { getMessage } from './i18n';
 
 const SCHEMA_VERSION = '0.1.0';
@@ -350,7 +351,7 @@ export async function exportAllSettings(): Promise<void> {
 		}
 
 		// What lives in storage.local (chat history, highlights, drafts, study choices) travels in the same file.
-		exportData[LOCAL_BACKUP_KEY] = pickLocalBackup(await browser.storage.local.get(null));
+		exportData[LOCAL_BACKUP_KEY] = await exportLocalData();
 
 		console.log('Data prepared for export');
 		const content = JSON.stringify(exportData, null, 2);
@@ -423,7 +424,7 @@ async function importAllSettingsFromJson(jsonContent: string): Promise<void> {
 
 			await browser.storage.sync.clear();
 			await browser.storage.sync.set(importData);
-			await restoreLocalBackup(browser.storage.local, localItems);
+			await restoreLocalData(browser.storage.local, localItems);
 			await loadSettings();
 			await loadTemplates();
 			updateTemplateList();
