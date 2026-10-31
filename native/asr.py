@@ -30,6 +30,7 @@ NEEDS_LOGIN = re.compile(r'sign in to confirm|not a bot|use --cookies|fresh cook
 # What a downloader that has fallen behind the site looks like (YouTube changes its player every few weeks). Worth one update and one retry.
 STALE_TOOL = re.compile(r'needs to be reloaded|unable to extract|nsig|signature|player response|precondition check failed|requested format is not available|http error 403|sabr|po token|js runtime|challenge', re.I)
 YOUTUBE_CLIENT_ERROR = re.compile(r'needs to be reloaded|player response|precondition check failed|unable to extract.{0,40}(?:player|initial)|requested format is not available', re.I)
+BILIBILI_NETWORK_ERROR = re.compile(r'unable to connect to proxy|proxyerror|connection refused|winerror 10061|timed? out|connection reset|winerror 10054|unexpected.eof|eof occurred|incomplete read|unexpected end|http error 5|downloaded.{0,20}expected', re.I)
 UPDATE_EVERY = 12 * 3600
 # Lines Whisper tends to invent over silence or music. Only dropped when they stand alone in a short segment.
 HALLUCINATIONS = ('谢谢观看', '感谢观看', '请不吝点赞', '字幕由', '字幕 by', '字幕by', '订阅', 'thanks for watching', 'thank you for watching', 'subtitles by', 'amara.org')
@@ -991,6 +992,13 @@ def download(directory, spec, env, tools):
     if spec['videoKey'].startswith('web:') and spec.get('mediaUrl') and xiaoe_media(spec['url'], spec['mediaUrl']): return download_hls(directory, spec, env, tools)
     if spec['videoKey'].startswith('web:') and spec.get('mediaUrl'): return download_page_media(directory, spec)
     command = [tools['yt-dlp'], '--no-playlist', '--no-warnings', '--newline', '--no-continue', '--retries', '4', '--fragment-retries', '4', '-f', 'bestaudio/best', '--write-info-json', '-o', str(directory / 'audio.%(ext)s')]
+    bilibili = spec['videoKey'].startswith('bilibili:')
+    if bilibili:
+        # A browser may retain an old proxy after it has been disabled in Windows.
+        # Apply routing only to this download; never edit the browser or system environment.
+        # Bilibili's CDN can reject an otherwise valid audio URL with HTTP 567
+        # unless the download explicitly requests a byte range (yt-dlp #17847).
+        command += ['--ignore-config', '--proxy', '', '--socket-timeout', '20', '--add-headers', 'Range:bytes=0-']
     if spec['videoKey'].startswith('youtube:'): command += youtube_runtime_args()
     cookie_args = []
     if spec.get('cookiesFile') and (directory / 'cookies.txt').is_file(): cookie_args = ['--cookies', str(directory / 'cookies.txt')]
@@ -1014,7 +1022,18 @@ def download(directory, spec, env, tools):
             if info: save_meta(directory, asr_context.from_ytdlp(info))
             return audio
         text = ' '.join(tail).lower()
-        if network_retries < 2 and (any(x in text for x in ('timed out', 'connection reset', 'winerror 10054', 'incomplete read', 'unexpected end', 'http error 5')) or re.search(r'downloaded.{0,20}expected', text)):
+        if bilibili and BILIBILI_NETWORK_ERROR.search(text) and attempt < 2:
+            # Direct -> inherited network -> direct. Both a broken direct route and a
+            # stale loopback proxy can recover, with the existing three-attempt bound.
+            if '--proxy' in command:
+                index = command.index('--proxy'); del command[index:index + 2]
+                route = 'inherited'
+            else:
+                command[-1:-1] = ['--proxy', '']
+                route = 'direct'
+            print(f'[asr] Bilibili network retry: route={route}', flush=True)
+            continue
+        if not bilibili and network_retries < 2 and (any(x in text for x in ('timed out', 'connection reset', 'winerror 10054', 'incomplete read', 'unexpected end', 'http error 5')) or re.search(r'downloaded.{0,20}expected', text)):
             network_retries += 1; time.sleep(network_retries); continue
         if NEEDS_LOGIN.search(text) and not using_login:
             if anonymous_retry: raise Failed('YouTube 拒绝了当前登录状态，匿名下载也需要验证身份；请更新 YouTube 登录状态后重试', code='cookies-rejected')
